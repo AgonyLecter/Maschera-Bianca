@@ -753,14 +753,14 @@ const LEVELS = [
       b.door(8, 6); b.door(9, 6); b.door(20, 6, ',');
       [[4, 6], [12, 6], [16, 6], [22, 6], [27, 6], [29, 6], [31, 9], [11, 25], [21, 25], [5, 25], [2, 10], [2, 22]].forEach(([x, y]) => b.win(x, y));
       // living
-      b.o('rug', 5, 9, 6, 4, { c: '#5a2430' }); b.o('tv', 7, 7, 2, 1); b.o('sofa', 6, 11, 4, 1, { c: '#6b4a3a' });
+      b.o('rug', 5, 9, 6, 4, { c: '#5a2430' }); b.o('tv', 6, 7, 2, 1); b.o('sofa', 6, 11, 4, 1, { c: '#6b4a3a' });
       b.o('armchair', 11, 10, 1, 1, { c: '#6b4a3a' }); b.o('shelf', 3, 7, 1, 3); b.o('lamp', 12, 13); b.o('plant', 13, 7);
       b.poi('tv', 6.6, 11.45, -Math.PI / 2, 'sit'); b.poi('tv', 8, 11.45, -Math.PI / 2, 'sit'); b.poi('tv', 9.4, 11.45, -Math.PI / 2, 'sit');
       b.poi('tv', 11.5, 10.5, -2.4, 'sit'); b.poi('read', 4.5, 8.5, Math.PI, 'idle');
       b.light('tv', 7.9, 8.3, 5, [0.35, 0.55, 1], 0.9, { flicker: 'tv' });
       b.light('liv', 12.5, 13.5, 5, [1, 0.75, 0.45], 0.85);
       // kitchen
-      b.o('counter', 15, 7); b.o('sink', 16, 7); b.o('counter', 17, 7); b.o('stove', 18, 7); b.o('counter', 19, 7, 3, 1);
+      b.o('counter', 15, 7); b.o('sink', 16, 7); b.o('counter', 17, 7); b.o('stove', 18, 7); b.o('counter', 21, 7, 1, 1);
       b.o('fridge', 23, 7); b.o('table', 18, 11, 3, 2, { c: '#5c4030' });
       b.poi('cook', 18.5, 8.45, -Math.PI / 2, 'cook'); b.poi('cook', 16.5, 8.45, -Math.PI / 2, 'cook');
       b.poi('fridge', 22.5, 7.6, 0, 'idle');
@@ -847,7 +847,7 @@ const LEVELS = [
       b.o('console', 12, 4, 6, 1); b.o('speaker', 9, 3, 1, 2); b.o('speaker', 20, 3, 1, 2);
       b.poi('dj', 14.9, 3.5, Math.PI / 2, 'dj');
       // bar
-      b.o('bar', 24, 6, 1, 12); b.o('bottles', 29, 5, 1, 13);
+      b.o('bar', 24, 6, 1, 12); b.o('bottles', 29, 7, 1, 11);
       [8.5, 12.5, 15.5].forEach(y => b.poi('bartend', 25.6, y, Math.PI, 'bartend'));
       [7.5, 9.5, 11.5, 13.5, 15.5].forEach(y => { b.o('stool', 23, Math.floor(y)); b.poi('bar', 23.4, y, 0, 'drink'); });
       // dance floor spots
@@ -958,7 +958,7 @@ const LEVELS = [
       b.light('morgue', 36.5, 7.5, 5, [0.6, 0.85, 1], 0.6, { flicker: 'bad' });
       b.lure('cold', 38, 4, 38.5, 5.5, 'Apri le celle frigorifere', 'bang', 'Chi sta aprendo le celle?!');
       // corridor
-      b.o('gurney', 8, 13, 2, 1, { c: '#cfe0e8' }); b.o('gurney', 24, 15, 2, 1, { c: '#cfe0e8' }); b.o('bench', 30, 13, 3, 1); b.o('cabinet', 4, 13); b.o('fridge', 39, 13);
+      b.o('gurney', 12, 13, 2, 1, { c: '#cfe0e8' }); b.o('gurney', 24, 15, 2, 1, { c: '#cfe0e8' }); b.o('bench', 30, 13, 3, 1); b.o('cabinet', 4, 13); b.o('fridge', 39, 13);
       b.poi('vend', 38.4, 13.6, 0, 'idle'); b.lure('alarm', 20, 13, 20.5, 14.2, 'Fai scattare l\'allarme antincendio', 'alarm', 'L\'allarme antincendio! Controllate!', { count: 2 });
       b.light('cor1', 8, 14, 5, [0.8, 0.95, 0.9], 0.45, { flicker: 'bad' }); b.light('cor2', 20, 14, 5, [0.8, 0.95, 0.9], 0.5); b.light('cor3', 32, 14, 5, [0.8, 0.95, 0.9], 0.45, { flicker: 'bad' });
       // lobby
@@ -1138,6 +1138,7 @@ const Game = {
       blood: 0, bloodMask: 0, weapon: null, stepD: 0, foot: 0, attackKind: 'stab', dead: false
     };
     this.npcs = L.npcs.map((d, i) => this.makeNPC(d, i));
+    this.randomizeRun();
     this.bodies = []; this.pools = []; this.particles = []; this.floaters = []; this.bubbles = [];
     this.score = 0; this.kills = 0; this.witnesses = 0; this.escaped = 0; this.time = 0; this.charges = 1;
     this.combo = { n: 0, t: 0, best: 0 }; this.police = null; this.blackoutT = 0; this.powerOff = false; this.musicOff = false;
@@ -1156,6 +1157,35 @@ const Game = {
     FB.bumpStat('plays');
   },
 
+  /* every run is different: jittered routines, extra habits, shuffled weapons, timed phases */
+  randomizeRun() {
+    const EXCL = new Set(['dj', 'bartend', 'bouncer', 'cloak', 'office', 'surgery', 'recep', 'pharm', 'morgue', 'patrol', 'kiss', 'sleep', 'desk']);
+    const count = {}; this.pois.forEach(p => { count[p.tag] = (count[p.tag] || 0) + 1; });
+    this.wanderPool = Object.keys(count).filter(t => !EXCL.has(t) && count[t] >= 2);
+    for (const n of this.npcs) {
+      if (n.guard) continue;
+      const r = {};
+      for (const [t, w] of Object.entries(n.routine)) r[t] = w * rand(0.35, 1.8);
+      if (Math.random() < 0.65) {
+        const extra = this.wanderPool.filter(t => !(t in r));
+        for (let i = randi(1, 2); i > 0 && extra.length; i--) r[extra.splice(randi(0, extra.length - 1), 1)[0]] = rand(1, 4);
+      }
+      n.routine = r; n.speedMul *= rand(0.9, 1.12); n.pitch = rand(0.85, 1.35);
+    }
+    // weapons: shuffled among the spots, sometimes one is missing
+    const types = this.pickups.map(p => p.w).sort(() => Math.random() - 0.5);
+    this.pickups.forEach((p, i) => { p.w = types[i]; });
+    if (this.pickups.length > 2 && Math.random() < 0.35) this.pickups.splice(randi(0, this.pickups.length - 1), 1);
+    // late arrivals: random time and entrance
+    this.events.forEach(e => { e.t *= rand(0.7, 1.3); e.exit = randi(0, this.L.exits.length - 1); });
+    this.phaseT = rand(25, 50);
+  },
+  startPhase() {
+    if (!this.wanderPool.length) return;
+    const tag = pick(this.wanderPool);
+    const cand = this.npcs.filter(n => n.alive && !n.guard && CALM[n.state] && n.state !== 'invest' && n.state !== 'look' && !n.lured).sort(() => Math.random() - 0.5);
+    cand.slice(0, Math.max(1, Math.round(cand.length * rand(0.25, 0.5)))).forEach(n => { n.forceTag = tag; if (n.state === 'act') n.timer = Math.min(n.timer, rand(0.5, 4)); });
+  },
   makeNPC(d, i) {
     return {
       id: i, name: d.name, look: d.look, routine: d.routine, speedMul: d.slow || 1, partner: d.partner, follower: d.follower,
@@ -1321,6 +1351,7 @@ const Game = {
   },
   chooseActivity(n, instant) {
     this.release(n);
+    const forced = n.forceTag; n.forceTag = null;
     const entries = Object.entries(n.routine).filter(([t]) => t !== n.lastTag && this.tagOK(t));
     const list = entries.length ? entries : Object.entries(n.routine).filter(([t]) => this.tagOK(t));
     let poi = null, tag = null;
@@ -1328,6 +1359,7 @@ const Game = {
       let tot = list.reduce((s, e) => s + e[1], 0), r = Math.random() * tot;
       for (const [t, w] of list) { r -= w; if (r <= 0) { tag = t; break; } }
       tag = tag || list[0][0];
+      if (tries === 0 && forced && this.tagOK(forced)) tag = forced;
       const free = this.pois.filter(p => p.tag === tag && !p.occ && (p.role == null || p.role === 0) &&
         (!p.pair || this.pois.every(q => q.pair !== p.pair || !q.occ)));
       if (free.length) poi = pick(free);
@@ -2019,6 +2051,8 @@ const Game = {
     if (this.frenzyT > 0 && !this.ended) { this.frenzyT -= dt; if (this.frenzyT <= 0) UI.toast('La frenesia svanisce…'); }
     for (const l of this.lures) { if (l.cd > 0) l.cd -= dt; if (l.active && (l.autoT -= dt) <= 0 && !this.npcs.some(n => n.lure === l && n.alive)) this.fixLure(l, null); }
     for (const h of this.hides) if (h.shake > 0) h.shake -= dt;
+    // random crowd phases
+    if (!this.ended && (this.phaseT -= dt) <= 0) { this.phaseT = rand(45, 90); this.startPhase(); }
     // scheduled FX
     if (this.sched.length) { for (const e of this.sched) e.t -= dt; const due = this.sched.filter(e => e.t <= 0); this.sched = this.sched.filter(e => e.t > 0); due.forEach(e => e.fn()); }
     // late arrivals
