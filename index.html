@@ -290,6 +290,7 @@ input{user-select:text;-webkit-user-select:text}
     <div><h4>TELEFONI E POLIZIA</h4><p>Taglia i fili dei telefoni ☎ prima di iniziare. Se qualcuno completa la chiamata hai 50 secondi per finire il lavoro prima che arrivi la polizia.</p></div>
     <div><h4>POTERI DELL'OMBRA</h4><p><b>Ombra</b> (1): appari alle spalle del bersaglio. <b>Richiamo</b> (1): sussurri il suo nome e viene da te. <b>Blackout</b> (2): luci spente in tutto l'edificio. Uccidere ricarica l'energia; le combo ne danno di più.</p></div>
     <div><h4>SABOTAGGI E TRAPPOLE ✦</h4><p>I rombi gialli attirano la persona più vicina lontano dagli altri. Alcuni (gas, caldaia, amplificatore…) sono <b>trappole mortali</b>: chi va a controllare ci lascia la pelle, e spesso non solo lui.</p></div>
+    <div><h4>GENTE VIVA</h4><p>Le persone chiacchierano, ballano, brindano e si passano le voci: se uno sospetta qualcosa, avvisa l'altro. Se salta la corrente qualcuno corre al quadro per ripararla, e le urla attirano i curiosi. Ognuno ha un carattere (curioso, codardo, chiacchierone, paranoico, solitario) che vedi sul bersaglio.</p></div>
     <div><h4>FRENESIA 🩸</h4><p>Quattro uccisioni in combo scatenano la Frenesia: corri più veloce, colpisci da più lontano e ogni punto vale di più. Ogni nuova vittima la prolunga.</p></div>
     <div><h4>CORPI E NASCONDIGLI</h4><p>Trascina i corpi negli armadi e nei cassonetti ◉, e nasconditi lì dentro anche tu. Un corpo in vista fa scattare l'allarme. Attento al sangue: lascia impronte.</p></div>
   </div>
@@ -1171,7 +1172,9 @@ const Game = {
         for (let i = randi(1, 2); i > 0 && extra.length; i--) r[extra.splice(randi(0, extra.length - 1), 1)[0]] = rand(1, 4);
       }
       n.routine = r; n.speedMul *= rand(0.9, 1.12); n.pitch = rand(0.85, 1.35);
+      n.trait = Math.random() < 0.6 ? pick(['curious', 'coward', 'chatty', 'paranoid', 'loner']) : null;
     }
+    this.talks = []; this.socialT = 1; this.darkT = 0;
     // weapons: shuffled among the spots, sometimes one is missing
     const types = this.pickups.map(p => p.w).sort(() => Math.random() - 0.5);
     this.pickups.forEach((p, i) => { p.w = types[i]; });
@@ -1192,7 +1195,8 @@ const Game = {
       x: 0, y: 0, ang: rand(-3, 3), state: 'idle', path: [], poi: null, timer: 0, sus: 0, alive: true, escaped: false,
       walkPh: rand(0, 6), moving: false, watchT: 0, watchAng: 0, lastTag: null, lured: false, pitch: rand(0.85, 1.35),
       speed: 78, bubble: null, anim: 'idle', icon: null, phone: null, saidHuh: false, wasWitness: false, tremble: 0,
-      guard: !!d.guard, vulnT: 0, loseT: 0, radioT: 0, trapDone: false
+      guard: !!d.guard, vulnT: 0, loseT: 0, radioT: 0, trapDone: false,
+      trait: null, talk: null, talkCd: rand(3, 10), nervous: 0, fixer: false, lookT: 0
     };
   },
 
@@ -1401,6 +1405,7 @@ const Game = {
   updateNPC(n, dt) {
     if (!n.alive) return;
     n.moving = false; if (n.bubbleT > 0) n.bubbleT -= dt; if (n.vulnT > 0) n.vulnT -= dt;
+    if (n.nervous > 0 && CALM[n.state] && (n.state === 'act' || n.state === 'route')) { n.nervous -= dt; n.watchT = Math.max(n.watchT, 0.4); if ((n.lookT -= dt) <= 0) { n.lookT = rand(0.6, 1.4); n.watchAng = rand(-Math.PI, Math.PI); } }
     if (CALM[n.state]) this.perceive(n, dt);
     const watching = n.watchT > 0 && CALM[n.state];
     if (n.watchT > 0) { n.watchT -= dt; if (CALM[n.state]) n.ang += clamp(angDiff(n.ang, n.watchAng), -8 * dt, 8 * dt); }
@@ -1415,7 +1420,7 @@ const Game = {
         }
         break;
       case 'act':
-        if (n.poi && !watching) n.ang += clamp(angDiff(n.ang, n.poi.face), -6 * dt, 6 * dt);
+        if (n.poi && !watching) { const T = n.talk, pr = T && T.turn ? (T.a === n ? T.b : T.a) : null; n.ang += clamp(angDiff(n.ang, pr ? Math.atan2(pr.y - n.y, pr.x - n.x) : n.poi.face), -6 * dt, 6 * dt); }
         if (n.poi && n.poi.tag === 'dance' && !this.tagOK('dance')) n.timer = Math.min(n.timer, rand(0, 1.5));
         if (n.poi && n.poi.tag === 'dj' && !this.tagOK('dj')) n.timer = Math.min(n.timer, 0.5);
         if (!watching) n.timer -= dt;
@@ -1439,6 +1444,7 @@ const Game = {
         if (n.lure && n.lure.deadly && !n.trapDone && n.timer <= (n.investDur || 5) - 1.8) { this.trap(n.lure, n); break; }
         if (n.timer <= 0) {
           if (n.lure) { this.fixLure(n.lure, n); n.lure = null; }
+          if (n.fixer) { n.fixer = false; this.restorePower(n); }
           n.lured = false; this.chooseActivity(n);
         }
         break;
@@ -1486,7 +1492,7 @@ const Game = {
             const er = inDark ? R * 0.5 : R;
             if (d < er) {
               sees = true;
-              const rate = (inDark ? 0.45 : 1) * (1.3 - d / er) * (P.sprint ? 1.4 : 1) * (P.carrying ? 2.2 : 1) * 0.75 * (g ? 1.7 : 1) * (P.blood > 0.5 ? 1.15 : 1);
+              const rate = (inDark ? 0.45 : 1) * (1.3 - d / er) * (P.sprint ? 1.4 : 1) * (P.carrying ? 2.2 : 1) * 0.75 * (g ? 1.7 : 1) * (n.trait === 'paranoid' ? 1.3 : 1) * (P.blood > 0.5 ? 1.15 : 1);
               n.sus = Math.min(1, n.sus + rate * dt);
             }
           }
@@ -1522,7 +1528,7 @@ const Game = {
     if (!CALM[n.state] || !n.alive) return;
     if (n.guard) { this.alertGuard(n, why, sx, sy); return; }
     if (n.lure) { this.fixLure(n.lure, null); n.lure = null; }
-    this.release(n); n.state = 'shock'; n.timer = why === 'witness' || why === 'blast' ? 1.0 : 0.85; n.sus = 1; n.lured = false;
+    n.fixer = false; this.release(n); n.state = 'shock'; n.timer = why === 'witness' || why === 'blast' ? 1.0 : 0.85; n.sus = 1; n.lured = false;
     n.watchAng = Math.atan2(sy - n.y, sx - n.x); n.path = [];
     this.say(n, why === 'body' ? pick(['AAAH! Un cadavere!', 'Oddio… è morto!', 'SANGUE!']) :
       why === 'blast' ? pick(['ESPLOSIONE!!', 'Che è stato?!', 'AIUTO! È saltato tutto!']) :
@@ -1533,7 +1539,8 @@ const Game = {
     this.noise(n.x, n.y, TILE * 6, 0.3, n);
   },
   /* ----- guards ----- */
-  alertGuard(n, why, sx, sy) {
+  alertGuard(n, why, sx, sy, noRelay) {
+    n.fixer = false;
     if (n.lure) { this.fixLure(n.lure, null); n.lure = null; }
     this.release(n); n.lured = false; n.sus = 1; n.path = []; n.watchT = 0; n.vulnT = 0;
     n.radioT = n.radioT > 0 ? n.radioT : (why === 'killer' || why === 'witness' ? 6 : 9);
@@ -1544,11 +1551,10 @@ const Game = {
     } else {
       n.state = 'search'; n.searchT = 9; n.searchTo = { x: sx, y: sy }; n.roamT = 0; n.lookBase = n.ang; n.hideT = 0;
       this.goTo(n, sx, sy, false); n.speed = 115;
-      this.say(n, why === 'blast' ? 'Un\'esplosione! Allarme!' : why === 'noise' ? 'Che rumore è?! Sicurezza!' : pick(['Un cadavere! Qui!', 'Oddio… un morto!']), 2.6);
+      this.say(n, why === 'blast' ? 'Un\'esplosione! Allarme!' : why === 'radio' ? 'Ricevuto! Arrivo sul posto!' : why === 'noise' ? 'Che rumore è?! Sicurezza!' : pick(['Un cadavere! Qui!', 'Oddio… un morto!']), 2.6);
     }
-    Sound.whistle(); Sound.scream(n.pitch * 0.7);
-    this.flash = 0.5; this.flashColor = '255,30,40'; this.slowmo(0.6, 0.35);
-    this.noise(n.x, n.y, TILE * 6, 0.35, n);
+    if (why !== 'radio') { Sound.whistle(); Sound.scream(n.pitch * 0.7); this.flash = 0.5; this.flashColor = '255,30,40'; this.slowmo(0.6, 0.35); this.noise(n.x, n.y, TILE * 6, 0.35, n); }
+    if (!noRelay && (why === 'killer' || why === 'witness')) for (const g of this.npcs) if (g !== n && g.alive && g.guard && CALM[g.state]) this.alertGuard(g, 'radio', n.x, n.y, true);
   },
   guardSees(n, omni) {
     const P = this.player; if (P.hidden || this.ended) return false;
@@ -1603,12 +1609,121 @@ const Game = {
       if (m === except || !m.alive || !CALM[m.state]) continue;
       if (dist(m.x, m.y, x, y) >= r) continue;
       if (m.guard && loud) { this.alertGuard(m, 'noise', x, y); continue; }
+      const p = m.trait === 'curious' ? 0.9 : m.trait === 'coward' ? 0.12 : 0.5;
+      if (!m.guard && (m.state === 'act' || m.state === 'route') && !m.lured && m.anim !== 'sleep' && Math.random() < p) {
+        this.release(m); m.talk = null; m.state = 'invest'; m.lure = null; m.lured = false; m.fixer = false; m.investDur = rand(3, 4.5);
+        this.goTo(m, x, y, false); m.speed = 100 * m.speedMul;
+        this.say(m, pick(['Che è stato?!', 'Andiamo a vedere!', 'Hai sentito?! Vieni!', 'Cos\'era quel grido?']), 2.2);
+        continue;
+      }
       m.watchT = 2.5; m.watchAng = Math.atan2(y - m.y, x - m.x); m.sus = Math.min(0.95, m.sus + sus);
+    }
+  },
+  /* ---------- crowd reactions ---------- */
+  fuseLure() { return this.lures.find(l => l.effect === 'fuse'); },
+  onPowerOff(k, maxD) {
+    const party = this.def.music === 'disco';
+    for (const m of this.npcs) {
+      if (!m.alive || !CALM[m.state]) continue;
+      if (Math.random() < 0.65) this.say(m, party && Math.random() < 0.5 ? pick(['Wooo! Al buio!', 'Uuuuh!']) : pick(['Ehi! La luce!', 'Non vedo niente!', 'Che succede?!', 'Qualcuno ha staccato la corrente!']), 2.2);
+      if ((m.state === 'act' || m.state === 'route') && !m.lured) m.nervous = rand(4, 9);
+    }
+    this.sendFixers(k, maxD);
+  },
+  sendFixers(k, maxD = 1e9) {
+    const l = this.fuseLure(); if (!l) return;
+    const fx = l.sx * TILE, fy = l.sy * TILE;
+    const cand = this.npcs.filter(n => n.alive && (n.state === 'act' || n.state === 'route') && !n.lured && !n.fixer && n.trait !== 'coward' && n.anim !== 'sleep' && dist(n.x, n.y, fx, fy) < maxD)
+      .map(n => ({ n, sc: dist(n.x, n.y, fx, fy) - (n.guard ? 600 : 0) + rand(0, 200) })).sort((a, b) => a.sc - b.sc);
+    cand.slice(0, k).forEach(({ n }) => {
+      this.release(n); n.talk = null; n.state = 'invest'; n.fixer = true; n.lured = true; n.lure = null; n.investDur = rand(3, 4.5);
+      this.goTo(n, fx, fy, false); n.speed = 112 * n.speedMul;
+      this.say(n, pick(['Vado a controllare il quadro!', 'Ci penso io alla corrente!', 'Torno subito, tenete duro!', 'Sarà saltato il contatore…']), 2.8);
+    });
+  },
+  restorePower(n) {
+    const l = this.fuseLure();
+    if (l && l.active && l.effect === 'fuse') this.fixLure(l, n);
+    else if (this.blackoutT > 0) { this.blackoutT = 0; Sound.powerUp(); UI.toast('Hanno riacceso la luce'); this.afterPower(); }
+  },
+  afterPower() {
+    for (const m of this.npcs) if (m.alive) { m.nervous = 0; if (CALM[m.state] && Math.random() < 0.45) this.say(m, pick(['Finalmente!', 'Era ora!', 'Che paura…', 'Chi è stato a spegnere?!']), 2); }
+  },
+  onMusicOff(l) {
+    for (const m of this.npcs) if (m.alive && CALM[m.state] && m.anim === 'dance' && Math.random() < 0.8) this.say(m, pick(['Boooo! La musica!', 'Rimetti il pezzo!', 'DJ!! Che fai?!']), 2.4);
+    const fx = l.sx * TILE, fy = l.sy * TILE;
+    this.npcs.filter(n => n.alive && (n.state === 'act' || n.state === 'route') && !n.lured && !n.guard && n.anim !== 'sleep')
+      .map(n => ({ n, d: dist(n.x, n.y, fx, fy) })).sort((a, b) => a.d - b.d).slice(0, 2).forEach(({ n }) => {
+        this.release(n); n.talk = null; n.state = 'invest'; n.lure = null; n.lured = false; n.investDur = rand(3, 5); this.goTo(n, fx, fy, false); n.speed = 100 * n.speedMul;
+        this.say(n, 'Ehi! Che succede all\'impianto?!', 2.6);
+      });
+  },
+  reactAll(x, y, r) {
+    for (const m of this.npcs) {
+      if (!m.alive || !CALM[m.state] || dist(m.x, m.y, x, y) > r) continue;
+      if (Math.random() < 0.45) this.say(m, pick(['Che è stato?!', 'Hai sentito?', 'Cos\'era quel rumore?']), 2);
+      if (Math.random() < 0.4 && m.state !== 'invest') { m.watchT = 2.2; m.watchAng = Math.atan2(y - m.y, x - m.x); }
+    }
+  },
+  /* ---------- conversations ---------- */
+  talkLine(s) {
+    const a = s.anim;
+    if (a === 'dance') return pick(['Wooo!', 'Che serata!', 'Balla con me!', 'Alza il volume!!', 'Questo pezzo spacca!']);
+    if (a === 'drink') return pick(['Cin cin!', 'Un altro giro?', 'Offro io!', 'Sto bevendo troppo…']);
+    if (a === 'smoke') return pick(['Hai da accendere?', 'Ultima, giuro.', 'Fa un freddo cane.']);
+    const act = CHATTER[s.lastTag];
+    return Math.random() < 0.45 && act ? pick(act) : pick((TALK[this.def.id] || []).concat(TALK.any));
+  },
+  startTalks() {
+    const NO = { sleep: 1, dj: 1, kiss: 1, phone: 1 }, TURN = { idle: 1, drink: 1, smoke: 1, dance: 1 };
+    const list = this.npcs.filter(n => n.alive && n.state === 'act' && !n.talk && !NO[n.anim] && n.nervous <= 0);
+    for (const n of list) n.talkCd -= 0.5;
+    for (let i = 0; i < list.length; i++) {
+      const a = list[i]; if (a.talk || a.talkCd > 0 || a.trait === 'loner') continue;
+      for (let j = i + 1; j < list.length; j++) {
+        const b = list[j]; if (b.talk || b.talkCd > 0 || b.trait === 'loner') continue;
+        if (dist(a.x, a.y, b.x, b.y) > TILE * 3 || !this.los(a.x, a.y, b.x, b.y)) continue;
+        if (Math.random() > Math.min(0.9, 0.45 * (a.trait === 'chatty' ? 2.5 : 1) * (b.trait === 'chatty' ? 2.5 : 1))) continue;
+        const T = { a, b, t: rand(6, 11), next: 0.3, who: Math.random() < 0.5 ? a : b, turn: !!(TURN[a.anim] && TURN[b.anim]) };
+        a.talk = b.talk = T; this.talks.push(T); break;
+      }
+    }
+    // sociable people walk over to someone nearby to chat
+    for (const n of list) {
+      if (n.talk || n.talkCd > 0 || n.trait === 'loner' || n.guard || Math.random() > (n.trait === 'chatty' ? 0.25 : 0.1)) continue;
+      let best = null, bd = TILE * 10;
+      for (const m of list) { if (m === n || m.talk || m.guard) continue; const d = dist(n.x, n.y, m.x, m.y); if (d > TILE * 3.2 && d < bd) { bd = d; best = m; } }
+      if (!best) continue;
+      this.release(n); n.poi = null; n.state = 'route'; n.anim = 'walk'; n.talkCd = 0; best.talkCd = 0;
+      this.goTo(n, best.x + rand(-34, 34), best.y + rand(-34, 34), false);
+      if (Math.random() < 0.5) this.say(n, pick(['Ehi, ciao!', 'Posso unirmi?', 'Dobbiamo parlare!', 'Vieni qui un attimo…']), 2);
+    }
+  },
+  updateTalks(dt) {
+    for (const T of this.talks) {
+      const { a, b } = T;
+      if (!a.alive || !b.alive || a.state !== 'act' || b.state !== 'act' || dist(a.x, a.y, b.x, b.y) > TILE * 3.6) { T.done = true; continue; }
+      T.t -= dt; T.next -= dt;
+      if (T.next <= 0) {
+        const sp = T.who, ot = sp === a ? b : a;
+        this.say(sp, this.talkLine(sp), rand(2, 3)); T.who = ot; T.next = rand(2.2, 3.4);
+        if (sp.sus > 0.3 && ot.sus < 0.5) { ot.sus = Math.min(0.7, ot.sus + 0.3); ot.watchT = 2.5; ot.watchAng = sp.watchAng; this.say(ot, pick(['Davvero?! Dove?', 'Anch\'io ho sentito qualcosa…', 'Stai attento!']), 2.2); }
+      }
+      if (T.t <= 0) T.done = true;
+    }
+    if (this.talks.some(T => T.done)) {
+      for (const T of this.talks) if (T.done) { T.a.talk = T.b.talk = null; T.a.talkCd = T.b.talkCd = rand(4, 12); }
+      this.talks = this.talks.filter(T => !T.done);
     }
   },
   afterShock(n, exclude) {
     if (!n.wasWitness) { n.wasWitness = true; this.witnesses++; }
     if (this.police) { this.goCower(n); return; }
+    if (n.trait === 'coward' && Math.random() < 0.5) {
+      let eb = null, el = 1e9;
+      for (const e of this.L.exits) { const p = this.findPath(n.x, n.y, e.x * TILE, e.y * TILE); if (p && p.len < el) { el = p.len; eb = p; } }
+      if (eb) { n.path = eb; n.speed = 168; n.state = 'flee'; this.say(n, 'Io me ne vado!! Aiuto!!', 2.2); return; }
+    }
     let best = null, bl = 1e9;
     for (const ph of this.phones) {
       if (ph.cut || ph === exclude || (ph.busy && ph.busy !== n)) continue;
@@ -1670,9 +1785,9 @@ const Game = {
     l.active = on; l.autoT = 25;
     const e = l.effect, x = l.x * TILE + TILE / 2, y = l.y * TILE + TILE / 2;
     if (on) {
-      if (e === 'tv' && this.lightById.tv) { this.lightById.tv.on = false; Sound.powerDown(); }
-      else if (e === 'fuse') { this.powerOff = true; Sound.powerDown(); UI.big('BLACKOUT', '#ffffff', ''); this.npcs.forEach(m => { if (m.alive && CALM[m.state] && Math.random() < 0.5) this.say(m, pick(['Ehi! La luce!', 'Non vedo niente!', 'Che succede?!']), 2); }); }
-      else if (e === 'music') { this.musicOff = true; Sound.powerDown(); UI.toast('La musica si è fermata'); }
+      if (e === 'tv' && this.lightById.tv) { this.lightById.tv.on = false; Sound.powerDown(); this.npcs.forEach(m => { if (m.alive && CALM[m.state] && m.poi && m.poi.tag === 'tv') this.say(m, pick(['Ehi! Il film!', 'Cos\'è successo alla TV?!', 'Proprio sul più bello!']), 2.4); }); }
+      else if (e === 'fuse') { this.powerOff = true; Sound.powerDown(); UI.big('BLACKOUT', '#ffffff', ''); this.onPowerOff(1, 1e9); }
+      else if (e === 'music') { this.musicOff = true; Sound.powerDown(); UI.toast('La musica si è fermata'); this.onMusicOff(l); }
       else if (e === 'water') Sound.water();
       else if (e === 'bell') Sound.bell();
       else if (e === 'radio') Sound.radio();
@@ -1684,9 +1799,10 @@ const Game = {
       else if (e === 'steam') Sound.noise(1.8, { filter: 'highpass', ff: 2500, vol: 0.15 });
       else if (e === 'stove') Sound.noise(1.2, { filter: 'highpass', ff: 3000, vol: 0.1 });
       for (let i = 0; i < 14; i++) this.particles.push({ x, y, vx: rand(-40, 40), vy: rand(-60, 10), life: rand(0.8, 2), max: 2, size: rand(3, 7), type: e === 'water' || e === 'splash' ? 'water' : e === 'stove' || e === 'steam' ? 'smoke' : 'spark' });
+      if (['alarm', 'bang', 'bell', 'glass', 'splash', 'radio'].includes(e)) this.reactAll(x, y, TILE * 12);
     } else {
       if (e === 'tv' && this.lightById.tv) this.lightById.tv.on = true;
-      if (e === 'fuse') { this.powerOff = false; Sound.powerUp(); }
+      if (e === 'fuse') { this.powerOff = false; Sound.powerUp(); this.afterPower(); }
       if (e === 'music') this.musicOff = false;
     }
   },
@@ -1951,7 +2067,7 @@ const Game = {
     if (k === 'blackout') {
       if (this.isDark()) { Sound.denied(); return; }
       this.charges -= 2; this.blackoutT = 12; Sound.powerDown(); UI.big('BLACKOUT', '#fff', '12 secondi di buio totale');
-      this.npcs.forEach(m => { if (m.alive && CALM[m.state] && Math.random() < 0.6) this.say(m, pick(['Ehi! La luce!', 'Non vedo niente!', 'Chi ha spento?!']), 2); });
+      this.onPowerOff(1, TILE * 9);
       return;
     }
     const n = this.currentTarget();
@@ -2046,11 +2162,24 @@ const Game = {
       this.updatePlayer(dt);
     }
     // timers
-    if (this.blackoutT > 0) { this.blackoutT -= dt; if (this.blackoutT <= 0) Sound.powerUp(); }
+    if (this.blackoutT > 0) { this.blackoutT -= dt; if (this.blackoutT <= 0) { Sound.powerUp(); this.afterPower(); } }
     if (this.combo.t > 0) this.combo.t -= dt;
     if (this.frenzyT > 0 && !this.ended) { this.frenzyT -= dt; if (this.frenzyT <= 0) UI.toast('La frenesia svanisce…'); }
     for (const l of this.lures) { if (l.cd > 0) l.cd -= dt; if (l.active && (l.autoT -= dt) <= 0 && !this.npcs.some(n => n.lure === l && n.alive)) this.fixLure(l, null); }
     for (const h of this.hides) if (h.shake > 0) h.shake -= dt;
+    // social life, power outage fallback, party emotes
+    if (!this.ended) {
+      if ((this.socialT -= dt) <= 0) { this.socialT = 0.5; this.startTalks(); }
+      this.updateTalks(dt);
+      if (this.powerOff) { this.darkT += dt; if (this.darkT > 20 && !this.npcs.some(n => n.alive && n.fixer)) { this.darkT = 8; this.sendFixers(1); } } else this.darkT = 0;
+      const mus = !this.musicOff && !this.isDark();
+      for (const n of this.npcs) {
+        if (!n.alive || n.state !== 'act') continue;
+        if (!n.talk && !(n.bubbleT > 0) && n.anim !== 'sleep' && Math.random() < dt * 0.035) this.say(n, pick(CHATTER[n.lastTag] || CHATTER.any), 2.4);
+        if (n.anim === 'dance' && mus && Math.random() < dt * 0.9 && this.particles.length < 700) this.particles.push({ x: n.x + rand(-10, 10), y: n.y - 14, vx: rand(-10, 10), vy: rand(-30, -18), life: 1.5, max: 1.5, size: 12, type: 'note', col: Math.floor(rand(0, 360)) });
+        if (n.poi && n.poi.tag === 'fire' && Math.random() < dt * 0.12) this.particles.push({ x: n.x, y: n.y - 14, vx: rand(-6, 6), vy: -22, life: 1.6, max: 1.6, size: 12, type: 'note', col: 40 });
+      }
+    }
     // random crowd phases
     if (!this.ended && (this.phaseT -= dt) <= 0) { this.phaseT = rand(45, 90); this.startPhase(); }
     // scheduled FX
@@ -2141,6 +2270,14 @@ const Game = {
   }
 };
 
+const TRAIT_IT = { curious: 'curioso', coward: 'codardo', chatty: 'chiacchierone', paranoid: 'paranoico', loner: 'solitario' };
+const TALK = {
+  any: ['Hai visto che ore sono?', 'Non ti sembra strano stasera?', 'Ti ricordi di sabato scorso?', 'Che nottata…', 'Ma tu ci credi ai fantasmi?', 'Ho sentito un rumore prima.'],
+  villa: ['Zia Rita cucina sempre troppo.', 'Questa casa mi mette i brividi.', 'Pioverà tutta la notte.', 'Hai sentito la nonna russare?', 'Chi ha lasciato la porta aperta?'],
+  club: ['Il DJ stasera è una bomba!', 'Che calca!', 'Mi fanno male i piedi.', 'Hai visto chi è entrato?', 'Il buttafuori non mi piace.', 'Andiamo a ballare?'],
+  hospital: ['Doppio turno anche domani.', 'Il paziente del 4 non dorme.', 'Quel corridoio di notte…', 'Si sente freddo vicino all\'obitorio.', 'Hai portato il caffè?'],
+  camp: ['Dicono che nel lago ci sia qualcosa.', 'Hai portato i marshmallow?', 'Il ranger fa il giro ogni ora.', 'Che cielo stellato!', 'Ho sentito un ululato.']
+};
 const CHATTER = {
   any: ['…', 'Che serata.', 'Mh.', 'Hai sentito anche tu?'],
   tv: ['Cambia canale!', 'Questo film fa paura…', 'Chi ha il telecomando?'],
@@ -2531,6 +2668,7 @@ const Render = {
     for (const p of G.particles) {
       const a = clamp(p.life / p.max, 0, 1);
       if (p.type === 'smoke') { c.fillStyle = `rgba(180,180,190,${a * 0.18})`; circ(c, p.x, p.y, p.size); }
+      if (p.type === 'note') { c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '700 15px sans-serif'; c.fillStyle = `hsla(${p.col},90%,68%,${a})`; c.fillText('♪', p.x, p.y); }
       if (p.type === 'shadow') { c.fillStyle = `rgba(10,0,15,${a * 0.6})`; circ(c, p.x, p.y, p.size); c.fillStyle = `rgba(120,0,30,${a * 0.25})`; circ(c, p.x, p.y, p.size * 0.5); }
     }
     // invisible killer aura
@@ -2601,7 +2739,7 @@ const Render = {
       c.save(); c.translate(s.x, s.y); c.rotate(t * (locked ? 2 : 0.8)); c.strokeStyle = locked ? '#ff2a40' : 'rgba(255,60,80,0.7)'; c.lineWidth = 2;
       for (let k = 0; k < 4; k++) { c.rotate(Math.PI / 2); c.beginPath(); c.moveTo(r, -6); c.lineTo(r, 6); c.stroke(); }
       c.restore();
-      c.font = '600 11px Oswald, sans-serif'; c.fillStyle = 'rgba(255,90,100,0.95)'; c.fillText(n.name.toUpperCase(), s.x, s.y + r + 12);
+      c.font = '600 11px Oswald, sans-serif'; c.fillStyle = 'rgba(255,90,100,0.95)'; c.fillText(n.name.toUpperCase() + (n.trait ? ' · ' + TRAIT_IT[n.trait].toUpperCase() : ''), s.x, s.y + r + 12);
     }
     // npc icons & bubbles
     for (const n of G.npcs) {
@@ -3091,7 +3229,7 @@ const UI = {
     // stealth status
     const P = G.player, st = P.hidden ? 'NASCOSTO' : P.invisible ? 'NELL\'OMBRA' : P.inDark ? 'PENOMBRA' : 'ALLO SCOPERTO';
     this.set('hudStealth', st); $('#hudEye').className = P.invisible ? 'eye closed' : P.inDark ? 'eye half' : 'eye open';
-    this.set('hudTarget', G.target ? `🎯 ${G.target.name}${G.lock === G.target ? ' 🔒' : ''}` : '');
+    this.set('hudTarget', G.target ? `🎯 ${G.target.name}${G.target.trait ? ' · ' + TRAIT_IT[G.target.trait] : ''}${G.lock === G.target ? ' 🔒' : ''}` : '');
     // joystick
     const j = Input.joy, jb = $('#joy');
     if (j.active) { jb.style.display = 'block'; jb.style.left = j.sx + 'px'; jb.style.top = j.sy + 'px'; $('#joyKnob').style.transform = `translate(${j.dx * 40}px,${j.dy * 40}px)`; }
