@@ -1,0 +1,12 @@
+{
+  "name": "maschera-bianca",
+  "private": true,
+  "type": "module",
+  "description": "Build: src/index.html (sorgente leggibile) -> index.html (pubblicato, minificato e cifrato)",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "terser": "5.36.0"
+  }
+}
