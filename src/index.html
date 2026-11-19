@@ -2793,7 +2793,7 @@ const Game = {
     }
     if (best) {
       const ctx = { label: mw.verb, kind: 'kill', n: best };
-      if (this.meleeId() === 'knife' && !P.carrying) {
+      if (!P.carrying) {
         const fin = this.finisherFor(best), dirA = Math.atan2(best.y - P.y, best.x - P.x), back = Math.abs(angDiff(best.ang, dirA)) < 1.15;
         if (fin && (!this.victimAware(best) || back)) ctx.alt = { n: best, fin };
       }
