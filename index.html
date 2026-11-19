@@ -225,6 +225,14 @@ input{user-select:text;-webkit-user-select:text}
 .row.top1 span:first-child{color:#ffd23a}.row.top2 span:first-child{color:#cfd3d8}.row.top3 span:first-child{color:#d08a4a}
 .row.world{grid-template-columns:40px 1fr 54px 96px}
 .boardMe{margin-top:10px;font-family:'Special Elite';font-size:12px;color:var(--mut)}
+#liLoad{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:.6vh}
+#liLoad>b{color:#7ab8ff;letter-spacing:.25em;font-size:clamp(10px,2vh,13px);font-family:'Special Elite'}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{background:rgba(0,0,0,.45);border:1px solid rgba(235,229,216,.25);color:var(--bone);padding:6px 10px;font-size:clamp(11px,2.2vh,14px);letter-spacing:.06em;max-width:190px;text-align:left}
+.chip small{display:block;font-family:'Special Elite';color:var(--mut);font-size:.82em;letter-spacing:0;line-height:1.25}
+.chip.on{border-color:#4aa3ff;background:rgba(74,163,255,.2)}
+.gad{font-size:8px!important;line-height:1.05;padding:0}
+.gad .ic{font-size:18px}
 </style>
 </head>
 <body>
@@ -290,6 +298,8 @@ input{user-select:text;-webkit-user-select:text}
     <div><h4>TELEFONI E POLIZIA</h4><p>Taglia i fili dei telefoni ☎ prima di iniziare. Se qualcuno completa la chiamata hai 50 secondi per finire il lavoro prima che arrivi la polizia.</p></div>
     <div><h4>POTERI DELL'OMBRA</h4><p><b>Ombra</b> (1): appari alle spalle del bersaglio. <b>Richiamo</b> (1): sussurri il suo nome e viene da te. <b>Blackout</b> (2): luci spente in tutto l'edificio. Uccidere ricarica l'energia; le combo ne danno di più.</p></div>
     <div><h4>SABOTAGGI E TRAPPOLE ✦</h4><p>I rombi gialli attirano la persona più vicina lontano dagli altri. Alcuni (gas, caldaia, amplificatore…) sono <b>trappole mortali</b>: chi va a controllare ci lascia la pelle, e spesso non solo lui.</p></div>
+    <div><h4>EQUIPAGGIAMENTO 🎒</h4><p>Prima di ogni livello scegli <b>2 gadget</b> (X e C): <b>Esca sonora</b> attira due persone dove la lanci, <b>Tagliola</b> uccide chi la pesta, <b>Fumogeno</b> ti rende invisibile nella nube, <b>Veleno</b> uccide con ritardo chi mangia o beve dal punto avvelenato.</p></div>
+    <div><h4>TRAVESTIMENTI E TELECAMERE 🎭</h4><p>Dal corpo di chi indossa una divisa puoi <b>prendere i vestiti</b>: finché non corri, non sei sporco di sangue e non trascini corpi, nessuno ti nota da vicino (i colleghi della stessa divisa ti smascherano a 3 caselle). Le <b>telecamere</b> avvisano la sicurezza: spegnile dal pannello, con un blackout o fumogeno, o evitale.</p></div>
     <div><h4>GENTE VIVA</h4><p>Le persone chiacchierano, ballano, brindano e si passano le voci: se uno sospetta qualcosa, avvisa l'altro. Se salta la corrente qualcuno corre al quadro per ripararla, e le urla attirano i curiosi. Ognuno ha un carattere (curioso, codardo, chiacchierone, paranoico, solitario) che vedi sul bersaglio.</p></div>
     <div><h4>FRENESIA 🩸</h4><p>Quattro uccisioni in combo scatenano la Frenesia: corri più veloce, colpisci da più lontano e ogni punto vale di più. Ogni nuova vittima la prolunga.</p></div>
     <div><h4>CORPI E NASCONDIGLI</h4><p>Trascina i corpi negli armadi e nei cassonetti ◉, e nasconditi lì dentro anche tu. Un corpo in vista fa scattare l'allarme. Attento al sangue: lascia impronte.</p></div>
@@ -309,6 +319,7 @@ input{user-select:text;-webkit-user-select:text}
   <div id="liNum"></div><div id="liName"></div><div id="liSub"></div><div id="liBlurb"></div>
   <div class="obj">OBIETTIVO: elimina <b id="liCount"></b> persone · nessuno deve completare una chiamata</div>
   <div id="liChal"></div>
+  <div id="liLoad"></div>
   <div class="tap" style="letter-spacing:.4em;animation:blink 1.6s infinite;margin-top:2vh">TOCCA PER ENTRARE</div>
 </div>
 
@@ -321,6 +332,7 @@ input{user-select:text;-webkit-user-select:text}
     <div class="ctrlCol">
       <div id="hudWeapon"></div>
       <div id="hudEnergy"></div>
+      <div class="pw"><button class="cbtn gad" id="gad0" data-btn="gad0"></button><button class="cbtn gad" id="gad1" data-btn="gad1"></button></div>
       <div class="pw">
         <button class="cbtn" data-btn="blink"><span class="ic">◐</span>OMBRA<small>1</small><span class="kb">Q</span></button>
         <button class="cbtn" data-btn="lure"><span class="ic">☊</span>RICHIAMO<small>1</small><span class="kb">E</span></button>
@@ -330,7 +342,7 @@ input{user-select:text;-webkit-user-select:text}
     <button class="cbtn" id="sprintBtn" data-btn="sprint">CORRI</button>
     <button class="cbtn" id="actBtn" data-btn="action"><span id="actLabel">—</span><span class="kb">SPAZIO</span></button>
   </div>
-  <div id="hudKeys">WASD muovi · SHIFT corri · SPAZIO azione · Q/E/R poteri · clic = blocca bersaglio · ESC pausa</div>
+  <div id="hudKeys">WASD muovi · SHIFT corri · SPAZIO azione · Q/E/R poteri · X/C gadget · clic = blocca bersaglio · ESC pausa</div>
 </div>
 <div id="touch" class="hidden"><div id="joyHint">◀ TRASCINA PER MUOVERTI ▶</div></div>
 <div id="joy"><div id="joyKnob"></div></div>
@@ -544,7 +556,7 @@ const Sound = {
     g.gain.setTargetAtTime(1, this.t, 1.2);
     this.amb = { g, nodes };
     if (kind === 'disco') { this.disco = true; this.step = 0; this.nextStep = this.t + 0.1; }
-    if (kind === 'menu' || kind === 'house' || kind === 'hospital' || kind === 'forest') { this.pingNext = this.t + 2; this.beepNext = this.t + 1; }
+    if (kind === 'menu' || kind === 'house' || kind === 'hospital' || kind === 'forest' || kind === 'lounge' || kind === 'park') { this.pingNext = this.t + 2; this.beepNext = this.t + 1; }
   },
   setMusic(on, cutoff, vol) {
     if (!this.ctx) return;
@@ -555,12 +567,16 @@ const Sound = {
   schedule() {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
-    if ((this.ambKind === 'menu' || this.ambKind === 'house') && now > this.pingNext) { // eerie music box pings
+    if ((this.ambKind === 'menu' || this.ambKind === 'house' || this.ambKind === 'lounge') && now > this.pingNext) { // eerie music box pings
       const notes = [220, 233.1, 261.6, 311.1, 329.6, 349.2, 415.3, 440];
       const n = pick(notes) * (Math.random() < 0.3 ? 2 : 1);
       this.tone(n, 3, { type: 'sine', vol: 0.05, verb: true, dest: this.ambBus });
       if (Math.random() < 0.4) this.tone(n * 1.06, 3, { type: 'sine', vol: 0.03, verb: true, at: now + 0.4, dest: this.ambBus });
       this.pingNext = now + rand(2.5, 6);
+    }
+    if (this.ambKind === 'park' && now > this.beepNext) { // carousel waltz
+      const tune = [392, 494, 587, 494, 440, 523, 659, 523], k = (this.tuneI = ((this.tuneI || 0) + 1) % tune.length);
+      this.tone(tune[k], 0.35, { type: 'triangle', vol: 0.035, verb: true, dest: this.ambBus }); this.tone(tune[k] / 2, 0.35, { type: 'sine', vol: 0.03, dest: this.ambBus }); this.beepNext = now + 0.38;
     }
     if (this.ambKind === 'hospital' && now > this.beepNext) { // heart monitor
       this.tone(880, 0.09, { type: 'sine', vol: 0.035, dest: this.ambBus }); this.beepNext = now + 1.15;
@@ -680,6 +696,15 @@ const OBJ_DEF = {
   campfire: { solid: 1 }, log: {}, grill: { solid: 1 }, canoe: { solid: 1 }, woodpile: { solid: 1 }
 };
 
+/* ---- gadgets (pick 2 before each level) ---- */
+const GADGETS = {
+  bait:   { name: 'Esca sonora', short: 'ESCA', icon: '📻', n: 3, desc: 'Lancia una radio: attira 2 persone nel punto' },
+  snare:  { name: 'Tagliola', short: 'TAGLIOLA', icon: '🪤', n: 2, desc: 'Piazzala sul pavimento: chi la pesta muore' },
+  smoke:  { name: 'Fumogeno', short: 'FUMO', icon: '💨', n: 2, desc: 'Nube che ti rende invisibile per 9 secondi' },
+  poison: { name: 'Veleno', short: 'VELENO', icon: '☠️', n: 2, desc: 'Avvelena cibo e bevande: muore chi li usa' }
+};
+const POISON_TAGS = new Set(['bar', 'eat', 'fridge', 'vend', 'break', 'bbq', 'cook', 'stall', 'fire']);
+
 /* ---- weapons ---- */
 const WEAPONS = {
   knife:  { name: 'Coltello', icon: '🔪', uses: Infinity, noise: 0, blood: 1, reach: 1, mult: 1, verb: 'UCCIDI' },
@@ -691,7 +716,7 @@ const WEAPONS = {
 class LevelBuilder {
   constructor(W, H, fill) {
     this.W = W; this.H = H; this.t = new Array(W * H).fill(fill);
-    this.doorFloor = {}; this.objs = []; this.lights = []; this.pois = []; this.lures = []; this.phones = []; this.pickups = []; this.events = [];
+    this.doorFloor = {}; this.objs = []; this.lights = []; this.pois = []; this.lures = []; this.phones = []; this.pickups = []; this.events = []; this.cams = [];
   }
   set(x, y, c) { if (x >= 0 && y >= 0 && x < this.W && y < this.H) this.t[y * this.W + x] = c; }
   get(x, y) { return this.t[y * this.W + x]; }
@@ -711,6 +736,7 @@ class LevelBuilder {
   lure(id, x, y, sx, sy, label, effect, say, extra = {}) { this.lures.push(Object.assign({ id, x, y, sx, sy, label, effect, say, cd: 0, active: false }, extra)); }
   phone(x, y, sx, sy) { this.o('phone', x, y); this.phones.push({ x, y, sx, sy, cut: false, ring: 0 }); }
   weapon(w, x, y) { this.pickups.push({ w, x, y }); }
+  cam(x, y, ang, sweep, range) { this.cams.push({ x, y, ang, sweep, range }); }
   ev(t, npc, msg, exit = 0) { this.events.push({ t, npc, msg, exit, done: false }); }
 }
 
@@ -720,7 +746,9 @@ const DUR = {
   tv: [15, 30], cook: [12, 22], eat: [8, 14], fridge: [3, 6], pc: [15, 30], bed1: [10, 20], sleep: [25, 45],
   read: [10, 18], study: [15, 25], garage: [10, 18], garden: [10, 18], knit: [12, 20],
   surgery: [15, 28], ward: [8, 16], desk: [10, 20], break: [10, 20], vend: [3, 6], recep: [20, 35], wait: [12, 22], morgue: [14, 26],
-  pharm: [12, 22], patrol: [2, 5], fire: [16, 30], tentchat: [8, 14], dock: [10, 20], bbq: [10, 18]
+  pharm: [12, 22], patrol: [2, 5], fire: [16, 30], tentchat: [8, 14], dock: [10, 20], bbq: [10, 18],
+  serve: [6, 12], monitor: [15, 30], laundry: [12, 20], pool: [10, 20], room: [10, 20], piano: [20, 40],
+  haunt: [10, 18], scare: [8, 14], perform: [15, 25], ride: [8, 16], operate: [25, 40], stall: [20, 35]
 };
 
 const LOOK = (shirt, hair, style, skin = '#e0b48f', pants = '#26262e') => ({ shirt, hair, style, skin, pants });
@@ -807,7 +835,7 @@ const LEVELS = [
       b.lure('bell', 1, 16, 1.5, 17.6, 'Suona il campanello', 'bell', 'C\'è qualcuno alla porta?');
       b.lure('splash', 25, 4, 26.5, 4.5, 'Lancia un sasso in piscina', 'splash', 'Chi c\'è in piscina?!');
       b.weapon('axe', 28.5, 14); b.weapon('pistol', 25.5, 10.5);
-      b.ev(70, { name: 'Zio Franco', look: LOOK('#8a5a2a', '#222', 'bald', '#d9a784'), routine: { eat: 4, tv: 3, smoke: 2, wc: 1, garage: 2, fridge: 2 } }, 'Zio Franco è appena arrivato in macchina');
+      b.ev(70, { name: 'Zio Franco', drunk: true, look: LOOK('#8a5a2a', '#222', 'bald', '#d9a784'), routine: { eat: 4, tv: 3, smoke: 2, wc: 1, garage: 2, fridge: 2 } }, 'Zio Franco è appena arrivato in macchina');
       return Object.assign(b, {
         start: { x: 36.5, y: 7.5 },
         exits: [{ x: 37.5, y: 28.5 }, { x: 1.5, y: 1.5 }],
@@ -896,21 +924,21 @@ const LEVELS = [
       b.lure('crate', 33.5, 7, 33.5, 8.5, 'Rovescia le bottiglie', 'glass', 'Le bottiglie! Chi è stato?!', { prefer: 'Elena' });
       b.lure('car', 41, 26.5, 40.5, 26.5, 'Fai scattare l\'antifurto', 'alarm', 'La mia macchina!', { prefer: 'Tony' });
       b.weapon('axe', 32.5, 8.5); b.weapon('pistol', 36.5, 11.5); b.weapon('saw', 30.5, 27.5);
-      b.ev(110, { name: 'Sicurezza Rocco', guard: true, look: LOOK('#1c2a44', '#222', 'cap', '#c79a74', '#14182a'), routine: { patrol: 1 } }, 'La sicurezza ha mandato un rinforzo');
+      b.ev(110, { name: 'Sicurezza Rocco', guard: true, uniform: 'guard', look: LOOK('#1c2a44', '#222', 'cap', '#c79a74', '#14182a'), routine: { patrol: 1 } }, 'La sicurezza ha mandato un rinforzo');
       return Object.assign(b, {
         start: { x: 43.5, y: 3.5 },
         dance: { x0: 8, y0: 7, x1: 21, y1: 15 },
         exits: [{ x: 43.5, y: 20.5 }, { x: 43.5, y: 30 }],
         npcs: [
           { name: 'DJ Vortex', look: LOOK('#1b1b1b', '#e8e8e8', 'short', '#c79a74'), routine: { dj: 12, wc: 1, bar: 1 } },
-          { name: 'Elena', look: LOOK('#111', '#7a1020', 'bun'), routine: { bartend: 12, office: 1, smoke: 1 } },
-          { name: 'Tony', guard: true, look: LOOK('#0f0f12', '#111', 'bald', '#a87654'), routine: { bouncer: 8, smoke: 2, wc: 1 } },
-          { name: 'Mia', look: LOOK('#7a3db8', '#f2d27a', 'long'), routine: { cloak: 8, smoke: 1, wc: 1, mirror: 1 } },
+          { name: 'Elena', uniform: 'staff', look: LOOK('#111', '#7a1020', 'bun'), routine: { bartend: 12, office: 1, smoke: 1 } },
+          { name: 'Tony', uniform: 'guard', guard: true, look: LOOK('#0f0f12', '#111', 'bald', '#a87654'), routine: { bouncer: 8, smoke: 2, wc: 1 } },
+          { name: 'Mia', uniform: 'staff', look: LOOK('#7a3db8', '#f2d27a', 'long'), routine: { cloak: 8, smoke: 1, wc: 1, mirror: 1 } },
           { name: 'Dario', look: LOOK('#3a3a44', '#3a2a1a', 'short'), routine: { office: 6, bar: 2, chat: 1, wc: 1 } },
           { name: 'Chiara', look: LOOK('#e0306a', '#2a1a10', 'long'), routine: { dance: 6, bar: 3, wc: 2, mirror: 1 } },
-          { name: 'Luca', look: LOOK('#30a0e0', '#1a1a1a', 'short'), routine: { dance: 5, bar: 4, smoke: 2, wc: 1 } },
+          { name: 'Luca', guard: true, hero: true, look: LOOK('#30a0e0', '#1a1a1a', 'short'), routine: { dance: 5, bar: 4, smoke: 2, wc: 1 } },
           { name: 'Nina', look: LOOK('#e8e040', '#4a2010', 'bun'), routine: { dance: 6, lounge: 2, wc: 2, mirror: 2 } },
-          { name: 'Ivan', look: LOOK('#40c070', '#c0a070', 'short'), routine: { dance: 4, bar: 3, chat: 3, smoke: 1 } },
+          { name: 'Ivan', drunk: true, look: LOOK('#40c070', '#c0a070', 'short'), routine: { dance: 4, bar: 3, chat: 3, smoke: 1 } },
           { name: 'Fede', look: LOOK('#f08030', '#3a2010', 'short'), routine: { kiss: 5, dance: 3, bar: 2, lounge: 1 }, partner: 10 },
           { name: 'Gio', look: LOOK('#c040c0', '#101010', 'long', '#d4a07a'), routine: { dance: 3, bar: 2, lounge: 1 }, follower: 9 }
         ]
@@ -989,22 +1017,22 @@ const LEVELS = [
       [[5, 14], [15, 14], [25, 14], [35, 14], [10, 21], [14, 24], [21, 18], [28, 19], [36, 21], [8, 10], [19, 10], [36, 10], [41.5, 14.5], [9.5, 28.5], [29, 10]].forEach(([x, y], i) => b.poi('patrol', x + 0.5 * (x % 1 === 0), y + 0.5 * (y % 1 === 0), i * 0.9, 'idle'));
       // weapons & arrivals
       b.weapon('axe', 4.5, 14.5); b.weapon('saw', 27.5, 23.5); b.weapon('pistol', 38.5, 24.5);
-      b.ev(100, { name: 'Dott.ssa Moretti', look: LOOK('#e8e8f0', '#3a2a1a', 'long'), routine: { ward: 4, desk: 3, break: 2, vend: 1 } }, 'La dottoressa del turno di notte è appena arrivata', 0);
+      b.ev(100, { name: 'Dott.ssa Moretti', uniform: 'medic', look: LOOK('#e8e8f0', '#3a2a1a', 'long'), routine: { ward: 4, desk: 3, break: 2, vend: 1 } }, 'La dottoressa del turno di notte è appena arrivata', 0);
       const G = LOOK('#243a5e', '#222', 'cap', '#d4a07a', '#1a2438');
       return Object.assign(b, {
         start: { x: 41.5, y: 29.5 },
         exits: [{ x: 9.5, y: 29.5 }, { x: 41.5, y: 14.5 }],
         npcs: [
-          { name: 'Dott. Bianchi', look: LOOK('#e8e8f0', '#2a1d14', 'short'), routine: { surgery: 6, ward: 2, desk: 1, break: 2 } },
-          { name: 'Inf. Luisa', look: LOOK('#5a9aa8', '#5a3a22', 'bun'), routine: { ward: 5, desk: 3, break: 2, vend: 1 } },
-          { name: 'Inf. Marco', look: LOOK('#5a9aa8', '#1a1210', 'short'), routine: { ward: 4, vend: 2, break: 3, smoke: 2 } },
-          { name: 'Gino', look: LOOK('#6a6a7a', '#c8a060', 'short'), routine: { recep: 8, smoke: 2, vend: 1, wait: 1 } },
+          { name: 'Dott. Bianchi', uniform: 'medic', look: LOOK('#e8e8f0', '#2a1d14', 'short'), routine: { surgery: 6, ward: 2, desk: 1, break: 2 } },
+          { name: 'Inf. Luisa', uniform: 'medic', look: LOOK('#5a9aa8', '#5a3a22', 'bun'), routine: { ward: 5, desk: 3, break: 2, vend: 1 } },
+          { name: 'Inf. Marco', uniform: 'medic', look: LOOK('#5a9aa8', '#1a1210', 'short'), routine: { ward: 4, vend: 2, break: 3, smoke: 2 } },
+          { name: 'Gino', uniform: 'staff', look: LOOK('#6a6a7a', '#c8a060', 'short'), routine: { recep: 8, smoke: 2, vend: 1, wait: 1 } },
           { name: 'Elda', look: LOOK('#c9d6e0', '#d8d8d8', 'bun', '#e8c4a8'), routine: { sleep: 6, wait: 1, vend: 1 }, slow: 0.75 },
           { name: 'Tommaso', look: LOOK('#c9d6e0', '#3a2a1a', 'short'), routine: { sleep: 5, wait: 2, ward: 1, vend: 1 } },
-          { name: 'Dott.ssa Elisa', look: LOOK('#e8e8f0', '#7a1020', 'long'), routine: { morgue: 6, break: 2, desk: 1 } },
-          { name: 'Farmacista Rossi', look: LOOK('#9ac09a', '#444', 'short'), routine: { pharm: 7, break: 2, vend: 1 } },
-          { name: 'Guardia Neri', guard: true, look: G, routine: { patrol: 1 } },
-          { name: 'Guardia Greco', guard: true, look: LOOK('#243a5e', '#3a2a1a', 'cap', '#c79a74', '#1a2438'), routine: { patrol: 1 } }
+          { name: 'Dott.ssa Elisa', uniform: 'medic', look: LOOK('#e8e8f0', '#7a1020', 'long'), routine: { morgue: 6, break: 2, desk: 1 } },
+          { name: 'Farmacista Rossi', uniform: 'medic', look: LOOK('#9ac09a', '#444', 'short'), routine: { pharm: 7, break: 2, vend: 1 } },
+          { name: 'Guardia Neri', uniform: 'guard', guard: true, look: G, routine: { patrol: 1 } },
+          { name: 'Guardia Greco', uniform: 'guard', guard: true, look: LOOK('#243a5e', '#3a2a1a', 'cap', '#c79a74', '#1a2438'), routine: { patrol: 1 } }
         ]
       });
     }
@@ -1071,13 +1099,171 @@ const LEVELS = [
         npcs: [
           { name: 'Alex', look: LOOK('#c0392b', '#2a1a10', 'short'), routine: { fire: 6, tentchat: 2, bbq: 2, bar: 2, smoke: 1 } },
           { name: 'Bea', look: LOOK('#8e44ad', '#f2d27a', 'long'), routine: { fire: 5, tentchat: 3, wc: 2, dock: 2 } },
-          { name: 'Carlo', look: LOOK('#27ae60', '#3a2a1a', 'short'), routine: { bbq: 5, bar: 3, fire: 3, smoke: 1 } },
+          { name: 'Carlo', guard: true, hero: true, look: LOOK('#27ae60', '#3a2a1a', 'short'), routine: { bbq: 5, bar: 3, fire: 3, smoke: 1 } },
           { name: 'Dani', look: LOOK('#2980b9', '#1a1210', 'bun'), routine: { dock: 5, fire: 3, tentchat: 2, wc: 1 } },
           { name: 'Ele', look: LOOK('#e67e22', '#5a3a22', 'long'), routine: { fire: 4, tentchat: 3, wc: 2, smoke: 2 } },
-          { name: 'Fabio', look: LOOK('#16a085', '#c8a060', 'short'), routine: { bar: 4, fire: 3, bbq: 2, smoke: 2, dock: 1 } },
+          { name: 'Fabio', drunk: true, look: LOOK('#16a085', '#c8a060', 'short'), routine: { bar: 4, fire: 3, bbq: 2, smoke: 2, dock: 1 } },
           { name: 'Gaia', look: LOOK('#d35490', '#b0402a', 'long', '#f0c8a8'), routine: { tentchat: 4, fire: 4, dock: 2, wc: 2 } },
           { name: 'Osvaldo', look: LOOK('#7a6a4a', '#d8d8d8', 'bald', '#e0b898'), routine: { tv: 6, desk: 2, bbq: 1, wc: 1 }, slow: 0.75 },
-          { name: 'Ranger Bruno', guard: true, look: LOOK('#2f5a3a', '#3a2a1a', 'cap', '#c79a74', '#2a3a2a'), routine: { patrol: 1 } }
+          { name: 'Ranger Bruno', uniform: 'guard', guard: true, look: LOOK('#2f5a3a', '#3a2a1a', 'cap', '#c79a74', '#2a3a2a'), routine: { patrol: 1 } }
+        ]
+      });
+    }
+  },
+  /* ===================== LEVEL 5 : HOTEL BELVEDERE ===================== */
+  {
+    id: 'hotel', name: 'Hotel Belvedere', sub: 'Riviera · 23:30 · gran gala',
+    blurb: 'Camerieri, ricconi ubriachi, telecamere ovunque e una guardia alla sala controllo. Indossa una divisa o fai saltare tutto.',
+    music: 'lounge', weather: null, par: 480, challenges: ['ghost', 'trap1', 'hide3'],
+    ambIn: [0.10, 0.09, 0.10], ambOut: [0.10, 0.11, 0.17],
+    hints: [
+      'Uccidi un cameriere o una guardia e premi AZIONE sul corpo: PRENDI DIVISA. Camminando piano nessuno ti nota.',
+      'Le telecamere (cono azzurro) avvisano la sicurezza. Spegnile dalla sala controllo o con un blackout.',
+      'Gli ubriachi vedono male e non sempre credono ai propri occhi. I veterani (⚔) invece reagiscono.',
+      'Il quadro della piscina, il gas in cucina… ci sono molti modi di far danni senza sporcarsi le mani.'
+    ],
+    build() {
+      const b = new LevelBuilder(52, 33, 'p');
+      b.room(3, 3, 18, 12, ':'); b.room(18, 3, 27, 12, ','); b.room(27, 3, 34, 12, '.'); b.room(34, 3, 49, 12, 'h'); b.rect(37, 5, 46, 10, '~');
+      b.room(3, 12, 26, 22, ':'); b.room(26, 12, 40, 22, 'k'); b.room(40, 12, 49, 22, '_');
+      const cols = ['#8a3a4a', '#3a5a8a', '#6a5a2a', '#3a6a4a', '#7a3a7a', '#4a4a4a'], xs = [3, 11, 19, 27, 35, 42, 49];
+      for (let i = 0; i < 6; i++) b.room(xs[i], 22, xs[i + 1], 30, i % 2 ? ':' : '.');
+      b.border('B');
+      b.door(10, 12, ':'); b.door(22, 12, ','); b.door(30, 12, '.'); b.door(38, 12, 'h'); b.door(44, 12, 'h'); b.door(18, 8, ','); b.door(26, 17, ':'); b.door(40, 17, '_');
+      b.door(3, 17, ':'); b.door(3, 18, ':'); b.door(49, 17, '_');
+      [6, 14, 22].forEach(x => b.door(x, 22, ':')); [30, 38].forEach(x => b.door(x, 22, 'k')); b.door(45, 22, '_');
+      [[3, 6], [3, 9], [8, 3], [14, 3], [40, 3], [46, 3], [49, 6], [49, 9], [3, 25], [3, 28], [49, 25], [49, 28]].forEach(([x, y]) => b.win(x, y));
+      // restaurant
+      [[6, 5], [11, 5], [6, 9], [11, 9]].forEach(([x, y]) => { b.o('table', x, y, 2, 2, { round: 1, c: '#eee' }); b.poi('eat', x - 0.55, y + 1, 0, 'sit'); b.poi('eat', x + 2.55, y + 1, Math.PI, 'sit'); });
+      [[9, 7.6], [14.5, 8.6], [4.6, 7.6], [16.5, 7.6]].forEach(([x, y], i) => b.poi('serve', x, y, i * 1.4, 'idle'));
+      b.o('piano', 14, 4, 2, 2); b.poi('piano', 14.6, 6.45, -Math.PI / 2, 'sit'); b.light('rest', 10, 7.5, 7, [1, 0.85, 0.6], 0.7);
+      // kitchen
+      b.o('counter', 19, 4, 4, 1); b.o('stove', 23, 4); b.o('sink', 24, 4); b.o('counter', 25, 4, 2, 1); b.o('table', 21, 7, 3, 2, { c: '#aaa' }); b.o('fridge', 26, 8);
+      [19.5, 21.5, 23.5].forEach(x => b.poi('cook', x, 5.45, -Math.PI / 2, 'cook')); b.poi('fridge', 25.5, 8.5, 0, 'idle'); b.phone(26, 5, 25.5, 5.9);
+      b.lure('gas', 23, 4, 23.5, 5.5, 'Manomette il gas', 'stove', 'Che puzza di gas in cucina!', { deadly: 'explode' }); b.light('kit', 22.5, 7.5, 6, [1, 0.95, 0.85], 1);
+      // security
+      b.o('desk', 28, 4, 2, 1); b.o('desk', 31, 4, 2, 1); b.poi('monitor', 28.5, 5.45, -Math.PI / 2, 'sit'); b.poi('monitor', 31.5, 5.45, -Math.PI / 2, 'sit'); b.o('locker', 33, 4, 1, 2); b.phone(33, 8, 32.5, 8.6);
+      b.lure('cams', 30, 4, 30.5, 5.5, 'Hackera le telecamere', 'camoff', 'Le telecamere! Si sono spente!'); b.light('sec', 30.5, 7.5, 5, [0.5, 0.7, 1], 0.6, { flicker: 'bad' });
+      // pool hall
+      [[36.5, 6.5, 0, 'idle'], [36.5, 8.5, 0, 'idle'], [47.5, 6.5, Math.PI, 'idle'], [47.5, 9, Math.PI, 'drink'], [40.5, 11.45, -Math.PI / 2, 'drink'], [43.5, 11.45, -Math.PI / 2, 'drink'], [41.5, 4.45, Math.PI / 2, 'drink']].forEach(([x, y, f, a]) => b.poi('pool', x, y, f, a));
+      b.o('fuse', 35, 5); b.o('plant', 48, 4); b.o('plant', 35, 11);
+      b.lure('pump', 35, 5, 35.5, 4.5, 'Elettrifica la piscina', 'zap', 'Qualcuno ha toccato la pompa!', { zone: [36, 4, 47, 11], style: 'electro' }); b.light('pool', 41.5, 7.5, 8, [0.3, 0.8, 1], 0.9);
+      // lobby
+      b.o('counter', 12, 14, 6, 1); b.poi('recep', 13.5, 13.5, Math.PI / 2, 'idle'); b.poi('recep', 15.5, 13.5, Math.PI / 2, 'idle'); b.phone(18, 14, 18.5, 15.2);
+      b.o('rug', 7, 16, 7, 4, { c: '#5a2430' }); b.o('sofa', 7, 19, 4, 1, { c: '#6b4a3a' }); [7.6, 9, 10.4].forEach(x => b.poi('wait', x, 19.45, -Math.PI / 2, 'sit'));
+      b.o('sofa', 4, 19, 1, 2, { c: '#6b4a3a', vertical: 1 }); b.poi('wait', 4.6, 19.6, 0, 'sit'); b.poi('wait', 4.6, 20.45, 0, 'sit');
+      b.o('plant', 4, 13); b.o('plant', 25, 13); b.o('plant', 16, 21);
+      b.lure('bell', 17, 14, 16.5, 15.2, 'Suona il campanello', 'bell', 'Qualcuno al bancone?', { count: 2 }); b.light('lobby', 12, 17, 9, [1, 0.85, 0.6], 0.9); b.light('lobby2', 20, 17, 6, [1, 0.85, 0.6], 0.6);
+      // bar
+      b.o('bar', 28, 14, 9, 1); [29, 32, 35].forEach(x => b.poi('bartend', x + 0.5, 13.5, Math.PI / 2, 'bartend'));
+      [29, 31, 33, 35].forEach(x => { b.o('stool', x, 15); b.poi('bar', x + 0.5, 15.5, -Math.PI / 2, 'drink'); });
+      [[29, 18], [33, 18], [37, 17]].forEach(([x, y]) => { b.o('table', x, y, 1, 1, { round: 1, c: '#222' }); b.poi('chat', x - 0.55, y + 0.5, 0, 'idle'); b.poi('chat', x + 1.55, y + 0.5, Math.PI, 'idle'); });
+      b.poi('kiss', 27.6, 20.5, 0, 'kiss', { pair: 'k1', role: 0 }); b.poi('kiss', 28.45, 20.5, Math.PI, 'kiss', { pair: 'k1', role: 1 });
+      b.light('bar', 32, 16, 8, [1, 0.55, 0.25], 0.8); b.light('bar2', 37, 19, 5, [0.6, 0.3, 1], 0.5);
+      // laundry
+      b.o('locker', 41, 13, 1, 2); b.o('fuse', 48, 13); b.o('table', 44, 18, 3, 1, { c: '#ccd' }); b.o('dumpster', 47, 20, 2, 1);
+      b.poi('laundry', 44.5, 17.45, Math.PI / 2, 'cook'); b.poi('laundry', 46.5, 17.45, Math.PI / 2, 'cook');
+      b.lure('fuse', 48, 13, 47.5, 14.5, 'Stacca la corrente', 'fuse', 'È saltata la corrente! Vado al quadro!'); b.light('laun', 45, 16, 5, [0.9, 0.95, 1], 0.6, { flicker: 'bad' });
+      // suites
+      const suite = (x0, i) => { b.o('bed', x0 + 5, 25, 2, 3, { c: cols[i] }); b.poi('sleep', x0 + 5.95, 26.3, -Math.PI / 2, 'sleep'); b.o('wardrobe', x0 + 1, 28, 2, 1); b.o('armchair', x0 + 1, 25, 1, 1, { c: '#5a5a3a' }); b.poi('room', x0 + 1.5, 25.5, 0, 'sit'); b.poi('room', x0 + 3.5, 27.5, i * 1.1, 'idle'); b.light('room' + i, x0 + 4, 26, 4, [1, 0.78, 0.5], 0.55); };
+      xs.slice(0, 6).forEach((x0, i) => suite(x0, i));
+      // outside
+      b.poi('smoke', 1.5, 15.5, 0, 'smoke'); b.poi('smoke', 50.5, 15.5, Math.PI, 'smoke');
+      b.light('porch', 1.5, 17.5, 4, [1, 0.8, 0.5], 0.8, { group: 'out' }); b.light('porchE', 50.5, 17.5, 4, [1, 0.8, 0.5], 0.7, { group: 'out' });
+      [[12.5, 17.5], [33.5, 19.5], [10.5, 8.5], [41.5, 4.5], [44.5, 15.5], [1.5, 20.5], [50.5, 20.5], [22.5, 9.5], [30.5, 8.5]].forEach(([x, y], i) => b.poi('patrol', x, y, i, 'idle'));
+      b.cam(4.5, 13.5, 0.6, 0.55, 11); b.cam(27.5, 13.5, 0.75, 0.5, 11); b.cam(35.5, 4.5, 0.5, 0.5, 11); b.cam(41.5, 13.5, 0.8, 0.5, 9);
+      b.weapon('axe', 47.5, 16.5); b.weapon('pistol', 29.5, 10.5); b.weapon('saw', 20.5, 10.5);
+      b.ev(90, { name: 'Rockstar Dino', drunk: true, look: LOOK('#2a2a2a', '#d8d070', 'long', '#d4a07a'), routine: { bar: 5, pool: 3, chat: 2, eat: 1 } }, 'Una rockstar ubriaca è appena arrivata', 0);
+      const ST = (n, l, r, x = {}) => Object.assign({ name: n, uniform: 'staff', look: l, routine: r }, x);
+      return Object.assign(b, {
+        start: { x: 1.5, y: 27.5 },
+        exits: [{ x: 1.5, y: 10.5 }, { x: 50.5, y: 17.5 }],
+        npcs: [
+          ST('Marta', LOOK('#8a1a3a', '#2a1a10', 'bun'), { recep: 9, wait: 1, smoke: 1 }),
+          ST('Chef Luigi', LOOK('#f0f0f0', '#222', 'bald'), { cook: 8, fridge: 2, smoke: 1, eat: 1 }),
+          ST('Paolo', LOOK('#222', '#2a1d14', 'short'), { serve: 7, fridge: 1, smoke: 1, eat: 1 }),
+          ST('Ines', LOOK('#222', '#5a3a22', 'long'), { serve: 7, fridge: 1, smoke: 1 }),
+          ST('Gigi', LOOK('#1a1a30', '#111', 'short'), { bartend: 9, smoke: 1, fridge: 1 }),
+          ST('Maria', LOOK('#7a9ab0', '#7a5a3a', 'bun'), { laundry: 5, room: 4, smoke: 1, fridge: 1 }),
+          { name: 'Sig. Conti', drunk: true, look: LOOK('#c0a040', '#8a8a8a', 'bald', '#e0b48f'), routine: { bar: 6, eat: 2, chat: 2, pool: 2, room: 1 } },
+          { name: 'Sig.ra Conti', look: LOOK('#d05a8a', '#e8d27a', 'long'), routine: { pool: 4, bar: 2, eat: 2, chat: 2, wait: 1 } },
+          { name: 'Anna', look: LOOK('#e04a6a', '#2a1a10', 'long'), routine: { kiss: 5, bar: 2, pool: 2, chat: 2 }, partner: 9 },
+          { name: 'Marco', look: LOOK('#3a6a9a', '#3a2a1a', 'short'), routine: { kiss: 3, bar: 3, pool: 2, chat: 2 }, follower: 8 },
+          ST('Elio', LOOK('#111', '#111', 'short'), { piano: 8, bar: 2, smoke: 1, eat: 1 }),
+          { name: 'Guardia Bruno', guard: true, uniform: 'guard', look: LOOK('#243a5e', '#222', 'cap', '#d4a07a', '#1a2438'), routine: { patrol: 3, monitor: 3 } },
+          { name: 'Col. Aldo', guard: true, hero: true, look: LOOK('#4a5a3a', '#cfcfcf', 'bald', '#d4a07a'), routine: { bar: 4, wait: 3, pool: 2, eat: 2 } }
+        ]
+      });
+    }
+  },
+  /* ===================== LEVEL 6 : LUNA PARK ===================== */
+  {
+    id: 'park', name: 'Luna Park Sorrisi', sub: 'Litorale · 00:40 · ultima corsa',
+    blurb: 'Carosello, ruota panoramica, casa degli orrori e un clown che non smette di ridere. Il parco chiude, ma nessuno uscirà.',
+    music: 'park', weather: null, par: 440, challenges: ['silent3', 'trap1', 'weapon2'],
+    ambIn: [0.09, 0.08, 0.12], ambOut: [0.13, 0.12, 0.22],
+    hints: [
+      'Nella casa degli orrori è buio e ci sono mille nascondigli: trascina lì i corpi.',
+      'La ruota panoramica ha un freno: sabotalo e chi sta in fila sotto… non riparte.',
+      'Il clown e i gestori portano divise: un travestimento perfetto per muoverti tra le attrazioni.',
+      'Il fumogeno ti rende invisibile nella piazza, anche sotto i fari del carosello.'
+    ],
+    build() {
+      const b = new LevelBuilder(52, 32, 'g');
+      b.rect(2, 14, 49, 17, 'p'); b.rect(24, 3, 27, 30, 'p'); b.rect(20, 10, 31, 21, 'p');
+      b.room(3, 3, 18, 13, 'k'); b.room(40, 22, 49, 29, '_'); b.room(3, 22, 12, 29, ',');
+      b.rect(8, 4, 8, 8, '#'); b.rect(13, 8, 13, 12, '#'); b.rect(5, 10, 6, 10, '#');
+      b.border('H');
+      [[34, 3, 37, 6], [34, 24, 36, 27]].forEach(r => b.rect(r[0], r[1], r[2], r[3], 'H'));
+      b.door(11, 13, 'k'); b.door(44, 22, '_'); b.door(8, 22, ',');
+      b.win(40, 25); b.win(3, 25);
+      // haunted house
+      b.o('curtain', 5, 5); b.o('curtain', 16, 11); b.o('wardrobe', 10, 4, 2, 1); b.o('crate', 15, 5, 2, 1);
+      [[6.5, 6.5], [15.5, 7.5], [15.5, 10.5], [6.5, 12.0], [10.5, 8.5]].forEach(([x, y], i) => b.poi('haunt', x, y, i * 1.3, 'idle'));
+      [[10, 6.5], [10, 10.5], [15, 9], [4.7, 8]].forEach(([x, y], i) => b.poi('scare', x, y, i * 1.9, 'idle'));
+      b.light('hh1', 6, 6, 4, [0.6, 0.1, 0.2], 0.7, { flicker: 'bad', group: 'in' }); b.light('hh2', 15, 9, 4, [0.3, 0.2, 0.7], 0.6, { flicker: 'bad', group: 'in' }); b.light('hh3', 10, 11, 3, [0.2, 0.7, 0.3], 0.5, { group: 'in' });
+      // ferris wheel
+      b.o('wheel', 42, 5, 4, 4); b.o('fuse', 47, 6);
+      [[43.2, 9.7], [44.8, 9.7], [41.5, 9.9], [46.2, 9.9]].forEach(([x, y], i) => b.poi('ride', x, y, -Math.PI / 2, 'idle')); b.poi('operate', 46.5, 8.0, Math.PI, 'idle');
+      b.light('wheel', 44, 7, 7, [0.9, 0.4, 1], 0.9, { flicker: 'pulse', group: 'in' });
+      b.lure('brake', 47, 6, 47.5, 7.4, 'Sabota il freno della ruota', 'crash', 'La ruota fa un rumore strano!', { zone: [41, 9, 47, 11], style: 'crush' });
+      // carousel
+      b.o('carousel', 24, 12, 4, 4); [[23.4, 13.5, 0], [28.6, 13.5, Math.PI], [25.5, 16.6, -Math.PI / 2], [25.5, 11.4, Math.PI / 2]].forEach(([x, y, f]) => b.poi('ride', x, y, f, 'idle')); b.poi('operate', 28.6, 15.5, Math.PI, 'idle');
+      b.light('carou', 25.5, 13.5, 7, [1, 0.6, 0.9], 0.9, { flicker: 'pulse', group: 'in' });
+      // stalls
+      [[8, 18], [13, 18], [34, 18], [39, 18]].forEach(([x, y], i) => { b.o('stall', x, y, 2, 1, { c: ['#c0392b', '#2980b9', '#27ae60', '#8e44ad'][i] }); b.poi('stall', x + 0.5, 19.45, -Math.PI / 2, 'cook'); b.poi('stall', x + 1.5, 19.45, -Math.PI / 2, 'cook'); b.poi('eat', x + 0.6, 17.5, Math.PI / 2, 'idle'); b.poi('eat', x + 1.4, 17.5, Math.PI / 2, 'idle'); b.light('st' + i, x + 1, 18.5, 4, [1, 0.8, 0.45], 0.7, { group: 'in' }); });
+      // stage
+      b.poi('perform', 30.5, 20.5, Math.PI, 'dance'); b.poi('perform', 21.5, 20.5, 0, 'dance'); b.poi('kiss', 36.5, 12.0, 0, 'kiss', { pair: 'k1', role: 0 }); b.poi('kiss', 37.4, 12.0, Math.PI, 'kiss', { pair: 'k1', role: 1 });
+      // gate
+      b.o('booth', 22, 27, 2, 2); b.phone(29, 27, 29.5, 28.4); b.poi('smoke', 30.5, 29.5, Math.PI, 'smoke'); b.poi('smoke', 20.5, 24.5, 0, 'smoke'); b.poi('smoke', 47.5, 19.5, Math.PI, 'smoke');
+      b.light('gate', 25.5, 28, 6, [1, 0.8, 0.5], 0.8, { group: 'out' }); b.light('plaza1', 20.5, 10.5, 5, [1, 0.85, 0.6], 0.6, { group: 'out' }); b.light('plaza2', 30.5, 20.5, 5, [1, 0.85, 0.6], 0.6, { group: 'out' }); b.light('ave1', 10, 15.5, 5, [1, 0.8, 0.5], 0.5, { group: 'out' }); b.light('ave2', 40, 15.5, 5, [1, 0.8, 0.5], 0.5, { group: 'out' });
+      // maintenance shed
+      b.o('fuse', 48, 23); b.o('locker', 41, 23, 1, 2); b.o('desk', 44, 26, 2, 1); b.phone(46, 26, 46.5, 27.2); b.o('radio', 45, 24); b.poi('work', 44.5, 27.45, -Math.PI / 2, 'sit'); b.poi('work', 42.5, 24.5, 0, 'cook');
+      b.lure('fuse', 48, 23, 47.5, 24.5, 'Stacca la corrente', 'fuse', 'Le luci del parco! Vado al quadro!'); b.lure('radio', 45, 24, 44.5, 25.0, 'Accendi la radio', 'radio', 'Chi ha acceso la radio?');
+      b.light('shed', 44.5, 25.5, 5, [1, 0.85, 0.55], 0.6, { group: 'in' });
+      // restrooms
+      [5, 7, 9].forEach(x => { b.o('toilet', x, 28); b.poi('wc', x + 0.5, 28.3, -Math.PI / 2, 'sit'); }); b.o('sink', 10, 23, 1, 3); b.poi('mirror', 9.5, 24.0, 0, 'idle'); b.light('wc', 7.5, 25.5, 4, [0.85, 0.95, 1], 0.7, { flicker: 'bad', group: 'in' });
+      [[22, 25], [29, 12], [14.5, 15.5], [38, 15.5], [46, 14.5], [10.5, 16.5], [32.5, 20.5], [43, 12.5]].forEach(([x, y], i) => b.poi('patrol', x, y, i, 'idle'));
+      b.cam(21.5, 10.5, 0.9, 0.5, 12); b.cam(27.5, 27.5, -1.9, 0.5, 10);
+      b.weapon('axe', 41.5, 27.5); b.weapon('saw', 47.5, 27.5); b.weapon('pistol', 21.5, 28.5);
+      b.ev(90, { name: 'Direttore Pace', uniform: 'staff', look: LOOK('#304a6a', '#222', 'short'), routine: { operate: 3, stall: 2, perform: 2, eat: 1 } }, 'Il direttore è venuto a controllare il parco', 0);
+      const ST = (n, l, r, x = {}) => Object.assign({ name: n, uniform: 'staff', look: l, routine: r }, x);
+      return Object.assign(b, {
+        start: { x: 25.5, y: 30.0 },
+        exits: [{ x: 1.5, y: 15.5 }, { x: 50.5, y: 15.5 }],
+        npcs: [
+          ST('Mostro Gus', LOOK('#2a3a2a', '#111', 'bald', '#6a8a5a'), { haunt: 9, smoke: 1 }),
+          ST('Bobo il clown', LOOK('#d02a3a', '#3ac0e0', 'long', '#f0e8e0'), { perform: 6, eat: 2, smoke: 1 }),
+          ST('Sal', LOOK('#4a4a8a', '#222', 'short'), { operate: 7, smoke: 1, eat: 1, wc: 1 }),
+          ST('Lina', LOOK('#c07a2a', '#5a3a22', 'bun'), { stall: 8, smoke: 1 }),
+          ST('Tom', LOOK('#2a8a6a', '#2a1d14', 'short'), { stall: 8, wc: 1 }),
+          { name: 'Kira', look: LOOK('#e0409a', '#2a1a10', 'long'), routine: { ride: 4, scare: 3, eat: 3, wc: 1, perform: 1 } },
+          { name: 'Zeb', look: LOOK('#40a0e0', '#c8a060', 'short'), routine: { ride: 4, scare: 3, eat: 3, wc: 1, perform: 1 } },
+          { name: 'Elia', look: LOOK('#e08a3a', '#3a2a1a', 'short'), routine: { kiss: 5, eat: 2, ride: 2, perform: 1 }, partner: 8 },
+          { name: 'Noa', look: LOOK('#9a4ac0', '#b0402a', 'long'), routine: { kiss: 3, eat: 3, ride: 2 }, follower: 7 },
+          { name: 'Nando', drunk: true, look: LOOK('#8a8a3a', '#6a6a6a', 'bald', '#e0b48f'), routine: { eat: 3, ride: 2, wc: 2, perform: 2 } },
+          { name: 'Guardia Rocco', guard: true, uniform: 'guard', look: LOOK('#243a5e', '#222', 'cap', '#d4a07a', '#1a2438'), routine: { patrol: 1 } },
+          { name: 'Dante', guard: true, hero: true, look: LOOK('#5a3a2a', '#2a1a10', 'short', '#c79a74'), routine: { eat: 3, ride: 3, perform: 2, wc: 1 } }
         ]
       });
     }
@@ -1136,7 +1322,7 @@ const Game = {
     this.player = {
       x: L.start.x * TILE, y: L.start.y * TILE, ang: Math.PI, r: 13, moving: false, sprint: false, stillT: 0, still: false,
       inDark: false, invisible: false, hidden: null, carrying: null, attackT: 0, blinkT: 0, shadowT: 0, vx: 0, vy: 0, dripT: 0,
-      blood: 0, bloodMask: 0, weapon: null, stepD: 0, foot: 0, attackKind: 'stab', dead: false
+      blood: 0, bloodMask: 0, weapon: null, stepD: 0, foot: 0, attackKind: 'stab', dead: false, disguise: null, disguiseLook: null
     };
     this.npcs = L.npcs.map((d, i) => this.makeNPC(d, i));
     this.randomizeRun();
@@ -1148,6 +1334,9 @@ const Game = {
     this.hintI = 0; this.hintT = 3; this.policeCalled = false; this.context = null;
     this.frenzyT = 0; this.frenzyMax = 9; this.st = { silent: 0, weapon: 0, trap: 0, multi: 0, hidden: 0 }; this.lastKillT = -9;
     this.tracers = []; this.sched = []; this.screenBlood = []; this.boomFx = [];
+    this.cams = (L.cams || []).map(c => ({ ...c, sus: 0, cd: 0, off: 0, a: c.ang }));
+    this.gadgets = (UI.loadout || ['bait', 'poison']).slice(0, 2).map(id => ({ id, n: GADGETS[id].n }));
+    this.snares = []; this.smokes = []; this.devices = [];
     this.cam = { x: this.player.x, y: this.player.y, zoom: 1 };
     // spread NPCs into their routines immediately
     this.npcs.forEach(n => { if (n.follower == null) this.chooseActivity(n, true); });
@@ -1196,7 +1385,8 @@ const Game = {
       walkPh: rand(0, 6), moving: false, watchT: 0, watchAng: 0, lastTag: null, lured: false, pitch: rand(0.85, 1.35),
       speed: 78, bubble: null, anim: 'idle', icon: null, phone: null, saidHuh: false, wasWitness: false, tremble: 0,
       guard: !!d.guard, vulnT: 0, loseT: 0, radioT: 0, trapDone: false,
-      trait: null, talk: null, talkCd: rand(3, 10), nervous: 0, fixer: false, lookT: 0
+      trait: null, talk: null, talkCd: rand(3, 10), nervous: 0, fixer: false, lookT: 0,
+      uniform: d.uniform || null, drunk: !!d.drunk, hero: !!d.hero, poison: 0
     };
   },
 
@@ -1417,6 +1607,7 @@ const Game = {
         if (this.moveAlong(n, dt)) {
           n.state = 'act'; const tag = n.poi ? n.poi.tag : null, d = DUR[tag] || [6, 12];
           n.timer = rand(d[0], d[1]); n.anim = n.poi ? n.poi.anim : 'idle';
+          if (n.poi && n.poi.poisoned) { n.poi.poisoned = false; n.poison = rand(9, 14); }
         }
         break;
       case 'act':
@@ -1479,12 +1670,14 @@ const Game = {
   },
 
   perceive(n, dt) {
-    const P = this.player, dark = this.isDark(), g = n.guard;
-    const R = VIEW * (g ? 1.3 : 1) * (dark ? 0.45 : 1), fov = FOV * (g ? 1.15 : 1);
+    const P = this.player, dark = this.isDark(), g = n.guard && !n.hero;
+    const R = VIEW * (g ? 1.3 : 1) * (dark ? 0.45 : 1) * (n.drunk ? 0.6 : 1), fov = FOV * (g ? 1.15 : 1);
     let sees = false;
     if (!P.hidden && !this.ended) {
       const d = dist(n.x, n.y, P.x, P.y);
-      if (d < R) {
+      const smoked = this.inSmoke(P.x, P.y) && d > TILE * 1.5;
+      const masked = P.disguise && !P.sprint && !P.carrying && P.blood < 0.75 && d > TILE * (n.uniform === P.disguise ? 3.2 : 1.6);
+      if (d < R && !smoked && !masked) {
         const a = Math.atan2(P.y - n.y, P.x - n.x);
         if (Math.abs(angDiff(n.ang, a)) < fov / 2 && this.los(n.x, n.y, P.x, P.y)) {
           const inDark = P.inDark;
@@ -1492,7 +1685,7 @@ const Game = {
             const er = inDark ? R * 0.5 : R;
             if (d < er) {
               sees = true;
-              const rate = (inDark ? 0.45 : 1) * (1.3 - d / er) * (P.sprint ? 1.4 : 1) * (P.carrying ? 2.2 : 1) * 0.75 * (g ? 1.7 : 1) * (n.trait === 'paranoid' ? 1.3 : 1) * (P.blood > 0.5 ? 1.15 : 1);
+              const rate = (inDark ? 0.45 : 1) * (1.3 - d / er) * (P.sprint ? 1.4 : 1) * (P.carrying ? 2.2 : 1) * 0.75 * (g ? 1.7 : 1) * (n.drunk ? 0.45 : 1) * (n.trait === 'paranoid' ? 1.3 : 1) * (P.blood > 0.5 ? 1.15 : 1);
               n.sus = Math.min(1, n.sus + rate * dt);
             }
           }
@@ -1513,6 +1706,7 @@ const Game = {
       const d = dist(n.x, n.y, b.x, b.y);
       if (d > R * 0.85) continue;
       if (this.lightAt(b.x, b.y) < DARK_T && d > R * 0.4) continue;
+      if (this.inSmoke(b.x, b.y) && d > TILE * 1.5) continue;
       if (Math.abs(angDiff(n.ang, Math.atan2(b.y - n.y, b.x - n.x))) > fov / 2) continue;
       if (!this.los(n.x, n.y, b.x, b.y)) continue;
       this.scare(n, 'body', b.x, b.y); return;
@@ -1521,17 +1715,21 @@ const Game = {
   sees(m, x, y) {
     const d = dist(m.x, m.y, x, y), R = VIEW * (this.isDark() ? 0.45 : 1) * (this.lightAt(x, y) < DARK_T ? 0.6 : 1);
     if (d > R) return false;
+    if (this.inSmoke(x, y) && d > TILE * 1.5) return false;
     if (d > 20 && Math.abs(angDiff(m.ang, Math.atan2(y - m.y, x - m.x))) > FOV / 2) return false;
     return this.los(m.x, m.y, x, y);
   },
   scare(n, why, sx, sy) {
     if (!CALM[n.state] || !n.alive) return;
+    if (why === 'killer' || why === 'witness') this.breakDisguise();
+    if (n.drunk && (why === 'witness' || why === 'killer') && Math.random() < 0.5) { this.say(n, pick(['Eh? Ho bevuto troppo…', 'Vedo doppio… o è sangue?', 'Hic! Chi è quello?']), 2.6); n.sus = 0.5; return; }
     if (n.guard) { this.alertGuard(n, why, sx, sy); return; }
     if (n.lure) { this.fixLure(n.lure, null); n.lure = null; }
     n.fixer = false; this.release(n); n.state = 'shock'; n.timer = why === 'witness' || why === 'blast' ? 1.0 : 0.85; n.sus = 1; n.lured = false;
     n.watchAng = Math.atan2(sy - n.y, sx - n.x); n.path = [];
     this.say(n, why === 'body' ? pick(['AAAH! Un cadavere!', 'Oddio… è morto!', 'SANGUE!']) :
       why === 'blast' ? pick(['ESPLOSIONE!!', 'Che è stato?!', 'AIUTO! È saltato tutto!']) :
+      why === 'accident' ? pick(['Oddio! È caduto!', 'Che è successo?!', 'AIUTO! Si è fatto male!']) :
       why === 'witness' ? pick(['ASSASSINO!!', 'AIUTO!!', 'NO! NO! NO!']) : pick(['Chi sei?! AIUTO!', 'Ha un coltello!', 'Stai lontano!']), 2.4);
     Sound.scream(n.pitch);
     if (!this.police) { this.slowmo(0.9, 0.3); Sound.spotted(); UI.big(why === 'body' ? 'CADAVERE TROVATO!' : why === 'blast' ? 'CHE BOTTO!' : 'TI HANNO VISTO!', '#ff3344', 'Fermalo prima che raggiunga un telefono'); }
@@ -1561,10 +1759,12 @@ const Game = {
     const d = dist(n.x, n.y, P.x, P.y), R = VIEW * 1.3 * (this.isDark() ? 0.45 : 1);
     if (d > R) return false;
     if (P.invisible && d > TILE * 2) return false;
+    if (this.inSmoke(P.x, P.y) && d > TILE * 1.5) return false;
     if (!omni && d > TILE * 1.6 && Math.abs(angDiff(n.ang, Math.atan2(P.y - n.y, P.x - n.x))) > FOV * 1.15 / 2) return false;
     return this.los(n.x, n.y, P.x, P.y);
   },
   guardRadio(n, dt) {
+    if (n.hero) return;
     n.radioT -= dt;
     if (n.radioT <= 0 && !this.police) { this.say(n, 'Centrale! Servono rinforzi!', 2.6); this.callPolice(n); }
   },
@@ -1772,6 +1972,7 @@ const Game = {
     }
     cands.sort((a, b) => a.d - b.d);
     this.applyLure(l, true);
+    if (l.zone) { l.zoneT = 2.8; UI.toast('Allontanati dalla zona!'); }
     if (!cands.length) { UI.toast('Nessuno ha sentito…'); l.autoT = 12; return; }
     const chosen = cands.slice(0, l.count || 1).map(c => c.n);
     chosen.forEach((best, i) => {
@@ -1795,6 +1996,8 @@ const Game = {
       else if (e === 'alarm') Sound.alarm();
       else if (e === 'splash') Sound.splash();
       else if (e === 'zap') Sound.zap();
+      else if (e === 'camoff') { this.cams.forEach(c => { c.off = 35; c.sus = 0; }); Sound.zap(); UI.toast('Telecamere disattivate per 35 secondi'); }
+      else if (e === 'crash') Sound.boom();
       else if (e === 'bang') Sound.bang();
       else if (e === 'steam') Sound.noise(1.8, { filter: 'highpass', ff: 2500, vol: 0.15 });
       else if (e === 'stove') Sound.noise(1.2, { filter: 'highpass', ff: 3000, vol: 0.1 });
@@ -1886,6 +2089,7 @@ const Game = {
     if (P.weapon && WEAPONS[P.weapon.id].ranged) { const t = this.shootTarget(); if (t && t !== best) return { label: 'SPARA', kind: 'shoot', n: t }; }
     if (best) return { label: mw.verb, kind: 'kill', n: best };
     for (const p of this.pickups) if (!p.taken && dist(P.x, P.y, p.x * TILE, p.y * TILE) < TILE * 0.9) return { label: 'PRENDI ' + WEAPONS[p.w].name.toUpperCase(), kind: 'pickup', p };
+    for (const b of this.bodies) if (!b.hidden && b.uniform && !b.looted && b.style !== 'explode' && dist(P.x, P.y, b.x, b.y) < TILE * 0.9) return { label: 'PRENDI DIVISA', kind: 'dress', b };
     for (const b of this.bodies) if (!b.hidden && dist(P.x, P.y, b.x, b.y) < TILE * 0.9) return { label: 'TRASCINA', kind: 'carry', b };
     for (const ph of this.phones) if (!ph.cut && this.nearRect({ x: ph.x, y: ph.y, w: 1, h: 1 }, P.x, P.y) < TILE * 0.75) return { label: 'TAGLIA FILO', kind: 'cut', ph };
     for (const l of this.lures) if (dist(P.x, P.y, (l.x + 0.5) * TILE, (l.y + 0.5) * TILE) < TILE * 1.3) return { label: l.used ? 'ESAURITO' : l.active ? 'IN CORSO…' : l.cd > 0 ? `ATTENDI ${Math.ceil(l.cd)}s` : l.label.toUpperCase(), kind: 'lure', l };
@@ -1898,6 +2102,7 @@ const Game = {
       case 'kill': this.kill(c.n); break;
       case 'shoot': this.kill(c.n, { weapon: 'pistol' }); break;
       case 'pickup': { const w = WEAPONS[c.p.w]; c.p.taken = true; P.weapon = { id: c.p.w, uses: w.uses }; Sound.pickup(); UI.toast(`${w.icon} ${w.name}: ${w.uses} ${w.ranged ? 'colpi' : 'usi'}`); break; }
+      case 'dress': { const b = c.b; b.looted = true; P.disguise = b.uniform; P.disguiseLook = Object.assign({}, b.n.look); b.n.look = Object.assign({}, b.n.look, { shirt: '#d8d0c8', pants: '#555' }); Sound.pickup(); UI.toast('Travestito! Muoviti piano e non farti sporcare di sangue'); break; }
       case 'unhide': this.unhide(); break;
       case 'hide': P.hidden = c.h; c.h.shake = 0.3; P.hx = P.x; P.hy = P.y; P.x = (c.h.x + c.h.w / 2) * TILE; P.y = (c.h.y + c.h.h / 2) * TILE; Sound.thud(); UI.toast('Nascosto. Muoviti per uscire.'); break;
       case 'carry': P.carrying = c.b; c.b.carried = true; Sound.thud(); break;
@@ -1952,7 +2157,7 @@ const Game = {
     const wasLured = n.lured;
     if (n.lure) { this.fixLure(n.lure, null); n.lure.cd = Math.max(n.lure.cd, 6); n.lure = null; }
     this.release(n); n.alive = false; n.state = 'dead'; n.bubbleT = 0;
-    const b = { n, x: n.x, y: n.y, ang: dirA, hidden: false, style, burnt: style === 'explode' || style === 'electro', split: style === 'saw', wound: bl };
+    const b = { n, x: n.x, y: n.y, ang: dirA, hidden: false, uniform: n.uniform, style, burnt: style === 'explode' || style === 'electro', split: style === 'saw', wound: bl };
     this.bodies.push(b);
     this.pools.push({ x: n.x + Math.cos(dirA) * 6, y: n.y + Math.sin(dirA) * 6, r: 2, max: rand(24, 34) * (0.65 + bl * 0.45), seed: Math.random() * 100, age: 0 });
     for (let i = 0, k = 2 + Math.round(bl * 1.5); i < k; i++) { const a = dirA + rand(-1.3, 1.3), d = rand(18, 70 * Math.sqrt(bl) + 20); Render.splat(n.x + Math.cos(a) * d, n.y + Math.sin(a) * d, rand(4, 11) * Math.sqrt(bl), 0.8); }
@@ -1975,6 +2180,9 @@ const Game = {
         this.splatter(n.x, n.y, dirA, 24 * bl, 0.6, [120, 340]); this.mist(n.x, n.y, 3); this.shake = 5; this.hitstop = 0.04; b.spurt = { t: 1.3, max: 1.3, k: 0.1, a: dirA };
         this.particles.push({ x: mx, y: my, vx: 0, vy: 0, life: 0.07, max: 0.07, size: 12, type: 'spark' }); break;
       }
+      case 'snare': this.splatter(n.x, n.y, dirA, 30, Math.PI, [60, 220]); this.gibs(n.x, n.y, dirA, 2, Math.PI); Sound.squelch(); Sound.scream(n.pitch * 1.1); this.shake = 8; b.spurt = { t: 1.5, max: 1.5, k: 0, a: dirA }; this.noise(n.x, n.y, TILE * 6, 0.3, n); break;
+      case 'poison': for (let i = 0; i < 8; i++) this.particles.push({ x: n.x + rand(-8, 8), y: n.y + rand(-8, 8), vx: rand(-14, 14), vy: rand(-26, -8), life: rand(1, 1.8), max: 1.8, size: rand(4, 7), type: 'smoke' }); Sound.thud(); break;
+      case 'crush': this.splatter(n.x, n.y, rand(0, TAU), 40, Math.PI, [40, 260]); this.gibs(n.x, n.y, dirA, 5, Math.PI); Sound.thud(); Sound.squelch(); this.shake = 14; break;
       case 'explode': this.splatter(n.x, n.y, dirA, 44, Math.PI, [120, 380]); this.gibs(n.x, n.y, dirA, 8, Math.PI); this.mist(n.x, n.y, 5); break;
       case 'electro': for (let i = 0; i < 26; i++) { const a = rand(0, TAU), sp = rand(60, 220); this.particles.push({ x: n.x, y: n.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.3, 0.9), max: 0.9, size: rand(2, 5), type: 'spark' }); } this.splatter(n.x, n.y, dirA, 8, Math.PI, [40, 140]); this.shake = 6; break;
     }
@@ -1992,7 +2200,7 @@ const Game = {
     if (style === 'slash') { mult *= 1.2; tags.push('GOLA TAGLIATA'); }
     if (style === 'stab' && aware) tags.push('ACCOLTELLATO');
     if (style === 'chop') tags.push('ACCETTATA'); if (style === 'saw') tags.push('SQUARTATO'); if (style === 'shoot') tags.push('COLPO IN TESTA');
-    if (trap) { mult *= 2; tags.push('INCIDENTE'); this.st.trap++; }
+    if (trap) { mult *= 2; tags.push(style === 'snare' ? 'TAGLIOLA' : style === 'poison' ? 'AVVELENATO' : style === 'crush' ? 'SCHIACCIATO' : 'INCIDENTE'); this.st.trap++; }
     if (!trap && wid !== 'knife') this.st.weapon++;
     if (!trap && P.blinkT > 0) { mult *= 1.5; tags.push('DIETRO DI TE'); }
     if (!trap && P.shadowT > 0) { mult *= 1.25; tags.push('DALL\'OMBRA'); }
@@ -2016,7 +2224,7 @@ const Game = {
     if (!trap && !chain && P.weapon && P.weapon.id === wid && wid !== 'knife') { if (--P.weapon.uses <= 0) { P.weapon = null; UI.toast('Arma esaurita: torni al coltello'); } }
     if (!trap && !chain && wd.noise) this.noise(P.x, P.y, TILE * wd.noise, 0.5, n, wd.noise >= 5);
     // witnesses
-    const why = trap ? 'blast' : 'witness';
+    const why = trap ? (style === 'explode' || style === 'electro' ? 'blast' : 'accident') : 'witness';
     for (const m of this.npcs) if (m.alive && CALM[m.state] && this.sees(m, n.x, n.y)) this.scare(m, why, n.x, n.y);
     if (!trap) for (const m of this.npcs) if (m.alive && CALM[m.state] && dist(m.x, m.y, n.x, n.y) < TILE * 1.5) this.scare(m, 'witness', n.x, n.y);
     if (aware && !trap) this.noise(n.x, n.y, TILE * 6, 0.4);
@@ -2024,6 +2232,64 @@ const Game = {
     // chainsaw cuts through whoever is in front
     if (wd.multi && !chain) for (const m of this.npcs.slice()) if (m !== n && m.alive && dist(P.x, P.y, m.x, m.y) < TILE * 1.9 && Math.abs(angDiff(dirA, Math.atan2(m.y - P.y, m.x - P.x))) < 1.4) this.kill(m, { weapon: 'saw', chain: true });
     this.checkWin();
+  },
+  breakDisguise() { const P = this.player; if (P.disguise) { P.disguise = null; P.disguiseLook = null; UI.toast('Travestimento scoperto!'); } },
+  inSmoke(x, y) { for (const s of this.smokes) if (dist(x, y, s.x, s.y) < s.r) return true; return false; },
+  attract(x, y, k, r, line) {
+    this.npcs.filter(n => n.alive && (n.state === 'act' || n.state === 'route') && !n.lured && n.anim !== 'sleep' && dist(n.x, n.y, x, y) < r)
+      .map(n => ({ n, d: dist(n.x, n.y, x, y) })).sort((a, b) => a.d - b.d).slice(0, k).forEach(({ n }) => {
+        this.release(n); n.talk = null; n.state = 'invest'; n.lure = null; n.lured = false; n.fixer = false; n.investDur = rand(4, 6); this.goTo(n, x, y, false); n.speed = 95 * n.speedMul; this.say(n, line, 2.4);
+      });
+  },
+  useGadget(i) {
+    const g = this.gadgets[i], P = this.player; if (!g || this.ended) return;
+    if (g.n <= 0) { Sound.denied(); UI.toast('Finito!'); return; }
+    if (P.hidden) { Sound.denied(); return; }
+    if (g.id === 'bait') {
+      let d = TILE * 3; for (; d < TILE * 7; d += 10) if (this.solidPx(P.x + Math.cos(P.ang) * (d + 14), P.y + Math.sin(P.ang) * (d + 14))) break;
+      const x = P.x + Math.cos(P.ang) * d, y = P.y + Math.sin(P.ang) * d;
+      this.devices.push({ x, y, t: 7 }); Sound.radio();
+      this.attract(x, y, 2, TILE * 14, pick(['Che cos\'è quel rumore?', 'Una radio? Qui?', 'Chi ha lasciato quella roba lì?'])); UI.toast('Esca sonora lanciata');
+    } else if (g.id === 'snare') { this.snares.push({ x: P.x, y: P.y }); Sound.cut(); UI.toast('Tagliola armata. Non pestarla!'); }
+    else if (g.id === 'smoke') { this.smokes.push({ x: P.x, y: P.y, r: TILE * 2.6, t: 9 }); Sound.noise(1.3, { filter: 'highpass', ff: 2500, vol: 0.15 }); UI.toast('Fumogeno: nessuno ti vede nella nube'); }
+    else if (g.id === 'poison') {
+      let best = null, bd = TILE * 2.2;
+      for (const p of this.pois) if (POISON_TAGS.has(p.tag) && !p.poisoned) { const d = dist(P.x, P.y, p.x * TILE, p.y * TILE); if (d < bd) { bd = d; best = p; } }
+      if (!best) { Sound.denied(); UI.toast('Avvicinati a cibo o da bere'); return; }
+      best.poisoned = true; Sound.cut(); UI.toast('Avvelenato… aspetta che qualcuno ne usufruisca');
+    }
+    g.n--;
+  },
+  updateCams(dt) {
+    const P = this.player;
+    for (const c of this.cams) {
+      c.a = c.ang + Math.sin(this.time * 0.7 + c.x) * c.sweep;
+      if (c.off > 0) { c.off -= dt; continue; }
+      if (this.isDark()) continue;
+      if (c.cd > 0) { c.cd -= dt; continue; }
+      const cx = c.x * TILE, cy = c.y * TILE, d = dist(cx, cy, P.x, P.y);
+      let seen = false;
+      if (!P.hidden && !this.ended && d < c.range * TILE && Math.abs(angDiff(c.a, Math.atan2(P.y - cy, P.x - cx))) < 0.42 && this.los(cx, cy, P.x, P.y))
+        seen = !(P.inDark && P.still) && !this.inSmoke(P.x, P.y) && !(P.disguise && !P.carrying && P.blood < 0.5);
+      c.sus = seen ? Math.min(1, c.sus + dt * 1.1 * (P.sprint ? 1.6 : 1)) : Math.max(0, c.sus - dt * 0.5);
+      if (c.sus >= 1) { c.sus = 0; c.cd = 14; this.camAlert(); }
+    }
+  },
+  camAlert() {
+    const P = this.player; let any = false;
+    UI.big('TELECAMERA!', '#4aa3ff', 'La sicurezza sa dove sei'); Sound.alarm();
+    for (const g of this.npcs) if (g.alive && g.guard && CALM[g.state]) { this.alertGuard(g, 'noise', P.x, P.y); any = true; }
+    if (!any) this.noise(P.x, P.y, TILE * 8, 0.25);
+  },
+  zoneKill(l) {
+    const [x0, y0, x1, y1] = l.zone, P = this.player; l.used = true;
+    const crush = l.style === 'crush', cx = (x0 + x1 + 1) / 2 * TILE, cy = (y0 + y1 + 1) / 2 * TILE;
+    if (crush) Sound.boom(); else Sound.zap();
+    this.shake = 18; this.flash = 0.6; this.flashColor = crush ? '255,200,120' : '140,180,255';
+    const inZ = e => e.x / TILE >= x0 && e.x / TILE < x1 + 1 && e.y / TILE >= y0 && e.y / TILE < y1 + 1;
+    for (const m of this.npcs.slice()) if (m.alive && inZ(m)) this.kill(m, { trap: true, style: l.style || 'electro', sx: cx, sy: cy, blood: crush ? 2 : 0.6 });
+    this.noise(cx, cy, TILE * 12, 0.5, null, true);
+    if (!P.hidden && !this.ended && inZ(P)) { P.dead = true; this.gibs(P.x, P.y, 0, 8, Math.PI); this.splatter(P.x, P.y, 0, 40, Math.PI, [100, 340]); this.finish(false, 'boom'); }
   },
   trap(l, n) {
     n.trapDone = true; l.used = true;
@@ -2170,6 +2436,19 @@ const Game = {
     // social life, power outage fallback, party emotes
     if (!this.ended) {
       if ((this.socialT -= dt) <= 0) { this.socialT = 0.5; this.startTalks(); }
+      this.updateCams(dt);
+      for (const l of this.lures) if (l.zoneT > 0 && (l.zoneT -= dt) <= 0) this.zoneKill(l);
+      for (let i = this.snares.length - 1; i >= 0; i--) { const sn = this.snares[i], v = this.npcs.find(n => n.alive && dist(n.x, n.y, sn.x, sn.y) < TILE * 0.55); if (v) { this.snares.splice(i, 1); this.kill(v, { trap: true, style: 'snare', sx: sn.x, sy: sn.y, blood: 1.4 }); } }
+      for (const sm of this.smokes) { sm.t -= dt; if (Math.random() < dt * 14 && this.particles.length < 700) this.particles.push({ x: sm.x + rand(-sm.r, sm.r) * 0.8, y: sm.y + rand(-sm.r, sm.r) * 0.8, vx: rand(-8, 8), vy: rand(-8, 8), life: 2.2, max: 2.2, size: rand(14, 24), type: 'smoke' }); }
+      this.smokes = this.smokes.filter(sm => sm.t > 0);
+      for (const d of this.devices) d.t -= dt; this.devices = this.devices.filter(d => d.t > 0);
+      for (const n of this.npcs) if (n.alive && n.poison > 0) {
+        n.poison -= dt;
+        if (n.poison < 7 && Math.random() < dt * 0.4) this.say(n, pick(['Cof… non mi sento bene.', 'Mi gira la testa…', 'Che bruciore allo stomaco…']), 2.4);
+        if (n.poison <= 0) { n.poison = 0; this.kill(n, { trap: true, style: 'poison', sx: n.x - 8, sy: n.y, blood: 0.3 }); }
+      }
+      if (Input.hit('KeyX') || UI.btnPressed('gad0')) this.useGadget(0);
+      if (Input.hit('KeyC') || UI.btnPressed('gad1')) this.useGadget(1);
       this.updateTalks(dt);
       if (this.powerOff) { this.darkT += dt; if (this.darkT > 20 && !this.npcs.some(n => n.alive && n.fixer)) { this.darkT = 8; this.sendFixers(1); } } else this.darkT = 0;
       const mus = !this.musicOff && !this.isDark();
@@ -2272,6 +2551,8 @@ const Game = {
 
 const TRAIT_IT = { curious: 'curioso', coward: 'codardo', chatty: 'chiacchierone', paranoid: 'paranoico', loner: 'solitario' };
 const TALK = {
+  hotel: ['Che serata di gala!', 'Il champagne è scadente.', 'Hai visto quella suite?', 'Il direttore sembra nervoso.'],
+  park: ['Sul carosello ci vado io!', 'Non mi piace la casa degli orrori.', 'Hai provato il zucchero filato?', 'Quella ruota scricchiola.'],
   any: ['Hai visto che ore sono?', 'Non ti sembra strano stasera?', 'Ti ricordi di sabato scorso?', 'Che nottata…', 'Ma tu ci credi ai fantasmi?', 'Ho sentito un rumore prima.'],
   villa: ['Zia Rita cucina sempre troppo.', 'Questa casa mi mette i brividi.', 'Pioverà tutta la notte.', 'Hai sentito la nonna russare?', 'Chi ha lasciato la porta aperta?'],
   club: ['Il DJ stasera è una bomba!', 'Che calca!', 'Mi fanno male i piedi.', 'Hai visto chi è entrato?', 'Il buttafuori non mi piace.', 'Andiamo a ballare?'],
@@ -2289,6 +2570,10 @@ const CHATTER = {
   surgery: ['Bisturi.', 'Più luce!'], ward: ['Come si sente?', 'Segno la cartella.'], desk: ['Che turno…', 'Cartelle, cartelle…'],
   break: ['Un caffè?', 'Ho i piedi a pezzi.'], vend: ['Mi si è incastrata!'], recep: ['Orario visite finito.'], wait: ['Quanto ci vorrà…'],
   morgue: ['Che freddo qui.', 'Nessuno disturba i miei ospiti.'], pharm: ['Contiamo le scorte.'], patrol: ['Tutto tranquillo.', 'Mh.', 'Controllo il piano.'],
+  piano: ['♪ …', 'Un po\' di Chopin?'], serve: ['Prego, si accomodi.', 'Il conto, signore?'], monitor: ['Tutto sotto controllo.', 'Che noia, queste telecamere.'],
+  laundry: ['Lenzuola, lenzuola…', 'Che turno!'], pool: ['L\'acqua è calda!', 'Un tuffo?'], room: ['Che bella suite.', 'Mi riposo un attimo.'],
+  haunt: ['Buuu!', 'Che spavento li faccio…'], scare: ['Aaah! Cos\'era?!', 'Ho paura!'], perform: ['Signore e signori!', 'Un applauso!'],
+  ride: ['Che giro!', 'Ancora una volta!'], operate: ['Tenetevi forte!', 'Si parte!'], stall: ['Zucchero filato!', 'Popcorn caldi!'],
   fire: ['Che storia di paura!', 'Passami un marshmallow.'], tentchat: ['Hai sentito un rumore?'], dock: ['L\'acqua è nera…'], bbq: ['Quasi pronte!']
 };
 
@@ -2492,6 +2777,11 @@ const Render = {
       case 'locker': c.fillStyle = '#3c4a52'; c.fillRect(X + 2, Y + 2, Wd - 4, Hd - 4); c.fillStyle = '#2a343a'; for (let k = 0; k < 4; k++) c.fillRect(X + 8, Y + 10 + k * 6, Wd - 16, 2); c.fillRect(X + 2, Y + Hd / 2, Wd - 4, 2); break;
       case 'dumpster': c.fillStyle = '#1e4a2a'; c.fillRect(X + 2, Y + 4, Wd - 4, Hd - 8); c.fillStyle = '#163a20'; c.fillRect(X + 6, Y + 8, Wd / 2 - 8, Hd - 16); c.fillRect(X + Wd / 2 + 2, Y + 8, Wd / 2 - 8, Hd - 16); break;
       case 'curtain': for (let k = 0; k < 6; k++) { c.fillStyle = k % 2 ? '#5a0a14' : '#7a1220'; c.fillRect(X + k * 8, Y + 2, 8, Hd - 4); } break;
+      case 'piano': c.fillStyle = '#0b0b0e'; rr(c, X + 2, Y + 2, Wd - 4, Hd - 4, 8); c.fill(); c.fillStyle = '#1e1e24'; rr(c, X + 6, Y + 6, Wd - 12, Hd * 0.5, 5); c.fill(); c.fillStyle = '#f2f2ea'; c.fillRect(X + 8, Y + Hd - 18, Wd - 16, 12); c.fillStyle = '#111'; for (let k = 0; k < 9; k++) c.fillRect(X + 12 + k * ((Wd - 24) / 9), Y + Hd - 18, 3, 7); break;
+      case 'booth': c.fillStyle = '#7a1d1d'; rr(c, X + 2, Y + 2, Wd - 4, Hd - 4, 6); c.fill(); c.fillStyle = '#e8e0c8'; for (let k = 0; k < 6; k++) if (k % 2) c.fillRect(X + 2 + k * (Wd - 4) / 6, Y + 2, (Wd - 4) / 6, 14); c.fillStyle = '#2a3a4a'; c.fillRect(X + 12, Y + 22, Wd - 24, 16); c.fillStyle = '#ffd23a'; c.fillRect(X + Wd / 2 - 8, Y + Hd - 14, 16, 5); break;
+      case 'stall': c.fillStyle = '#3a2a1a'; c.fillRect(X + 2, Y + 8, Wd - 4, Hd - 10); for (let k = 0; k < o.w * 4; k++) { c.fillStyle = k % 2 ? '#e8e0c8' : o.c || '#c0392b'; c.fillRect(X + 2 + k * (Wd - 4) / (o.w * 4), Y + 2, (Wd - 4) / (o.w * 4), 14); } c.fillStyle = '#d8b878'; circ(c, X + 14, Y + 28, 5); circ(c, X + Wd - 14, Y + 28, 5); break;
+      case 'carousel': { const cx = X + Wd / 2, cy = Y + Hd / 2, R = Wd / 2 - 4; c.fillStyle = '#2a1a30'; circ(c, cx, cy, R); c.fillStyle = '#6a2a5a'; circ(c, cx, cy, R - 6); for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; c.fillStyle = ['#e8c040', '#e04060', '#40a0e0', '#60e080'][k % 4]; circ(c, cx + Math.cos(a) * (R - 22), cy + Math.sin(a) * (R - 22), 7); } c.fillStyle = '#e8e0c8'; circ(c, cx, cy, 14); c.fillStyle = '#c03040'; circ(c, cx, cy, 8); break; }
+      case 'wheel': { const cx = X + Wd / 2, cy = Y + Hd / 2, R = Wd / 2 - 4; c.strokeStyle = '#8a8a92'; c.lineWidth = 3; c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.stroke(); c.lineWidth = 1.5; for (let k = 0; k < 12; k++) { const a = k / 12 * TAU; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); c.stroke(); c.fillStyle = ['#e04060', '#40a0e0', '#e8c040'][k % 3]; rr(c, cx + Math.cos(a) * R - 5, cy + Math.sin(a) * R - 5, 10, 10, 3); c.fill(); } c.fillStyle = '#444'; circ(c, cx, cy, 8); break; }
       case 'gurney': { const hz = o.w >= o.h; c.fillStyle = '#7e8a92'; rr(c, X + 3, Y + 5, Wd - 6, Hd - 10, 5); c.fill(); c.fillStyle = o.c || '#cfe0e8'; rr(c, X + 6, Y + 8, Wd - 12, Hd - 16, 4); c.fill(); c.fillStyle = '#fff'; if (hz) rr(c, X + 8, Y + 11, 20, Hd - 22, 5); else rr(c, X + 11, Y + 8, Wd - 22, 20, 5); c.fill();
         c.fillStyle = 'rgba(120,0,10,0.55)'; circ(c, X + Wd * 0.62, Y + Hd * 0.5, 6); c.fillStyle = '#333'; circ(c, X + 8, Y + 6, 3); circ(c, X + Wd - 8, Y + 6, 3); circ(c, X + 8, Y + Hd - 6, 3); circ(c, X + Wd - 8, Y + Hd - 6, 3); break; }
       case 'drawer': for (let k = 0; k < o.w; k++) { const x = X + k * T; c.fillStyle = '#8f9ba3'; c.fillRect(x + 1, Y + 2, T - 2, Hd - 4); c.fillStyle = '#6e7a82'; c.fillRect(x + 4, Y + 6, T - 8, Hd - 14); c.fillStyle = '#d0d8de'; c.fillRect(x + 14, Y + Hd - 14, T - 28, 4); c.fillStyle = '#f0f0e0'; c.fillRect(x + 8, Y + 9, 14, 7); } break;
@@ -2626,14 +2916,26 @@ const Render = {
       const steps = 18; for (let i = 0; i <= steps; i++) { const a = n.ang - fov / 2 + fov * i / steps, d = G.castRay(n.x, n.y, a, R); c.lineTo(n.x + Math.cos(a) * d, n.y + Math.sin(a) * d); }
       c.closePath(); c.fill();
     }
+    // cameras
+    for (const cm of G.cams) {
+      const x = cm.x * TILE, y = cm.y * TILE; if (!inView(x, y, cm.range * TILE)) continue;
+      const off = cm.off > 0 || dark, R = cm.range * TILE, col = off ? '90,90,100' : cm.sus > 0.3 ? '255,60,60' : '120,200,255', a0 = off ? 0.03 : cm.sus > 0.3 ? 0.28 : 0.15;
+      const gr = c.createRadialGradient(x, y, 6, x, y, R); gr.addColorStop(0, `rgba(${col},${a0})`); gr.addColorStop(1, `rgba(${col},0)`);
+      c.fillStyle = gr; c.beginPath(); c.moveTo(x, y);
+      for (let i = 0; i <= 14; i++) { const a = cm.a - 0.42 + 0.84 * i / 14, d = G.castRay(x, y, a, R); c.lineTo(x + Math.cos(a) * d, y + Math.sin(a) * d); }
+      c.closePath(); c.fill();
+      c.save(); c.translate(x, y); c.rotate(cm.a); c.fillStyle = '#1a1c22'; rr(c, -7, -5, 14, 10, 3); c.fill(); c.fillStyle = '#2a2d36'; c.fillRect(4, -3, 6, 6); c.fillStyle = off ? '#444' : (Math.sin(t * 6) > 0 ? '#ff2a2a' : '#7a1010'); circ(c, -3, 0, 1.8); c.restore();
+    }
+    for (const sn of G.snares) { c.save(); c.translate(sn.x, sn.y); c.strokeStyle = '#9aa0a8'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 9, 0, TAU); c.stroke(); c.fillStyle = '#6a6e74'; for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; c.beginPath(); c.moveTo(Math.cos(a) * 9, Math.sin(a) * 9); c.lineTo(Math.cos(a + 0.2) * 5, Math.sin(a + 0.2) * 5); c.lineTo(Math.cos(a - 0.2) * 5, Math.sin(a - 0.2) * 5); c.fill(); } c.restore(); }
+    for (const d of G.devices) { const pu = 0.5 + 0.5 * Math.sin(t * 9); c.fillStyle = '#222'; rr(c, d.x - 8, d.y - 5, 16, 10, 2); c.fill(); c.fillStyle = '#888'; circ(c, d.x - 3, d.y, 3); c.strokeStyle = `rgba(255,220,100,${0.2 + 0.5 * pu})`; c.lineWidth = 2; c.beginPath(); c.arc(d.x, d.y, 12 + pu * 14, 0, TAU); c.stroke(); }
     // bodies
     for (const b of G.bodies) if (!b.hidden && inView(b.x, b.y, 40)) drawPerson(c, b.x, b.y, b.ang, b.n.look, 'dead', t, 0, { burnt: b.burnt, split: b.split, wound: b.wound, style: b.style });
     // characters (y-sorted)
     const list = G.npcs.filter(n => n.alive && inView(n.x, n.y, 40));
     list.push(G.player); list.sort((a, b) => a.y - b.y);
     for (const e of list) {
-      if (e === G.player) { if (!e.hidden && !e.dead) drawKiller(c, e, t); continue; }
-      drawPerson(c, e.x, e.y, e.ang, e.look, e.moving ? (e.anim === 'run' || e.anim === 'panic' ? 'panic' : 'walk') : e.anim, t, e.walkPh, { moving: e.moving });
+      if (e === G.player) { if (!e.hidden && !e.dead) { if (e.disguise) drawPerson(c, e.x, e.y, e.ang, e.disguiseLook, e.moving ? 'walk' : 'idle', t, e.walkPh || 0, { moving: e.moving }); else drawKiller(c, e, t); } continue; }
+      drawPerson(c, e.x, e.y, e.ang, e.look, e.moving ? (e.anim === 'run' || e.anim === 'panic' ? 'panic' : 'walk') : e.anim, t, e.walkPh, { moving: e.moving, drunk: e.drunk });
     }
     // particles (pre-light)
     for (const p of G.particles) {
@@ -2671,6 +2973,7 @@ const Render = {
       if (p.type === 'note') { c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '700 15px sans-serif'; c.fillStyle = `hsla(${p.col},90%,68%,${a})`; c.fillText('♪', p.x, p.y); }
       if (p.type === 'shadow') { c.fillStyle = `rgba(10,0,15,${a * 0.6})`; circ(c, p.x, p.y, p.size); c.fillStyle = `rgba(120,0,30,${a * 0.25})`; circ(c, p.x, p.y, p.size * 0.5); }
     }
+    for (const sm of G.smokes) { const k = Math.min(1, sm.t / 2, (9 - sm.t) / 0.8 + 0.2), g = c.createRadialGradient(sm.x, sm.y, 0, sm.x, sm.y, sm.r * 1.15); g.addColorStop(0, `rgba(190,190,200,${0.55 * k})`); g.addColorStop(0.7, `rgba(170,170,180,${0.35 * k})`); g.addColorStop(1, 'rgba(150,150,160,0)'); c.fillStyle = g; c.fillRect(sm.x - sm.r * 1.2, sm.y - sm.r * 1.2, sm.r * 2.4, sm.r * 2.4); }
     // invisible killer aura
     const P = G.player;
     if (P.invisible && !P.hidden) { c.fillStyle = 'rgba(5,0,10,0.35)'; circ(c, P.x, P.y, 22 + Math.sin(t * 3) * 2); }
@@ -2731,6 +3034,8 @@ const Render = {
       else { c.font = `${14}px sans-serif`; c.fillStyle = ph.busy ? `rgba(255,60,60,${0.6 + Math.sin(t * 20) * 0.4})` : 'rgba(120,180,255,0.85)'; c.fillText('☎', s.x, s.y - 6); }
     }
     for (const h of G.hides) if (G.nearRect(h, P.x, P.y) < TILE * 1.6 && !P.hidden) { const s = this.toScreen((h.x + h.w / 2) * TILE, (h.y + h.h / 2) * TILE); c.fillStyle = 'rgba(200,200,255,0.7)'; c.font = '13px sans-serif'; c.fillText(h.bodies ? `◉ ${h.bodies}` : '◉', s.x, s.y); }
+    for (const p of G.pois) if (p.poisoned) { const s2 = this.toScreen(p.x * TILE, p.y * TILE); c.fillStyle = `rgba(120,255,120,${0.6 + Math.sin(t * 5) * 0.3})`; c.font = '16px sans-serif'; c.fillText('☠', s2.x, s2.y - 10 * z); }
+    for (const n of G.npcs) if (n.alive && n.poison > 0) { const s2 = this.toScreen(n.x, n.y); c.fillStyle = 'rgba(120,255,120,0.9)'; c.font = '12px sans-serif'; c.fillText('☠', s2.x + 14 * z, s2.y - 22 * z); }
     // kill highlight
     if (G.context && G.context.kind === 'kill') { const n = G.context.n, s = this.toScreen(n.x, n.y); c.strokeStyle = `rgba(255,30,50,${0.6 + Math.sin(t * 10) * 0.3})`; c.lineWidth = 2.5; c.beginPath(); c.arc(s.x, s.y, 22 * z, 0, TAU); c.stroke(); }
     // target reticle
@@ -2760,7 +3065,7 @@ const Render = {
         c.font = '16px sans-serif'; c.fillText('☎', s.x, iy - 14);
       } else if (n.state === 'cower') { c.fillStyle = 'rgba(200,200,255,0.7)'; c.font = '12px Oswald, sans-serif'; c.fillText('…', s.x + Math.sin(t * 30) * 1.5, iy); }
       else if (n.state === 'act' && n.anim === 'sleep') { c.fillStyle = 'rgba(200,220,255,0.7)'; c.font = '11px Oswald, sans-serif'; const k = (t * 0.6 + n.id * 0.3) % 1; c.fillText('z', s.x + 10 + k * 8, s.y - 40 * z - k * 16); }
-      if (n.guard && CALM[n.state] && n.sus <= 0.05 && n.vulnT <= 0) { c.fillStyle = 'rgba(130,175,255,0.95)'; c.font = '700 13px sans-serif'; c.fillText('★', s.x, iy + 2); }
+      if (n.guard && CALM[n.state] && n.sus <= 0.05 && n.vulnT <= 0) { c.fillStyle = 'rgba(130,175,255,0.95)'; c.font = '700 13px sans-serif'; c.fillText(n.hero ? '⚔' : '★', s.x, iy + 2); }
       if (n.bubbleT > 0 && n.bubble) this.bubble(c, s.x, iy - (n.sus > 0.05 || !CALM[n.state] ? 20 : 4), n.bubble, Math.min(1, n.bubbleT * 2));
     }
     // floaters
@@ -2870,7 +3175,7 @@ function drawPerson(c, x, y, ang, L, anim, t, ph, o = {}) {
     headDraw(c, L, 0, -26); c.restore(); return;
   }
   if (anim === 'dead') {
-    c.rotate(ang);
+    c.rotate(ang); if (o.style === 'crush') c.scale(1.2, 0.72);
     const bn = o.burnt, sh = bn ? '#1c1814' : mix(L.shirt, '#555555', 0.35), sk = bn ? '#2a2018' : mix(L.skin, '#9a9a9a', 0.45), pn = bn ? '#14110e' : L.pants, sp = o.split ? 16 : 0, wd = o.wound || 1;
     c.fillStyle = pn; rr(c, -30 - sp, -8, 22, 6, 3); c.fill(); rr(c, -30 - sp, 2, 22, 6, 3); c.fill();
     if (o.split) { c.fillStyle = '#4a0006'; ell(c, -12 - sp / 2, 0, 13, 12); c.fillStyle = '#8a0010'; ell(c, -10 - sp / 2, 0, 8, 7); c.strokeStyle = '#b01a2a'; c.lineWidth = 3; c.beginPath(); c.moveTo(-16, -5); c.quadraticCurveTo(-26, 7, -12, 9); c.moveTo(-8, 4); c.quadraticCurveTo(-18, -9, -22, 2); c.stroke(); }
@@ -2888,7 +3193,7 @@ function drawPerson(c, x, y, ang, L, anim, t, ph, o = {}) {
   let sc = 1;
   if (anim === 'cower') { sc = 0.82; c.translate(Math.sin(t * 40) * 1.2, 0); }
   if (anim === 'dance') c.translate(0, Math.sin(t * 8.27 + ph) * 1.5);
-  c.rotate(ang + (anim === 'dance' ? Math.sin(t * 4.13 + ph) * 0.5 : 0)); c.scale(sc, sc);
+  c.rotate(ang + (anim === 'dance' ? Math.sin(t * 4.13 + ph) * 0.5 : 0) + (o.drunk ? Math.sin(t * 2.6 + ph) * 0.3 : 0)); c.scale(sc, sc);
   const s = Math.sin(ph), walking = o.moving;
   c.fillStyle = L.pants;
   if (walking) { ell(c, s * 7, -5, 6, 3.8); ell(c, -s * 7, 5, 6, 3.8); }
@@ -2995,6 +3300,7 @@ const cleanNick = v => String(v || '').replace(/[^\w àèéìòùÀÈÉÌÒÙ.\-
 const randomNick = () => pick(['Lama', 'Ombra', 'Corvo', 'Spettro', 'Gelo', 'Cenere', 'Veleno', 'Ruggine', 'Notte', 'Sangue']) + pick(['Nera', 'Muta', 'Pallida', 'Cieca', 'Fredda', 'Rossa', 'Vuota']) + (10 + Math.random() * 89 | 0);
 
 const UI = {
+  loadout: store.get('loadout', ['bait', 'poison']),
   scene: 'boot', btn: {}, progress: store.get('progress', { unlocked: 0, best: {}, kills: 0 }),
   init() {
     this.mm = $('#minimap');
@@ -3183,7 +3489,17 @@ const UI = {
     const bb = L.build(); $('#liCount').textContent = bb.npcs.length + (bb.events || []).length;
     const ch = (L.challenges || []).map(id => CHALLENGES[id].t);
     $('#liChal').innerHTML = ch.length ? '<b>SFIDE BONUS · +300 CIASCUNA</b>' + ch.map(t => '◆ ' + t).join('<br>') : '';
+    this.buildLoadout();
     this.show('lvlintro'); this.scene = 'lvlintro'; Sound.sting();
+  },
+  buildLoadout() {
+    const box = $('#liLoad'); box.innerHTML = '<b>EQUIPAGGIAMENTO · SCEGLINE 2</b><div class="chips"></div>';
+    const row = box.querySelector('.chips');
+    for (const [id, g] of Object.entries(GADGETS)) {
+      const b = document.createElement('button'); b.className = 'chip' + (this.loadout.includes(id) ? ' on' : ''); b.innerHTML = `${g.icon} ${g.name} ×${g.n}<small>${g.desc}</small>`;
+      b.addEventListener('click', e => { e.stopPropagation(); Sound.click(); const i = this.loadout.indexOf(id); if (i >= 0) { if (this.loadout.length > 1) this.loadout.splice(i, 1); } else { this.loadout.push(id); if (this.loadout.length > 2) this.loadout.shift(); } store.set('loadout', this.loadout); this.buildLoadout(); });
+      row.appendChild(b);
+    }
   },
   beginPlay() {
     if (this.scene !== 'lvlintro') return;
@@ -3213,6 +3529,7 @@ const UI = {
     { const wp = G.player.weapon, wd = WEAPONS[wp ? wp.id : 'knife']; this.set('hudWeapon', `${wd.icon} <b>${wd.name.toUpperCase()}</b>${wp ? ' ×' + wp.uses : ''}`, 'innerHTML'); }
     $('#hudFrenzy').classList.toggle('hidden', !(G.frenzyT > 0)); if (G.frenzyT > 0) $('#hudFrenzyBar i').style.width = Math.min(100, G.frenzyT / G.frenzyMax * 100) + '%';
     $('#hudChase').classList.toggle('hidden', !G.chased);
+    G.gadgets.forEach((g, i) => { const d = GADGETS[g.id]; this.set('gad' + i, `<span class="ic">${d.icon}</span>${d.short}<small>×${g.n}</small><span class="kb">${i ? 'C' : 'X'}</span>`, 'innerHTML'); $('#gad' + i).classList.toggle('na', g.n <= 0); });
     this.set('hudCombo', G.combo.t > 0 && G.combo.n > 1 ? `COMBO ×${G.combo.n}` : '');
     const cb = $('#hudComboBar'); if (cb) cb.style.width = (G.combo.t > 0 && G.combo.n > 1 ? G.combo.t / 7 * 100 : 0) + '%';
     // police
@@ -3227,7 +3544,7 @@ const UI = {
     this.set('actLabel', ctx ? ctx.label : '—');
     const ab = $('[data-btn="action"]'); ab.classList.toggle('na', !ctx); ab.classList.toggle('kill', !!ctx && ctx.kind === 'kill');
     // stealth status
-    const P = G.player, st = P.hidden ? 'NASCOSTO' : P.invisible ? 'NELL\'OMBRA' : P.inDark ? 'PENOMBRA' : 'ALLO SCOPERTO';
+    const P = G.player, st = P.hidden ? 'NASCOSTO' : P.disguise ? 'TRAVESTITO' : P.invisible ? 'NELL\'OMBRA' : P.inDark ? 'PENOMBRA' : 'ALLO SCOPERTO';
     this.set('hudStealth', st); $('#hudEye').className = P.invisible ? 'eye closed' : P.inDark ? 'eye half' : 'eye open';
     this.set('hudTarget', G.target ? `🎯 ${G.target.name}${G.target.trait ? ' · ' + TRAIT_IT[G.target.trait] : ''}${G.lock === G.target ? ' 🔒' : ''}` : '');
     // joystick
