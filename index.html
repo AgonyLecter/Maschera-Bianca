@@ -309,6 +309,11 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 .resList .blood{font-size:1.15em}.resList .blood b{color:#ff5a6a}
 .chip.lock{opacity:.55}.chip.shopchip{border-color:#c4101f;background:rgba(196,16,31,.2)}
 @media (max-height:560px){#shopList{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}.sitem{padding:6px 8px}.sitem p{display:none}.sitem .ic{font-size:20px}}
+#grabBtn{width:clamp(70px,16vh,92px);height:clamp(70px,16vh,92px);font-size:10px;font-weight:700;text-align:center;line-height:1.1;padding:6px;border-color:#ffb02a;background:radial-gradient(circle at 40% 35%,rgba(255,150,30,.9),rgba(90,30,0,.92));box-shadow:0 0 18px rgba(255,150,30,.6);animation:killp .6s infinite alternate}
+#struggle{position:fixed;left:50%;bottom:16%;transform:translateX(-50%);z-index:13;text-align:center;pointer-events:none;width:min(420px,80vw)}
+#struggle .sTxt{font-family:Nosifer;font-size:clamp(14px,3.6vh,24px);color:#ff2a3a;text-shadow:0 0 18px #f00,0 3px 0 #000;animation:cshake .1s steps(2) infinite}
+#struggle .sBar{height:14px;border:2px solid #ff2a3a;background:rgba(0,0,0,.7);margin-top:8px}
+#struggle .sBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8a0010,#ff3a4a);box-shadow:0 0 12px #f00}
 </style>
 </head>
 <body>
@@ -379,6 +384,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
     <div><h4>EQUIPAGGIAMENTO 🎒</h4><p>Vincendo i livelli guadagni <b>punti sangue 🩸</b>: nell'<b>Armeria</b> sblocchi e potenzi i gadget. Prima di ogni livello scegli <b>2 gadget</b> (X e C): <b>Esca sonora</b> attira due persone dove la lanci, <b>Tagliola</b> uccide chi la pesta, <b>Fumogeno</b> ti rende invisibile nella nube, <b>Veleno</b> uccide con ritardo chi mangia o beve dal punto avvelenato.</p></div>
     <div><h4>TRAVESTIMENTI E TELECAMERE 🎭</h4><p>Dal corpo di chi indossa una divisa puoi <b>prendere i vestiti</b>: finché non corri, non sei sporco di sangue e non trascini corpi, nessuno ti nota da vicino (i colleghi della stessa divisa ti smascherano a 3 caselle). Le <b>telecamere</b> avvisano la sicurezza: spegnile dal pannello, con un blackout o fumogeno, o evitale.</p></div>
     <div><h4>GENTE VIVA</h4><p>Le persone chiacchierano, ballano, brindano e si passano le voci: se uno sospetta qualcosa, avvisa l'altro. Se salta la corrente qualcuno corre al quadro per ripararla, e le urla attirano i curiosi. Ognuno ha un carattere (curioso, codardo, chiacchierone, paranoico, solitario) che vedi sul bersaglio.</p></div>
+    <div><h4>PRESE E FINALI 🔪</h4><p>Se sei vicino a un muro, un'auto, un fornello, una vasca, la console del DJ, un tavolo, un cassonetto… compare il tasto <b>PRESA</b> (<kbd>V</kbd>): afferri la vittima e la finisci contro l'ambiente, con punti ×1.8. Colpire una vittima che ti ha visto di fronte scatena una <b>lotta</b>: <b>premi AZIONE ripetutamente</b> per spingere la lama fino in fondo, o ti respinge e dà l'allarme.</p></div>
     <div><h4>FRENESIA 🩸</h4><p>Quattro uccisioni in combo scatenano la Frenesia: corri più veloce, colpisci da più lontano e ogni punto vale di più. Ogni nuova vittima la prolunga.</p></div>
     <div><h4>CORPI E NASCONDIGLI</h4><p>Trascina i corpi negli armadi e nei cassonetti ◉, e nasconditi lì dentro anche tu. Un corpo in vista fa scattare l'allarme. Attento al sangue: lascia impronte.</p></div>
   </div>
@@ -418,10 +424,12 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
       </div>
     </div>
     <button class="cbtn" id="sprintBtn" data-btn="sprint">CORRI</button>
+    <button class="cbtn hidden" id="grabBtn" data-btn="grab"><span id="grabLabel">PRESA</span><span class="kb">V</span></button>
     <button class="cbtn" id="actBtn" data-btn="action"><span id="actLabel">—</span><span class="kb">SPAZIO</span></button>
   </div>
-  <div id="hudKeys">WASD muovi · SHIFT corri · SPAZIO azione · Q/E/R poteri · X/C gadget · clic = blocca bersaglio · ESC pausa</div>
+  <div id="hudKeys">WASD muovi · SHIFT corri · SPAZIO azione · V presa · Q/E/R poteri · X/C gadget · clic = blocca bersaglio · ESC pausa</div>
 </div>
+<div id="struggle" class="hidden"><div class="sTxt">PREMI AZIONE RIPETUTAMENTE!</div><div class="sBar"><i id="struggleBar"></i></div></div>
 <div id="touch" class="hidden"><div id="joyHint">◀ TRASCINA PER MUOVERTI ▶</div></div>
 <div id="joy"><div id="joyKnob"></div></div>
 
@@ -534,15 +542,19 @@ const Sound = {
     s.start(t, Math.random()); s.stop(t + dur + 0.05);
   },
   /* ---------- SFX ---------- */
-  click() { this.tone(900, 0.06, { type: 'square', vol: 0.05, filter: 'lowpass', ff: 2500 }); },
-  hover() { this.tone(500, 0.04, { type: 'sine', vol: 0.03 }); },
+  click() { this.tone(280, 0.1, { slide: 90, vol: 0.12 }); this.noise(0.05, { filter: 'lowpass', ff: 900, vol: 0.1 }); this.tone(1700, 0.05, { slide: 900, vol: 0.03 }); },
+  hover() { this.tone(1500, 0.07, { slide: 800, vol: 0.025, verb: true }); },
   stab() {
-    this.noise(0.09, { ff: 2600, q: 2, vol: 0.5 });
-    this.tone(120, 0.22, { slide: 35, vol: 0.7, type: 'sine' });
-    this.noise(0.35, { filter: 'lowpass', ff: 700, slide: 150, vol: 0.35, at: this.t + 0.04 });
+    const t = this.t;
+    this.noise(0.05, { filter: 'highpass', ff: 3200, q: 1, vol: 0.22 });
+    this.noise(0.14, { filter: 'bandpass', ff: 900, slide: 260, q: 4, vol: 0.55 });
+    this.tone(95, 0.2, { slide: 34, vol: 0.75 });
+    this.noise(0.4, { filter: 'lowpass', ff: 650, slide: 120, vol: 0.38, at: t + 0.03 });
+    this.noise(0.02, { filter: 'bandpass', ff: 2600, q: 8, vol: 0.3, at: t + 0.05 });
   },
-  scream(pitch = 1) {
+  scream(pitch = 1, vol = 1) {
     if (!this.ctx) return;
+    this.noise(0.7, { filter: 'bandpass', ff: 2000, q: 2, vol: 0.1 * vol, attack: 0.04, verb: true });
     const c = this.ctx, t = c.currentTime, o = c.createOscillator(), lfo = c.createOscillator(), lg = c.createGain();
     const f1 = c.createBiquadFilter(), f2 = c.createBiquadFilter(), g = c.createGain();
     o.type = 'sawtooth'; const base = 520 * pitch;
@@ -550,13 +562,13 @@ const Sound = {
     o.frequency.linearRampToValueAtTime(base * 1.1, t + 0.8); o.frequency.exponentialRampToValueAtTime(base * 0.6, t + 1.2);
     lfo.frequency.value = 7; lg.gain.value = 28; lfo.connect(lg); lg.connect(o.frequency);
     f1.type = 'bandpass'; f1.frequency.value = 1100; f1.Q.value = 3; f2.type = 'bandpass'; f2.frequency.value = 2600; f2.Q.value = 4;
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.05); g.gain.setValueAtTime(0.35, t + 0.8); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.25);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35 * vol, t + 0.05); g.gain.setValueAtTime(0.35 * vol, t + 0.8); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.25);
     o.connect(f1); o.connect(f2); f1.connect(g); f2.connect(g); g.connect(this.sfx); g.connect(this.verb);
     o.start(t); lfo.start(t); o.stop(t + 1.3); lfo.stop(t + 1.3);
   },
   spotted() {
     [110, 116.5, 155.6, 233].forEach((f, i) => this.tone(f, 1.4, { type: 'sawtooth', vol: 0.12, filter: 'lowpass', ff: 1800, verb: true, detune: i * 7 }));
-    this.noise(0.6, { filter: 'highpass', ff: 3000, vol: 0.15, verb: true });
+    this.noise(0.6, { filter: 'highpass', ff: 3000, vol: 0.15, verb: true }); this.screech();
   },
   blink() {
     this.noise(0.55, { filter: 'bandpass', ff: 5000, slide: 200, q: 4, vol: 0.4, verb: true });
@@ -588,7 +600,57 @@ const Sound = {
   sting() { [146.8, 155.6].forEach(f => this.tone(f, 2.2, { type: 'sawtooth', vol: 0.09, filter: 'lowpass', ff: 900, verb: true })); },
   win() { [0, 3, 7, 12].forEach((s, i) => this.tone(220 * Math.pow(2, s / 12), 1.4, { type: 'triangle', vol: 0.12, at: this.t + i * 0.12, verb: true })); },
   chop() { this.noise(0.12, { ff: 900, q: 1, vol: 0.7 }); this.tone(90, 0.3, { slide: 30, vol: 0.9 }); this.noise(0.45, { filter: 'lowpass', ff: 500, slide: 120, vol: 0.5, at: this.t + 0.03 }); },
-  squelch() { this.noise(0.2, { filter: 'lowpass', ff: 420, slide: 90, vol: 0.45, q: 3 }); this.tone(70, 0.15, { slide: 40, vol: 0.3 }); },
+  squelch() { const r = rand(0.8, 1.3); this.noise(0.2, { filter: 'lowpass', ff: 420 * r, slide: 90, vol: 0.45, q: 3 }); this.tone(70 * r, 0.15, { slide: 40, vol: 0.3 }); this.noise(0.08, { filter: 'bandpass', ff: 1400 * r, slide: 500, q: 5, vol: 0.2 }); },
+  slash() { this.noise(0.22, { filter: 'bandpass', ff: 1500, slide: 6500, q: 2, vol: 0.32 }); this.noise(0.12, { filter: 'bandpass', ff: 900, slide: 300, q: 4, vol: 0.5, at: this.t + 0.12 }); this.tone(80, 0.25, { slide: 36, vol: 0.5, at: this.t + 0.12 }); this.gurgle(1.1); },
+  crack() { const t = this.t; this.noise(0.012, { ff: 3500, q: 1, vol: 0.6 }); this.tone(180, 0.08, { type: 'square', slide: 60, vol: 0.3, filter: 'lowpass', ff: 900 }); this.noise(0.09, { filter: 'lowpass', ff: 1200, slide: 200, vol: 0.4, at: t + 0.02 }); this.tone(60, 0.28, { slide: 30, vol: 0.7 }); },
+  slam(kind) { this.crack(); if (kind === 'metal') { this.tone(420, 0.7, { type: 'triangle', vol: 0.12, verb: true }); this.noise(0.25, { filter: 'highpass', ff: 3000, vol: 0.2 }); } else if (kind === 'glass') this.glass(); else if (kind === 'wood') this.noise(0.3, { filter: 'bandpass', ff: 350, q: 2, vol: 0.4 }); else this.noise(0.45, { filter: 'lowpass', ff: 500, slide: 90, vol: 0.4 }); },
+  gurgle(dur = 0.9) {
+    if (!this.ctx) return;
+    const c = this.ctx, t = c.currentTime, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(), l = c.createOscillator(), lg = c.createGain();
+    s.buffer = this.noiseBuf; s.loop = true; f.type = 'bandpass'; f.frequency.value = 380; f.Q.value = 5; l.frequency.value = rand(11, 16); lg.gain.value = 0.3; l.connect(lg); lg.connect(g.gain);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.38, t + 0.1); g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(this.sfx); g.connect(this.verb); s.start(t, Math.random()); s.stop(t + dur + 0.05); l.start(t); l.stop(t + dur + 0.05);
+  },
+  strain() { this.tone(rand(95, 135), 0.35, { type: 'sawtooth', slide: 80, vol: 0.1, filter: 'lowpass', ff: 600 }); this.noise(0.3, { filter: 'bandpass', ff: 520, q: 2, vol: 0.14, attack: 0.08 }); this.noise(0.05, { filter: 'highpass', ff: 3500, vol: 0.12 }); },
+  scrapeHit() { this.noise(0.08, { filter: 'highpass', ff: 2500, slide: 5500, q: 3, vol: 0.2 }); this.tone(rand(1400, 2600), 0.05, { type: 'square', vol: 0.03 }); },
+  stabThrough() { this.stab(); this.noise(0.55, { filter: 'bandpass', ff: 500, slide: 200, q: 3, vol: 0.5, at: this.t + 0.05 }); this.tone(55, 0.5, { slide: 28, vol: 0.7 }); this.gurgle(1.3); },
+  sizzle() { this.noise(1.5, { filter: 'highpass', ff: 4000, vol: 0.12, attack: 0.05 }); for (let i = 0; i < 12; i++) this.noise(0.02, { ff: rand(2000, 6000), q: 1, vol: 0.12, at: this.t + rand(0, 1.3) }); },
+  drownSplash() { this.noise(0.6, { filter: 'lowpass', ff: 1800, slide: 300, vol: 0.35 }); for (let i = 0; i < 9; i++) this.tone(rand(300, 900), 0.09, { slide: rand(500, 1300), vol: 0.07, at: this.t + 0.1 + i * 0.13, verb: true }); },
+  screech() {
+    if (!this.ctx) return; const c = this.ctx, t = c.currentTime;
+    [0, 1].forEach(k => { const o = c.createOscillator(), l = c.createOscillator(), lg = c.createGain(), f = c.createBiquadFilter(), g = c.createGain();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(1900 + k * 14, t); o.frequency.exponentialRampToValueAtTime(2600 + k * 14, t + 0.7); l.frequency.value = 6; lg.gain.value = 36; l.connect(lg); lg.connect(o.frequency);
+      f.type = 'bandpass'; f.frequency.value = 2300; f.Q.value = 3; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+      o.connect(f); f.connect(g); g.connect(this.sfx); g.connect(this.verb); o.start(t); l.start(t); o.stop(t + 1.2); l.stop(t + 1.2); });
+  },
+  tinnitus() { this.tone(4300, 3, { vol: 0.05, attack: 0.05 }); this.tone(5200, 2.2, { vol: 0.02, attack: 0.1 }); },
+  stalkWhisper() { const t = this.t; for (let i = 0; i < 3; i++) this.noise(0.09, { filter: 'bandpass', ff: 3400, q: 7, vol: 0.22, at: t + i * 0.17, verb: true }); for (let i = 0; i < 3; i++) this.noise(0.14, { filter: 'bandpass', ff: 700, slide: 520, q: 5, vol: 0.22, at: t + 0.62 + i * 0.2, verb: true }); },
+  /* footsteps by surface */
+  stepSurf(surf, v) {
+    const R = rand(0.85, 1.2);
+    switch (surf) {
+      case '.': this.noise(0.05, { filter: 'lowpass', ff: 520 * R, vol: v }); this.tone(130 * R, 0.07, { slide: 80, vol: v * 0.7, type: 'triangle' }); break;
+      case ',': case 'h': case 'm': this.noise(0.03, { filter: 'bandpass', ff: 2400 * R, q: 3, vol: v * 1.1 }); this.tone(320 * R, 0.03, { vol: v * 0.3, type: 'square', filter: 'lowpass', ff: 1500 }); break;
+      case ':': this.noise(0.08, { filter: 'lowpass', ff: 260, vol: v * 0.7 }); break;
+      case 'g': case 'f': this.noise(0.13, { filter: 'bandpass', ff: 3200 * R, q: 0.7, vol: v * 0.8 }); this.noise(0.04, { filter: 'lowpass', ff: 300, vol: v * 0.5 }); break;
+      case 'd': this.tone(190 * R, 0.1, { slide: 120, vol: v, type: 'triangle' }); this.noise(0.04, { filter: 'lowpass', ff: 600, vol: v * 0.5 }); break;
+      default: this.noise(0.04, { filter: 'lowpass', ff: 900 * R, vol: v }); this.tone(150 * R, 0.04, { slide: 100, vol: v * 0.5 }); break;
+    }
+  },
+  /* ambient horror events */
+  creak() { this.tone(rand(60, 90), rand(1.2, 2.2), { type: 'sawtooth', slide: rand(45, 120), vol: 0.05, filter: 'bandpass', ff: rand(300, 700), q: 6, verb: true, dest: this.ambBus }); },
+  drip() { this.tone(rand(1500, 2300), 0.12, { slide: rand(700, 1000), vol: 0.05, verb: true, dest: this.ambBus }); },
+  howl() { this.tone(280, 1.3, { slide: 480, vol: 0.04, verb: true, dest: this.ambBus }); this.tone(480, 1.6, { slide: 300, vol: 0.04, at: this.t + 1.15, verb: true, dest: this.ambBus }); },
+  thunder() { this.noise(3.2, { filter: 'lowpass', ff: 1300, slide: 70, vol: 0.4, attack: 0.25, verb: true, dest: this.ambBus }); this.noise(0.1, { filter: 'highpass', ff: 2500, vol: 0.2, dest: this.ambBus }); },
+  twig() { this.noise(0.03, { filter: 'highpass', ff: 3000, vol: 0.15, dest: this.ambBus }); this.noise(0.04, { filter: 'highpass', ff: 3500, vol: 0.1, at: this.t + 0.09, dest: this.ambBus }); },
+  farThud() { this.tone(60, 0.35, { slide: 34, vol: 0.14, verb: true, dest: this.ambBus }); this.noise(0.25, { filter: 'lowpass', ff: 300, vol: 0.12, verb: true, dest: this.ambBus }); },
+  ambEvent() {
+    const by = { house: ['creak', 'thunder', 'drip', 'farThud', 'whisper'], hospital: ['creak', 'drip', 'farThud', 'whisper', 'creak'], forest: ['howl', 'twig', 'creak', 'whisper', 'farThud'], lounge: ['creak', 'drip', 'farThud'], park: ['creak', 'farThud', 'whisper', 'drip'] };
+    const k = pick(by[this.ambKind] || ['creak', 'drip']);
+    if (k === 'whisper') this.noise(1.1, { filter: 'bandpass', ff: rand(1800, 3200), q: 9, vol: 0.05, attack: 0.3, verb: true, dest: this.ambBus }); else this[k]();
+    if (Math.random() < 0.08) this.scream(rand(0.8, 1.3), 0.12);
+  },
+
   shot() { this.noise(0.07, { ff: 3000, q: 1, vol: 0.28 }); this.tone(220, 0.1, { slide: 60, vol: 0.25, type: 'square', filter: 'lowpass', ff: 1200 }); this.noise(0.25, { filter: 'lowpass', ff: 600, slide: 120, vol: 0.2, at: this.t + 0.05 }); },
   boom() { this.noise(1.4, { filter: 'lowpass', ff: 1500, slide: 60, vol: 0.9, verb: true }); this.tone(55, 1.2, { slide: 22, vol: 1, verb: true }); this.noise(0.12, { ff: 5000, vol: 0.5 }); },
   zap() { this.noise(0.55, { filter: 'highpass', ff: 2500, vol: 0.3 }); for (let i = 0; i < 9; i++) this.tone(rand(300, 1800), 0.06, { type: 'sawtooth', vol: 0.1, at: this.t + i * 0.05 }); },
@@ -600,7 +662,8 @@ const Sound = {
   breath() { for (let i = 0; i < 3; i++) { this.noise(0.55, { filter: 'bandpass', ff: 700, slide: 380, q: 1.2, vol: 0.2, attack: 0.18, at: this.t + i * 0.75, verb: true }); this.noise(0.5, { filter: 'bandpass', ff: 420, slide: 900, q: 1.2, vol: 0.14, attack: 0.15, at: this.t + i * 0.75 + 0.38 }); } },
   scrape() { this.noise(0.8, { filter: 'highpass', ff: 1800, slide: 6500, q: 3, vol: 0.18, attack: 0.05, verb: true }); this.tone(1900, 0.7, { type: 'sawtooth', slide: 3400, vol: 0.03 }); },
   cineHit() { this.tone(46, 1.5, { type: 'sawtooth', slide: 28, vol: 0.7, filter: 'lowpass', ff: 500, verb: true }); this.noise(0.6, { filter: 'lowpass', ff: 900, slide: 80, vol: 0.6 }); this.stab(); this.sting(); this.tone(200, 0.9, { type: 'sawtooth', slide: 70, vol: 0.12, filter: 'lowpass', ff: 700 }); },
-  step() { this.noise(0.05, { filter: 'lowpass', ff: 380, vol: 0.05 }); },
+  step() { this.stepSurf('.', 0.06); },
+  setLevels(stalk, tens) { this.stalkV = stalk; this.tensV = tens; },
   /* ---------- Siren ---------- */
   startSiren() {
     if (!this.ctx || this.siren) return;
@@ -616,7 +679,7 @@ const Sound = {
   ambience(kind) {
     if (!this.ctx) { this.pendingAmb = kind; return; }
     if (this.ambKind === kind) return;
-    this.ambKind = kind;
+    this.ambKind = kind; this.evNext = 0;
     if (this.amb) { const old = this.amb; old.g.gain.setTargetAtTime(0.0001, this.t, 0.4); setTimeout(() => old.nodes.forEach(n => { try { n.stop(); } catch (e) {} }), 1500); }
     this.amb = null; this.disco = false; this.musicBus.gain.setTargetAtTime(0, this.t, 0.3);
     if (!kind) return;
@@ -649,6 +712,24 @@ const Sound = {
   schedule() {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
+    // tension bed
+    const tv = this.tensV || 0, sv = this.stalkV || 0;
+    if (!this.tn) {
+      const c = this.ctx, g = c.createGain(); g.gain.value = 0; const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; lp.connect(g); g.connect(this.ambBus);
+      const mk = (f, type) => { const o = c.createOscillator(); o.type = type; o.frequency.value = f; const og = c.createGain(); og.gain.value = 0.5; o.connect(og); og.connect(lp); o.start(); return o; };
+      const l = c.createOscillator(), lg = c.createGain(); l.frequency.value = 5.5; lg.gain.value = 180; l.connect(lg); lg.connect(lp.frequency); l.start();
+      this.tn = { g, o1: mk(58, 'sawtooth'), o2: mk(82.4, 'sawtooth'), o3: mk(116.5, 'square') };
+    }
+    this.tn.g.gain.setTargetAtTime(tv * tv * 0.18, now, 0.35); this.tn.o2.frequency.setTargetAtTime(82.4 + tv * 14, now, 0.5);
+    if (tv > 0.5 && now > (this.pulseNext || 0)) { this.tone(48, 0.2, { vol: 0.3 * tv, slide: 36 }); this.pulseNext = now + 0.85 - tv * 0.45; }
+    if (sv > 0.08 && now > (this.stalkNext || 0)) {
+      const pat = [41.2, 41.2, 58.3, 41.2, 43.7, 41.2, 41.2, 58.3, 41.2, 65.4], i = (this.stalkI = ((this.stalkI || 0) + 1) % pat.length);
+      this.tone(pat[i] * (i === 9 ? 2 : 1), 0.2, { type: 'triangle', vol: 0.22 * sv, filter: 'lowpass', ff: 420, verb: i % 5 === 0 });
+      if (i % 5 === 0) this.tone(pat[i] * 4, 0.1, { vol: 0.05 * sv, verb: true });
+      this.stalkNext = now + 0.2 + (i === 4 || i === 9 ? 0.12 : 0);
+    }
+    if (this.ambKind && this.ambKind !== 'menu' && this.ambKind !== 'disco') { if (!this.evNext) this.evNext = now + 6; if (now > this.evNext) { this.ambEvent(); this.evNext = now + rand(9, 22); } }
+    if (this.ambKind === 'menu' && now > (this.dripNext || 0)) { this.drip(); this.dripNext = now + rand(1.5, 4); if (Math.random() < 0.15) this.creak(); }
     if ((this.ambKind === 'menu' || this.ambKind === 'house' || this.ambKind === 'lounge') && now > this.pingNext) { // eerie music box pings
       const notes = [220, 233.1, 261.6, 311.1, 329.6, 349.2, 415.3, 440];
       const n = pick(notes) * (Math.random() < 0.3 ? 2 : 1);
@@ -792,6 +873,24 @@ const SHOP = {
   axe: 400                 // start every level with an axe (2 uses)
 };
 const newShop = () => ({ own: ['bait'], ch: {}, shadow: 0, axe: false });
+const FIN = {
+  stove: { k: 'burn', label: 'FRIGGI SUL FORNELLO' }, grill: { k: 'burn', label: 'FRIGGI SULLA GRIGLIA' },
+  sink: { k: 'drown', label: 'SPACCA NEL LAVANDINO' }, tub: { k: 'drown', label: 'ANNEGA NELLA VASCA' }, toilet: { k: 'drown', label: 'TESTA NEL WC' }, water: { k: 'drown', label: 'ANNEGA NELL\'ACQUA' },
+  car: { k: 'slam', label: 'SBATTI SUL PARABREZZA', snd: 'glass', alarm: true },
+  console: { k: 'slam', label: 'SBATTI SULLA CONSOLE', snd: 'metal', dj: true }, speaker: { k: 'slam', label: 'SBATTI SULL\'ALTOPARLANTE', snd: 'metal', screech: true }, amp: { k: 'slam', label: 'SBATTI SULL\'AMPLI', snd: 'metal', screech: true },
+  table: { k: 'slam', label: 'SCHIANTA SUL TAVOLO', snd: 'wood' }, counter: { k: 'slam', label: 'SBATTI SUL BANCONE', snd: 'wood' }, bar: { k: 'slam', label: 'SBATTI SUL BANCO', snd: 'wood', bottle: true },
+  desk: { k: 'slam', label: 'SBATTI SULLA SCRIVANIA', snd: 'wood' }, bench: { k: 'slam', label: 'SBATTI SUL BANCO', snd: 'wood' }, shelf: { k: 'slam', label: 'SBATTI SULLO SCAFFALE', snd: 'wood' },
+  fridge: { k: 'slam', label: 'SCHIACCIA NELLO SPORTELLO', snd: 'metal' }, pillar: { k: 'slam', label: 'SBATTI SUL PILASTRO' }, crate: { k: 'slam', label: 'SBATTI SULLE CASSE', snd: 'wood' },
+  boiler: { k: 'slam', label: 'SBATTI SULLA CALDAIA', snd: 'metal' }, piano: { k: 'slam', label: 'SBATTI SUI TASTI', snd: 'metal' }, tv: { k: 'slam', label: 'SFONDA LO SCHERMO', snd: 'glass', tv: true },
+  bottles: { k: 'slam', label: 'SBATTI SULLE BOTTIGLIE', snd: 'glass' }, gurney: { k: 'slam', label: 'SBATTI SULLA BARELLA', snd: 'metal' }, cabinet: { k: 'slam', label: 'SBATTI SULL\'ARMADIO', snd: 'metal' },
+  fuse: { k: 'zap', label: 'ELETTROCUTA NEL QUADRO' },
+  dumpster: { k: 'bin', label: 'GETTA NEL CASSONETTO' }, wardrobe: { k: 'bin', label: 'CHIUDI NELL\'ARMADIO' }, locker: { k: 'bin', label: 'CHIUDI NELL\'ARMADIETTO' }, shed: { k: 'bin', label: 'CHIUDI NEL CAPANNO' }, drawer: { k: 'bin', label: 'CHIUDI NELLA CELLA' },
+  woodpile: { k: 'slam', label: 'SBATTI SULLA LEGNA', snd: 'wood' }, canoe: { k: 'slam', label: 'SBATTI SULLA CANOA', snd: 'wood' }, stall: { k: 'slam', label: 'SBATTI SUL BANCONE', snd: 'wood' },
+  carousel: { k: 'slam', label: 'SBATTI SUL CAROSELLO', snd: 'metal' }, wheel: { k: 'slam', label: 'SBATTI SULLA RUOTA', snd: 'metal' }, campfire: { k: 'burn', label: 'GETTA NEL FALÒ' },
+  booth: { k: 'bin', label: 'CHIUDI NELLA BIGLIETTERIA' }, tent: { k: 'bin', label: 'CHIUDI NELLA TENDA' },
+  wall: { k: 'slam', label: 'SBATTI AL MURO', snd: 'wall' }
+};
+const FIN_T = { slam: [0.3, 0.72, 1.2], burn: [0.35, 1.4], drown: [0.35, 1.7], bin: [0.3, 0.85], zap: [0.3, 1.0] };
 const POISON_TAGS = new Set(['bar', 'eat', 'fridge', 'vend', 'break', 'bbq', 'cook', 'stall', 'fire']);
 
 /* ---- weapons ---- */
@@ -1421,7 +1520,7 @@ const Game = {
     this.lock = null; this.target = null; this.ended = false; this.endT = 0; this.slowT = 0; this.slowScale = 1; this.hitstop = 0;
     this.shake = 0; this.flash = 0; this.flashColor = '255,0,0'; this.hb = 0; this.lightDirty = true; this.styleCount = {};
     this.hintI = 0; this.hintT = 3; this.policeCalled = false; this.context = null;
-    this.cine = null; this.cineK = 0;
+    this.cine = null; this.cineK = 0; this.fin = null; this.struggle = null; this.punchT = 0; this.killCamT = 0; this.whisperCd = 0;
     this.frenzyT = 0; this.frenzyMax = 9; this.st = { silent: 0, weapon: 0, trap: 0, multi: 0, hidden: 0 }; this.lastKillT = -9;
     this.tracers = []; this.sched = []; this.screenBlood = []; this.boomFx = [];
     this.cams = (L.cams || []).map(c => ({ ...c, sus: 0, cd: 0, off: 0, a: c.ang }));
@@ -2111,6 +2210,7 @@ const Game = {
   updatePlayer(dt) {
     const P = this.player, mv = Input.move();
     P.attackT = Math.max(0, P.attackT - dt); P.blinkT -= dt; P.shadowT -= dt;
+    if (this.fin || this.struggle || P.stunT > 0) { if (P.stunT > 0) P.stunT -= dt; P.moving = false; P.sprint = false; P.stillT = 0; return; }
     if (P.hidden) {
       P.invisible = true; P.moving = false; P.sprint = false;
       if (mv.x || mv.y) { if ((P.hideHold = (P.hideHold || 0) + dt) > 0.25) this.unhide(); } else P.hideHold = 0;
@@ -2124,6 +2224,11 @@ const Game = {
       const ox = P.x, oy = P.y;
       this.moveCircle(P, mv.x * sp * dt, mv.y * sp * dt);
       const moved = dist(ox, oy, P.x, P.y);
+      P.stepA = (P.stepA || 0) + moved;
+      if (P.stepA > (P.sprint ? 34 : 26)) {
+        P.stepA = 0; const tx = Math.floor(P.x / TILE), ty = Math.floor(P.y / TILE); let tt = this.tiles[ty * this.W + tx]; if (tt === 'D') tt = this.L.doorFloor[ty * this.W + tx] || '.';
+        Sound.stepSurf(tt, P.carrying ? 0.07 : P.sprint ? 0.1 : 0.045);
+      }
       P.walkPh = (P.walkPh || 0) + sp * dt * 0.13;
       for (const pl of this.pools) if (dist(P.x, P.y, pl.x, pl.y) < pl.r * 0.8) P.blood = Math.min(1, P.blood + dt * 1.4);
       if (P.blood > 0.04) {
@@ -2188,7 +2293,14 @@ const Game = {
     let best = null, bd = kr;
     for (const n of this.npcs) { if (!n.alive || !this.canKnife(n, mw)) continue; const d = dist(P.x, P.y, n.x, n.y); if (d < bd && this.wallClear(P.x, P.y, n.x, n.y)) { bd = d; best = n; } }
     if (P.weapon && WEAPONS[P.weapon.id].ranged) { const t = this.shootTarget(); if (t && t !== best) return { label: 'SPARA', kind: 'shoot', n: t }; }
-    if (best) return { label: mw.verb, kind: 'kill', n: best };
+    if (best) {
+      const ctx = { label: mw.verb, kind: 'kill', n: best };
+      if (this.meleeId() === 'knife' && !P.carrying) {
+        const fin = this.finisherFor(best), dirA = Math.atan2(best.y - P.y, best.x - P.x), back = Math.abs(angDiff(best.ang, dirA)) < 1.15;
+        if (fin && (!this.victimAware(best) || back)) ctx.alt = { n: best, fin };
+      }
+      return ctx;
+    }
     for (const p of this.pickups) if (!p.taken && dist(P.x, P.y, p.x * TILE, p.y * TILE) < TILE * 0.9) return { label: 'PRENDI ' + WEAPONS[p.w].name.toUpperCase(), kind: 'pickup', p };
     for (const b of this.bodies) if (!b.hidden && b.uniform && !b.looted && b.style !== 'explode' && dist(P.x, P.y, b.x, b.y) < TILE * 0.9) return { label: 'PRENDI DIVISA', kind: 'dress', b };
     for (const b of this.bodies) if (!b.hidden && dist(P.x, P.y, b.x, b.y) < TILE * 0.9) return { label: 'TRASCINA', kind: 'carry', b };
@@ -2200,7 +2312,7 @@ const Game = {
   doAction() {
     const c = this.context, P = this.player; if (!c || this.ended) return;
     switch (c.kind) {
-      case 'kill': this.kill(c.n); break;
+      case 'kill': this.tryKill(c.n); break;
       case 'shoot': if (this.wallClear(P.x, P.y, c.n.x, c.n.y)) this.kill(c.n, { weapon: 'pistol' }); else Sound.denied(); break;
       case 'pickup': { const w = WEAPONS[c.p.w]; c.p.taken = true; P.weapon = { id: c.p.w, uses: w.uses }; Sound.pickup(); UI.toast(`${w.icon} ${w.name}: ${w.uses} ${w.ranged ? 'colpi' : 'usi'}`); break; }
       case 'dress': { const b = c.b; b.looted = true; P.disguise = b.uniform; P.disguiseLook = Object.assign({}, b.n.look); b.n.look = Object.assign({}, b.n.look, { shirt: '#d8d0c8', pants: '#555' }); Sound.pickup(); UI.toast('Travestito! Muoviti piano e non farti sporcare di sangue'); break; }
@@ -2248,11 +2360,11 @@ const Game = {
     const wd = trap ? { name: 'trap', blood: o.blood || 2, noise: 0, mult: 1 } : WEAPONS[wid];
     const sx = o.sx != null ? o.sx : P.x, sy = o.sy != null ? o.sy : P.y;
     const dirA = Math.atan2(n.y - sy, n.x - sx);
-    const aware = !trap && (!CALM[n.state] || n.sus > 0.45 || (n.watchT > 0 && this.sees(n, P.x, P.y) && !P.invisible));
+    const aware = o.aware != null ? o.aware : !trap && (!CALM[n.state] || n.sus > 0.45 || (n.watchT > 0 && this.sees(n, P.x, P.y) && !P.invisible));
     const panicking = n.state === 'panic' || n.state === 'calling' || n.state === 'flee';
     const back = !trap && wid !== 'pistol' && Math.abs(angDiff(n.ang, dirA)) < 1.15;
-    const style = trap ? (o.style || 'explode') : wid === 'pistol' ? 'shoot' : wid === 'axe' ? 'chop' : wid === 'saw' ? 'saw' : (back && !aware ? 'slash' : 'stab');
-    const bl = wd.blood * (this.frenzyT > 0 && !trap ? 1.25 : 1);
+    const style = o.style && !trap ? o.style : trap ? (o.style || 'explode') : wid === 'pistol' ? 'shoot' : wid === 'axe' ? 'chop' : wid === 'saw' ? 'saw' : (back && !aware ? 'slash' : 'stab');
+    const bl = (o.blood || wd.blood) * (this.frenzyT > 0 && !trap ? 1.25 : 1);
     if (!trap) { P.attackT = style === 'saw' ? 1 : style === 'shoot' ? 0.2 : 0.3; P.attackKind = style; P.ang = dirA; }
     if (n.phone && n.phone.busy === n) n.phone.busy = null;
     const wasLured = n.lured;
@@ -2264,10 +2376,10 @@ const Game = {
     for (let i = 0, k = 2 + Math.round(bl * 1.5); i < k; i++) { const a = dirA + rand(-1.3, 1.3), d = rand(18, 70 * Math.sqrt(bl) + 20); Render.splat(n.x + Math.cos(a) * d, n.y + Math.sin(a) * d, rand(4, 11) * Math.sqrt(bl), 0.8); }
     const nearP = dist(n.x, n.y, P.x, P.y) < TILE * 2.2;
     switch (style) {
-      case 'slash': this.splatter(n.x, n.y, dirA, 30 * bl, 0.75); b.spurt = { t: 1.8, max: 1.8, k: 0, a: dirA }; Sound.stab(); Sound.squelch(); this.shake = 9; this.hitstop = 0.07; break;
+      case 'slash': this.splatter(n.x, n.y, dirA, 30 * bl, 0.75); b.spurt = { t: 1.8, max: 1.8, k: 0, a: dirA }; Sound.slash(); this.shake = 9; this.hitstop = 0.07; this.sched.push({ t: 0.18, fn: () => { this.splatter(n.x, n.y, dirA + rand(-0.5, 0.5), 22 * bl, 0.7); Sound.squelch(); } }); break;
       case 'stab':
         this.splatter(n.x, n.y, dirA, 26 * bl, 0.9); Sound.stab(); Sound.squelch(); this.shake = 9; this.hitstop = 0.06; b.spurt = { t: 1.2, max: 1.2, k: 0.3, a: dirA };
-        [0.11, 0.22].forEach(dl => this.sched.push({ t: dl, fn: () => { this.splatter(n.x, n.y, dirA + rand(-0.6, 0.6), 18 * bl, 1.1); Sound.squelch(); this.shake = 7; Render.splat(n.x + rand(-12, 12), n.y + rand(-12, 12), rand(5, 9), 0.8); } }));
+        [0.11, 0.22].forEach(dl => this.sched.push({ t: dl, fn: () => { this.splatter(n.x, n.y, dirA + rand(-0.6, 0.6), 18 * bl, 1.1); Sound.squelch(); this.shake = 7; Render.splat(n.x + rand(-12, 12), n.y + rand(-12, 12), rand(5, 9), 0.8); if (dl > 0.2) Sound.crack(); } }));
         break;
       case 'chop': this.splatter(n.x, n.y, dirA, 42 * bl / 1.4, 1.1, [80, 320]); this.gibs(n.x, n.y, dirA, 4, 1); this.mist(n.x, n.y, 4); Sound.chop(); this.shake = 15; this.hitstop = 0.11; b.spurt = { t: 2, max: 2, k: 0, a: dirA }; break;
       case 'saw':
@@ -2281,6 +2393,11 @@ const Game = {
         this.splatter(n.x, n.y, dirA, 24 * bl, 0.6, [120, 340]); this.mist(n.x, n.y, 3); this.shake = 5; this.hitstop = 0.04; b.spurt = { t: 1.3, max: 1.3, k: 0.1, a: dirA };
         this.particles.push({ x: mx, y: my, vx: 0, vy: 0, life: 0.07, max: 0.07, size: 12, type: 'spark' }); break;
       }
+      case 'push': this.splatter(n.x, n.y, dirA, 38 * bl, 0.8); this.splatter(n.x, n.y, dirA + Math.PI, 28 * bl, 0.9, [80, 300]); this.gibs(n.x, n.y, dirA, 3, 1.2); this.mist(n.x, n.y, 4); Sound.stabThrough(); this.shake = 16; this.hitstop = 0.14; b.spurt = { t: 2.2, max: 2.2, k: 0, a: dirA }; this.slowmo(0.9, 0.3); break;
+      case 'slam': this.splatter(n.x, n.y, dirA, 34 * bl, 1.2, [60, 280]); this.gibs(n.x, n.y, dirA, 3, 1.4); this.mist(n.x, n.y, 3); this.shake = 14; this.hitstop = 0.1; b.spurt = { t: 1.6, max: 1.6, k: 0.2, a: dirA }; Sound.gurgle(0.9); break;
+      case 'burn': b.burnt = true; for (let i = 0; i < 16; i++) this.particles.push({ x: n.x + rand(-8, 8), y: n.y + rand(-8, 8), vx: rand(-30, 30), vy: rand(-80, -20), life: rand(0.5, 1.2), max: 1.2, size: rand(4, 9), type: 'fire' }); Sound.sizzle(); this.shake = 6; break;
+      case 'drown': this.splatter(n.x, n.y, dirA, 14, 1.4, [30, 120]); for (let i = 0; i < 10; i++) this.particles.push({ x: n.x + rand(-8, 8), y: n.y + rand(-8, 8), vx: rand(-60, 60), vy: rand(-90, -10), life: rand(0.5, 1), max: 1, size: rand(4, 8), type: 'water' }); Sound.gurgle(1.4); break;
+      case 'bin': Sound.slam('metal'); this.shake = 8; b.hidden = true; break;
       case 'snare': this.splatter(n.x, n.y, dirA, 30, Math.PI, [60, 220]); this.gibs(n.x, n.y, dirA, 2, Math.PI); Sound.squelch(); Sound.scream(n.pitch * 1.1); this.shake = 8; b.spurt = { t: 1.5, max: 1.5, k: 0, a: dirA }; this.noise(n.x, n.y, TILE * 6, 0.3, n); break;
       case 'poison': for (let i = 0; i < 8; i++) this.particles.push({ x: n.x + rand(-8, 8), y: n.y + rand(-8, 8), vx: rand(-14, 14), vy: rand(-26, -8), life: rand(1, 1.8), max: 1.8, size: rand(4, 7), type: 'smoke' }); Sound.thud(); break;
       case 'crush': this.splatter(n.x, n.y, rand(0, TAU), 40, Math.PI, [40, 260]); this.gibs(n.x, n.y, dirA, 5, Math.PI); Sound.thud(); Sound.squelch(); this.shake = 14; break;
@@ -2296,11 +2413,13 @@ const Game = {
     this.kills++; FB.bumpStat('kills');
     // style & score
     const tags = []; let mult = wd.mult;
-    const silent = !trap && !aware && !wd.noise;
+    const silent = !trap && !aware && !wd.noise && !o.finisher;
     if (silent) { mult *= 1.5; tags.push('SILENZIOSO'); this.st.silent++; }
     if (style === 'slash') { mult *= 1.2; tags.push('GOLA TAGLIATA'); }
     if (style === 'stab' && aware) tags.push('ACCOLTELLATO');
     if (style === 'chop') tags.push('ACCETTATA'); if (style === 'saw') tags.push('SQUARTATO'); if (style === 'shoot') tags.push('COLPO IN TESTA');
+    if (style === 'push') { mult *= 1.4; tags.push('TRAPASSATO'); }
+    if (o.finisher) { mult *= 1.8; tags.push(({ slam: 'SBATTUTO', burn: 'ARROSTITO', drown: 'ANNEGATO', bin: 'CHIUSO DENTRO', electro: 'ELETTROCUTATO' })[style] || 'FINISHER'); this.st.finisher = (this.st.finisher || 0) + 1; }
     if (trap) { mult *= 2; tags.push(style === 'snare' ? 'TAGLIOLA' : style === 'poison' ? 'AVVELENATO' : style === 'crush' ? 'SCHIACCIATO' : 'INCIDENTE'); this.st.trap++; }
     if (!trap && wid !== 'knife') this.st.weapon++;
     if (!trap && P.blinkT > 0) { mult *= 1.5; tags.push('DIETRO DI TE'); }
@@ -2321,6 +2440,8 @@ const Game = {
     // shadow energy
     let gain = aware ? 0.5 : 1; if (this.combo.n % 3 === 0) gain += 1;
     this.charges = Math.min(3, this.charges + gain);
+    this.punchT = 0.4; if (['slash', 'push', 'slam', 'chop', 'saw', 'burn', 'drown', 'bin'].includes(style)) this.killCamT = 1.1; else if (style === 'stab') this.killCamT = 0.55;
+    if (o.noise) this.noise(P.x, P.y, TILE * o.noise, 0.4, n);
     // weapon wear + noise
     if (!trap && !chain && P.weapon && P.weapon.id === wid && wid !== 'knife') { if (--P.weapon.uses <= 0) { P.weapon = null; UI.toast('Arma esaurita: torni al coltello'); } }
     if (!trap && !chain && wd.noise) this.noise(P.x, P.y, TILE * wd.noise, 0.5, n, wd.noise >= 5);
@@ -2333,6 +2454,88 @@ const Game = {
     // chainsaw cuts through whoever is in front
     if (wd.multi && !chain) for (const m of this.npcs.slice()) if (m !== n && m.alive && dist(P.x, P.y, m.x, m.y) < TILE * 1.9 && this.wallClear(P.x, P.y, m.x, m.y) && Math.abs(angDiff(dirA, Math.atan2(m.y - P.y, m.x - P.x))) < 1.4) this.kill(m, { weapon: 'saw', chain: true });
     this.checkWin();
+  },
+  victimAware(n) { const P = this.player; return !CALM[n.state] || n.sus > 0.45 || (n.watchT > 0 && this.sees(n, P.x, P.y) && !P.invisible); },
+  finisherFor(n) {
+    let best = null, bd = 1e9;
+    for (const o of this.objs) { const def = FIN[o.t]; if (!def) continue; const d = this.nearRect(o, n.x, n.y); if (d < TILE * 0.95 && d < bd) { bd = d; best = { o, def }; } }
+    if (best) return best;
+    const tx = Math.floor(n.x / TILE), ty = Math.floor(n.y / TILE); let wall = null, wd = 1e9;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const x = tx + dx, y = ty + dy; if (x < 0 || y < 0 || x >= this.W || y >= this.H) continue;
+      const t = this.tiles[y * this.W + x], d = dist(n.x, n.y, clamp(n.x, x * TILE, (x + 1) * TILE), clamp(n.y, y * TILE, (y + 1) * TILE));
+      if (t === '~' && d < TILE * 0.8) return { o: { x, y, w: 1, h: 1, t: 'water' }, def: FIN.water };
+      if ((t === '#' || t === 'B') && d < TILE * 0.75 && d < wd) { wd = d; wall = { o: { x, y, w: 1, h: 1, t: 'wall' }, def: FIN.wall }; }
+    }
+    return wall;
+  },
+  tryKill(n) {
+    const P = this.player, dirA = Math.atan2(n.y - P.y, n.x - P.x), back = Math.abs(angDiff(n.ang, dirA)) < 1.15;
+    if (this.meleeId() === 'knife' && !n.guard && this.victimAware(n) && !back && Math.random() < (n.drunk ? 0.2 : 0.65)) { this.startStruggle(n); return; }
+    this.kill(n);
+  },
+  startStruggle(n) {
+    const P = this.player; this.release(n); n.talk = null; n.state = 'held'; n.anim = 'panic'; n.path = []; n.fixer = false;
+    if (n.phone && n.phone.busy === n) n.phone.busy = null;
+    P.ang = Math.atan2(n.y - P.y, n.x - P.x); this.struggle = { n, prog: 0.2, t: 0, max: 3.6 };
+    Sound.scream(n.pitch); Sound.strain(); this.noise(n.x, n.y, TILE * 5, 0.4, n); this.shake = 5;
+  },
+  updateStruggle(dt) {
+    const S = this.struggle, P = this.player, n = S.n; S.t += dt; S.prog = Math.max(0, S.prog - 0.2 * dt);
+    const presses = ((Input.hit('Space') || Input.hit('KeyF') || Input.hit('Enter')) ? 1 : 0) + (UI.btnPressed('action') ? 1 : 0) + Input.taps.length;
+    if (presses) {
+      S.prog += presses * (n.drunk ? 0.2 : 0.11); Sound.scrapeHit(); this.shake = Math.max(this.shake, 3.5); if (Math.random() < 0.35) Sound.strain();
+      for (let i = 0; i < 4; i++) this.particles.push({ x: (P.x + n.x) / 2, y: (P.y + n.y) / 2, vx: rand(-120, 120), vy: rand(-120, 120), life: rand(0.15, 0.35), max: 0.35, size: rand(2, 4), type: 'spark' });
+    }
+    if (S.prog >= 1) { this.struggle = null; this.kill(n, { style: 'push', aware: true, blood: 1.7 }); return; }
+    if (S.t > S.max) {
+      this.struggle = null; n.state = 'act'; n.timer = 3; n.poi = null;
+      const a = Math.atan2(P.y - n.y, P.x - n.x); this.moveCircle(P, Math.cos(a) * 44, Math.sin(a) * 44); P.stunT = 0.7;
+      Sound.denied(); UI.toast('Ti ha respinto!'); this.scare(n, 'killer', P.x, P.y);
+    }
+  },
+  startFinisher(alt) {
+    const P = this.player, n = alt.n, { o, def } = alt.fin;
+    this.release(n); n.talk = null; n.state = 'held'; n.anim = 'panic'; n.path = []; n.fixer = false;
+    if (n.phone && n.phone.busy === n) n.phone.busy = null;
+    const cx = clamp(n.x, o.x * TILE, (o.x + o.w) * TILE), cy = clamp(n.y, o.y * TILE, (o.y + o.h) * TILE), dx = n.x - cx, dy = n.y - cy, dl = Math.hypot(dx, dy) || 1;
+    const vx = cx + dx / dl * 16, vy = cy + dy / dl * 16; if (!this.solidPx(vx, vy)) { n.x = vx; n.y = vy; }
+    n.ang = Math.atan2(cy - n.y, cx - n.x); P.ang = Math.atan2(n.y - P.y, n.x - P.x);
+    const px = n.x - Math.cos(P.ang) * 26, py = n.y - Math.sin(P.ang) * 26; if (!this.solidPx(px, py)) { P.x = px; P.y = py; }
+    this.fin = { n, o, def, t: 0, i: 0, cx, cy }; Sound.strain(); this.killCamT = 1.9;
+  },
+  updateFinisher(dt) {
+    const F = this.fin; F.t += dt; const T = FIN_T[F.def.k];
+    if (F.i < T.length && F.t >= T[F.i]) { const i = F.i++; this.finStage(F, i, i === T.length - 1); }
+  },
+  finStage(F, i, last) {
+    const n = F.n, d = F.def, k = d.k, cx = F.cx, cy = F.cy, ang = Math.atan2(n.y - cy, n.x - cx);
+    if (k === 'slam') {
+      Sound.slam(d.snd); this.shake = 9 + i * 4; this.hitstop = 0.05; this.splatter(cx, cy, ang, 12 + i * 12, 0.9, [60, 240]);
+      Render.splat(cx + Math.cos(ang) * 8, cy + Math.sin(ang) * 8, 7 + i * 4, 0.85); Render.smear(cx, cy, cx + rand(-5, 5), cy + 18 + i * 12, 7, 0.7); this.bloodScreen(1 + i, false);
+      if (d.alarm && i === 0) { Sound.alarm(); this.noise(cx, cy, TILE * 10, 0.5, n, true); }
+      if (d.screech && i === 0) Sound.screech();
+      if (d.bottle && i === 1) Sound.glass();
+      if (d.tv && i === 0) { const L = this.lightById.tv; if (L) L.on = false; }
+      if (d.dj && last) { this.musicOff = true; this.sched.push({ t: 5, fn: () => { this.musicOff = false; } }); Sound.noise(0.5, { filter: 'bandpass', ff: 2500, slide: 250, q: 2, vol: 0.4 }); }
+    } else if (k === 'burn') {
+      if (i === 0) Sound.sizzle(); this.shake = 6; this.bloodScreen(1, false);
+      for (let j = 0; j < 14; j++) this.particles.push({ x: cx + rand(-10, 10), y: cy + rand(-10, 10), vx: rand(-30, 30), vy: rand(-90, -20), life: rand(0.5, 1.2), max: 1.2, size: rand(4, 9), type: j % 3 ? 'fire' : 'smoke' });
+    } else if (k === 'drown') {
+      Sound.drownSplash(); this.shake = 5; this.splatter(cx, cy, ang, 8, 1.5, [20, 90]);
+      for (let j = 0; j < 12; j++) this.particles.push({ x: cx + rand(-10, 10), y: cy + rand(-10, 10), vx: rand(-70, 70), vy: rand(-100, -10), life: rand(0.5, 1), max: 1, size: rand(4, 8), type: 'water' });
+    } else if (k === 'bin') {
+      Sound.slam('metal'); this.shake = 8; if (F.o.hide) F.o.shake = 0.5;
+    } else if (k === 'zap') {
+      Sound.zap(); this.shake = 6; for (let j = 0; j < 22; j++) { const a = rand(0, TAU), sp = rand(60, 220); this.particles.push({ x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.3, 0.8), max: 0.8, size: rand(2, 5), type: 'spark' }); }
+    }
+    if (last) this.finEnd(F);
+  },
+  finEnd(F) {
+    const P = this.player, n = F.n, k = F.def.k; this.fin = null;
+    this.kill(n, { style: { slam: 'slam', burn: 'burn', drown: 'drown', bin: 'bin', zap: 'electro' }[k], finisher: true, aware: false, blood: { slam: 1.5, burn: 0.8, drown: 0.7, bin: 1.2, zap: 0.6 }[k], noise: { slam: 3.4, burn: 2.2, drown: 2.2, bin: 2.8, zap: 5 }[k], sx: P.x, sy: P.y });
+    if (k === 'bin') { const h = this.hides.find(h => h === F.o); if (h) { h.bodies++; h.shake = 0.5; } this.st.hidden++; }
+    if (k === 'zap') { this.blackoutT = 7; Sound.powerDown(); this.onPowerOff(1, TILE * 9); }
   },
   breakDisguise() { const P = this.player; if (P.disguise) { P.disguise = null; P.disguiseLook = null; UI.toast('Travestimento scoperto!'); } },
   inSmoke(x, y) { for (const s of this.smokes) if (dist(x, y, s.x, s.y) < s.r) return true; return false; },
@@ -2385,7 +2588,7 @@ const Game = {
   zoneKill(l) {
     const [x0, y0, x1, y1] = l.zone, P = this.player; l.used = true;
     const crush = l.style === 'crush', cx = (x0 + x1 + 1) / 2 * TILE, cy = (y0 + y1 + 1) / 2 * TILE;
-    if (crush) Sound.boom(); else Sound.zap();
+    if (crush) { Sound.boom(); Sound.tinnitus(); } else Sound.zap();
     this.shake = 18; this.flash = 0.6; this.flashColor = crush ? '255,200,120' : '140,180,255';
     const inZ = e => e.x / TILE >= x0 && e.x / TILE < x1 + 1 && e.y / TILE >= y0 && e.y / TILE < y1 + 1;
     for (const m of this.npcs.slice()) if (m.alive && inZ(m)) this.kill(m, { trap: true, style: l.style || 'electro', sx: cx, sy: cy, blood: crush ? 2 : 0.6 });
@@ -2399,7 +2602,7 @@ const Game = {
   },
   explosion(x, y) {
     const P = this.player;
-    Sound.boom(); this.shake = 28; this.flash = 0.9; this.flashColor = '255,170,60'; this.slowmo(0.9, 0.3); this.hitstop = 0.12;
+    Sound.boom(); Sound.tinnitus(); this.shake = 28; this.flash = 0.9; this.flashColor = '255,170,60'; this.slowmo(0.9, 0.3); this.hitstop = 0.12;
     this.boomFx.push({ x, y, life: 1.2 }); Render.scorch(x, y, TILE * 1.7);
     for (let i = 0; i < 50; i++) { const a = rand(0, TAU), sp = rand(60, 360); this.particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.4, 1.3), max: 1.3, size: rand(5, 15), type: 'fire' }); }
     for (let i = 0; i < 16; i++) this.particles.push({ x: x + rand(-20, 20), y: y + rand(-20, 20), vx: rand(-30, 30), vy: rand(-50, -10), life: rand(1.5, 3), max: 3, size: rand(8, 16), type: 'smoke' });
@@ -2486,7 +2689,7 @@ const Game = {
   },
   finish(win, reason) {
     if (this.ended) return;
-    this.ended = true; this.endT = 0; this.win = win; this.reason = reason;
+    this.ended = true; this.endT = 0; this.win = win; this.reason = reason; Sound.setLevels(0, 0);
     if (win) { this.slowmo(1.6, 0.25); Sound.win(); UI.big(this.escaped ? 'LAVORO SPORCO' : 'NESSUN SOPRAVVISSUTO', '#ff2a2a', ''); }
     else if (reason === 'guard') { Sound.whistle(); Sound.stopSiren(); this.flash = 0.6; this.flashColor = '60,120,255'; UI.big('PRESO!', '#4aa3ff', 'Una guardia ti ha bloccato'); }
     else if (reason === 'boom') { Sound.stopSiren(); UI.big('SALTATO IN ARIA', '#ff9a2a', 'Eri troppo vicino alla trappola'); }
@@ -2522,11 +2725,16 @@ const Game = {
     this.time += this.ended ? 0 : dt;
     // input
     if (!this.ended) {
-      if (Input.hit('Space') || Input.hit('KeyF') || Input.hit('Enter') || UI.btnPressed('action')) this.doAction();
-      if (Input.hit('KeyQ') || Input.hit('Digit1') || UI.btnPressed('blink')) this.usePower('blink');
-      if (Input.hit('KeyE') || Input.hit('Digit2') || UI.btnPressed('lure')) this.usePower('lure');
-      if (Input.hit('KeyR') || Input.hit('Digit3') || UI.btnPressed('blackout')) this.usePower('blackout');
-      for (const tp of Input.taps) this.onTap(tp);
+      if (this.struggle) this.updateStruggle(dt);
+      else if (this.fin) this.updateFinisher(dt);
+      else {
+        if (Input.hit('Space') || Input.hit('KeyF') || Input.hit('Enter') || UI.btnPressed('action')) this.doAction();
+        if ((Input.hit('KeyV') || UI.btnPressed('grab')) && this.context && this.context.alt) this.startFinisher(this.context.alt);
+        if (Input.hit('KeyQ') || Input.hit('Digit1') || UI.btnPressed('blink')) this.usePower('blink');
+        if (Input.hit('KeyE') || Input.hit('Digit2') || UI.btnPressed('lure')) this.usePower('lure');
+        if (Input.hit('KeyR') || Input.hit('Digit3') || UI.btnPressed('blackout')) this.usePower('blackout');
+        for (const tp of Input.taps) this.onTap(tp);
+      }
       this.updatePlayer(dt);
     }
     // timers
@@ -2580,6 +2788,13 @@ const Game = {
     this.hb -= dt; if (maxSus > 0.25 && this.hb <= 0) { Sound.heartbeat(0.25 + maxSus * 0.5); this.hb = 1.1 - maxSus * 0.6; }
     if (this.frenzyT > 0 && this.hb > 0.5) this.hb = 0.5;
     this.maxSus = maxSus;
+    { const Pl = this.player; let stalk = 0;
+      if (!this.police && !this.chased && maxSus < 0.35 && !this.ended) { let md = 1e9; for (const n of this.npcs) if (n.alive && CALM[n.state]) md = Math.min(md, dist(n.x, n.y, Pl.x, Pl.y)); if (md < TILE * 7) stalk = clamp(1 - md / (TILE * 7), 0, 1) * (Pl.moving || md < TILE * 3 ? 1 : 0.6); }
+      const tens = Math.max(maxSus * 0.9, this.chased ? 1 : 0, this.police ? 0.6 + 0.4 * (1 - this.police.t / this.police.max) : 0, this.frenzyT > 0 ? 0.5 : 0, this.struggle ? 1 : 0);
+      Sound.setLevels(this.ended ? 0 : stalk, this.ended ? 0 : tens);
+      if (stalk > 0.65 && this.time > this.whisperCd) { Sound.stalkWhisper(); this.whisperCd = this.time + 30; } }
+    if (this.punchT > 0) this.punchT -= dt; if (this.killCamT > 0) this.killCamT -= rdt;
+    for (const b of this.bodies) b.age = (b.age || 0) + dt;
     // pools grow & age
     for (const p of this.pools) { p.age = (p.age || 0) + dt; if (p.r < p.max) p.r += dt * 9; }
     // arterial spurts from fresh bodies
@@ -2626,7 +2841,7 @@ const Game = {
     }
     for (const o of this.objs) if (o.t === 'campfire' && Math.random() < dt * 14 && this.particles.length < 700) this.particles.push({ x: (o.x + 0.5) * TILE + rand(-8, 8), y: (o.y + 0.5) * TILE + rand(-4, 6), vx: rand(-10, 10), vy: rand(-50, -20), life: rand(0.5, 1), max: 1, size: rand(4, 8), type: 'fire' });
     // context + target
-    this.context = this.ended ? null : this.computeContext();
+    this.context = this.ended || this.fin || this.struggle ? null : this.computeContext();
     this.target = this.currentTarget();
     this.shake = Math.max(0, this.shake - rdt * 30); this.flash = Math.max(0, this.flash - rdt * 1.5);
     // tutorial hints
@@ -2974,6 +3189,7 @@ const Render = {
     if (this.h / z < 9 * TILE) z = this.h / (9 * TILE);
     if (G.slowT > 0) z *= 1.08;
     if (G.cine) z *= 1 + 1.3 * G.cineK;
+    if (G.struggle || G.fin) z *= 1.2; else if (G.punchT > 0) z *= 1 + 0.12 * Math.min(1, G.punchT / 0.3); else if (G.killCamT > 0) z *= 1.1;
     cam.zoom = lerp(cam.zoom || z, z, 1 - Math.exp(-dt * 4));
     const tx = P.x + Math.cos(P.ang) * (P.moving ? 40 : 0), ty = P.y + Math.sin(P.ang) * (P.moving ? 40 : 0);
     const k = 1 - Math.exp(-dt * 5); cam.x = lerp(cam.x, tx, k); cam.y = lerp(cam.y, ty, k);
@@ -3062,7 +3278,7 @@ const Render = {
     for (const sn of G.snares) { c.save(); c.translate(sn.x, sn.y); c.strokeStyle = '#9aa0a8'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 9, 0, TAU); c.stroke(); c.fillStyle = '#6a6e74'; for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; c.beginPath(); c.moveTo(Math.cos(a) * 9, Math.sin(a) * 9); c.lineTo(Math.cos(a + 0.2) * 5, Math.sin(a + 0.2) * 5); c.lineTo(Math.cos(a - 0.2) * 5, Math.sin(a - 0.2) * 5); c.fill(); } c.restore(); }
     for (const d of G.devices) { const pu = 0.5 + 0.5 * Math.sin(t * 9); c.fillStyle = '#222'; rr(c, d.x - 8, d.y - 5, 16, 10, 2); c.fill(); c.fillStyle = '#888'; circ(c, d.x - 3, d.y, 3); c.strokeStyle = `rgba(255,220,100,${0.2 + 0.5 * pu})`; c.lineWidth = 2; c.beginPath(); c.arc(d.x, d.y, 12 + pu * 14, 0, TAU); c.stroke(); }
     // bodies
-    for (const b of G.bodies) if (!b.hidden && inView(b.x, b.y, 40)) drawPerson(c, b.x, b.y, b.ang, b.n.look, 'dead', t, 0, { burnt: b.burnt, split: b.split, wound: b.wound, style: b.style });
+    for (const b of G.bodies) if (!b.hidden && inView(b.x, b.y, 40)) drawPerson(c, b.x, b.y, b.ang, b.n.look, 'dead', t, 0, { burnt: b.burnt, split: b.split, wound: b.wound, style: b.style, tw: (b.age || 9) < 1.5 ? 1.5 - b.age : 0 });
     // characters (y-sorted)
     const list = G.npcs.filter(n => n.alive && inView(n.x, n.y, 40));
     list.push(G.player); list.sort((a, b) => a.y - b.y);
@@ -3229,6 +3445,7 @@ const Render = {
       const g2 = c.createLinearGradient(w, 0, w * 0.75, 0); g2.addColorStop(0, !k ? `rgba(255,20,40,${a})` : `rgba(30,90,255,${a})`); g2.addColorStop(1, 'rgba(0,0,0,0)');
       c.fillStyle = g2; c.fillRect(w * 0.75, 0, w * 0.25, h);
     }
+    if (G.killCamT > 0 || G.struggle || G.fin) { const k = G.struggle || G.fin ? 1 : Math.min(1, G.killCamT * 2.5), bh = h * 0.075 * k; c.fillStyle = '#000'; c.fillRect(0, 0, w, bh); c.fillRect(0, h - bh, w, bh); c.fillStyle = `rgba(90,0,8,${0.2 * k})`; c.fillRect(0, 0, w, h); }
     if (G.cine) { const k = 0.35 + 0.65 * G.cineK, pu = 0.5 + 0.5 * Math.sin(t * 5.5), g = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.15, w / 2, h / 2, Math.max(w, h) * 0.65); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(150,0,16,${(0.4 + 0.15 * pu) * k})`); c.fillStyle = g; c.fillRect(0, 0, w, h); }
     if (G.frenzyT > 0) { const k = Math.min(1, G.frenzyT / 2), pu = 0.5 + 0.5 * Math.sin(t * 10), g = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.25, w / 2, h / 2, Math.max(w, h) * 0.7); g.addColorStop(0, 'rgba(255,0,0,0)'); g.addColorStop(1, `rgba(220,0,20,${(0.3 + 0.14 * pu) * k})`); c.fillStyle = g; c.fillRect(0, 0, w, h); }
     for (const sb of G.screenBlood) {
@@ -3316,6 +3533,7 @@ function drawPerson(c, x, y, ang, L, anim, t, ph, o = {}) {
     headDraw(c, L, 0, -26); c.restore(); return;
   }
   if (anim === 'dead') {
+    if (o.tw) c.translate(Math.sin(t * 40) * o.tw * 1.8, Math.cos(t * 33) * o.tw * 1.3);
     c.rotate(ang); if (o.style === 'crush') c.scale(1.2, 0.72);
     const bn = o.burnt, sh = bn ? '#1c1814' : mix(L.shirt, '#555555', 0.35), sk = bn ? '#2a2018' : mix(L.skin, '#9a9a9a', 0.45), pn = bn ? '#14110e' : L.pants, sp = o.split ? 16 : 0, wd = o.wound || 1;
     c.fillStyle = pn; rr(c, -30 - sp, -8, 22, 6, 3); c.fill(); rr(c, -30 - sp, 2, 22, 6, 3); c.fill();
@@ -3551,7 +3769,7 @@ const UI = {
     if (id === 'menu') { this.scene = 'menu'; this.refreshMenu(); }
   },
   toMenu() {
-    Game.running = false; Sound.stopSiren(); Sound.ambience('menu');
+    Game.running = false; Sound.stopSiren(); Sound.ambience('menu'); Sound.setLevels(0, 0);
     $('#hud').classList.add('hidden'); $('#touch').classList.add('hidden'); $('#bigtext').className = ''; $('#cine').classList.add('hidden'); document.body.classList.remove('cine'); this.cineOn = false;
     this.show('menu'); this.scene = 'menu'; FB.setPresence({ state: 'menu', level: null });
   },
@@ -3691,7 +3909,7 @@ const UI = {
   },
   pause(on) {
     if (this.scene !== 'game' || Game.ended) return;
-    Game.paused = on; $('#pause').classList.toggle('hidden', !on);
+    Game.paused = on; $('#pause').classList.toggle('hidden', !on); if (on) Sound.setLevels(0, 0);
     if (on) Sound.sirenLevel(0.0001);
   },
   btnPressed(k) { return !!this.btn[k]; },
@@ -3720,6 +3938,8 @@ const UI = {
     { const wp = G.player.weapon, wd = WEAPONS[wp ? wp.id : 'knife']; this.set('hudWeapon', `${wd.icon} <b>${wd.name.toUpperCase()}</b>${wp ? ' ×' + wp.uses : ''}`, 'innerHTML'); }
     $('#hudFrenzy').classList.toggle('hidden', !(G.frenzyT > 0)); if (G.frenzyT > 0) $('#hudFrenzyBar i').style.width = Math.min(100, G.frenzyT / G.frenzyMax * 100) + '%';
     $('#hudChase').classList.toggle('hidden', !G.chased);
+    { const alt = G.context && G.context.alt; $('#grabBtn').classList.toggle('hidden', !alt); if (alt) this.set('grabLabel', alt.fin.def.label);
+      $('#struggle').classList.toggle('hidden', !G.struggle); if (G.struggle) $('#struggleBar').style.width = Math.min(100, G.struggle.prog * 100) + '%'; }
     for (let i = 0; i < 2; i++) { const g = G.gadgets[i], el = $('#gad' + i); el.style.display = g ? '' : 'none'; if (!g) continue; const d = GADGETS[g.id]; this.set('gad' + i, `<span class="ic">${d.icon}</span>${d.short}<small>×${g.n}</small><span class="kb">${i ? 'C' : 'X'}</span>`, 'innerHTML'); el.classList.toggle('na', g.n <= 0); }
     this.set('hudCombo', G.combo.t > 0 && G.combo.n > 1 ? `COMBO ×${G.combo.n}` : '');
     const cb = $('#hudComboBar'); if (cb) cb.style.width = (G.combo.t > 0 && G.combo.n > 1 ? G.combo.t / 7 * 100 : 0) + '%';
