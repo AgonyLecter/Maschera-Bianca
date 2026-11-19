@@ -316,6 +316,36 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 #struggle .sBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8a0010,#ff3a4a);box-shadow:0 0 12px #f00}
 #hudHp{display:flex;gap:3px;margin-top:4px;font-size:16px}
 #hudHp i{font-style:normal;color:#3a2a2e}#hudHp i.f{color:#ff2a3a;text-shadow:0 0 8px #f00}
+/* objectives HUD, pops, kill text */
+.hudR2{right:max(12px,env(safe-area-inset-right));top:calc(max(10px,env(safe-area-inset-top)) + clamp(100px,24vh,158px));text-align:right;max-width:min(270px,34vw)}
+#hudObj{font-family:'Special Elite';font-size:clamp(9px,1.9vh,12px);line-height:1.25}
+#hudObj .ob{color:#d8d0c0;text-shadow:0 1px 2px #000;margin-top:3px;opacity:.92}
+#hudObj .ob b{color:#ffd23a}
+#hudObj .ob.done{color:#7aff8a;text-decoration:line-through;opacity:.65}
+#objPop{position:fixed;left:50%;top:15%;transform:translateX(-50%);z-index:14;pointer-events:none;text-align:center;font-family:Oswald;font-weight:700;letter-spacing:.1em;font-size:clamp(13px,3vh,20px);color:#fff;background:linear-gradient(90deg,rgba(0,0,0,0),rgba(70,50,0,.85),rgba(0,0,0,0));padding:8px 40px;opacity:0;white-space:nowrap;text-shadow:0 2px 0 #000}
+#objPop small{display:block;color:#ffd23a;letter-spacing:.35em;font-size:.62em}
+#objPop b{color:#ffd23a}
+#objPop.show{animation:objpop 3s ease forwards}
+@keyframes objpop{0%{opacity:0;transform:translateX(-50%) scale(1.6)}8%{opacity:1;transform:translateX(-50%) scale(1)}85%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-14px)}}
+#killTxt{position:fixed;left:50%;top:33%;z-index:13;pointer-events:none;font-family:Nosifer;font-size:clamp(26px,9vh,76px);white-space:nowrap;opacity:0;text-shadow:0 0 28px currentColor,0 5px 0 #000;transform:translateX(-50%)}
+#killTxt.show{animation:killpop 1.15s cubic-bezier(.2,1.5,.4,1) forwards}
+@keyframes killpop{0%{opacity:0;transform:translateX(-50%) scale(2.8) rotate(var(--tilt,-3deg))}10%{opacity:1;transform:translateX(-50%) scale(1) rotate(var(--tilt,-3deg))}70%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-34px) scale(.92) rotate(var(--tilt,-3deg))}}
+/* compact fixed results (no scrolling on phones) */
+#results{padding:0;align-items:stretch}
+.resWrap{width:100%;height:100vh;height:100dvh;max-height:100dvh;overflow:hidden;justify-content:space-between;padding:max(1vh,env(safe-area-inset-top)) 3vw max(1vh,env(safe-area-inset-bottom));gap:.4vh}
+.resWrap .muted{margin:0;font-size:11px}
+.resHead{font-size:clamp(16px,5vh,40px);line-height:1.05}
+.resLvl{font-size:clamp(9px,1.9vh,12px);letter-spacing:.3em}
+.resBody{flex:1;min-height:0;width:100%;max-width:1000px;justify-content:center;gap:clamp(10px,3vw,40px)}
+.rank{font-size:clamp(44px,19vh,150px)}
+.resList{display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(10px,2.4vw,26px);align-content:center;font-size:clamp(9px,2vh,13px);min-width:0;flex:1;max-width:640px}
+.resList>div{padding:.2vh 0;gap:8px;min-width:0}
+.resList .tot,.resList .blood,.resList .rec,.resList .styles,.resList .net,.resList .ch,.resList .obr{grid-column:1/-1}
+.resList .tot{font-size:1.25em}
+.resList .obr b{color:#ffd23a}
+.resList .net{font-size:.85em}
+.resBtns{gap:8px}.resBtns .btn{padding:.9vh 14px;font-size:clamp(11px,2.4vh,15px);letter-spacing:.15em}
+@media (max-height:430px){.resList .styles,.resList .net,.resWrap .muted{display:none}.resList>div{padding:.05vh 0}}
 </style>
 </head>
 <body>
@@ -412,6 +442,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 <div id="hud" class="hidden">
   <div class="hudTL"><div id="hudLevel"></div><div id="hudVictims"></div><div id="hudLeft"></div><div id="hudHp"></div></div>
   <div class="hudTC"><div id="hudScore">0</div><div id="hudCombo"></div><div id="hudComboWrap"><div id="hudComboBar"></div></div><div id="hudPolice" class="hidden"></div><div id="hudChase" class="hidden">⚠ INSEGUITO!</div><div id="hudFrenzy" class="hidden">FRENESIA<div id="hudFrenzyBar"><i></i></div></div></div>
+  <div class="hudR2"><div id="hudObj"></div></div>
   <div class="hudTR"><canvas id="minimap"></canvas><button id="btnPause">❚❚</button></div>
   <div class="hudStatus"><div id="hudEye" class="eye open"></div><div><div id="hudStealth"></div><div id="hudTarget"></div></div></div>
   <div class="ctrls">
@@ -435,7 +466,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 <div id="touch" class="hidden"><div id="joyHint">◀ TRASCINA PER MUOVERTI ▶</div></div>
 <div id="joy"><div id="joyKnob"></div></div>
 
-<div id="bigtext"></div><div id="toast"></div><div id="hint"></div><div id="combo"></div>
+<div id="killTxt"></div><div id="objPop"></div><div id="bigtext"></div><div id="toast"></div><div id="hint"></div><div id="combo"></div>
 
 <div id="cine" class="hidden"><div class="cbar t"></div><div class="cbar b"></div><svg class="cmask" id="cMask"><use href="#maskSym"/></svg><div class="cflash" id="cFlash"></div><div id="cSub"></div><div id="cLine"></div><div class="cskip">TOCCA PER SALTARE ›</div></div>
 <div id="pause" class="screen hidden">
@@ -625,6 +656,9 @@ const Sound = {
       f.type = 'bandpass'; f.frequency.value = 2300; f.Q.value = 3; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
       o.connect(f); f.connect(g); g.connect(this.sfx); g.connect(this.verb); o.start(t); l.start(t); o.stop(t + 1.2); l.stop(t + 1.2); });
   },
+  whoosh() { this.noise(0.28, { filter: 'bandpass', ff: 700, slide: 4200, q: 1.5, vol: 0.22, attack: 0.05 }); },
+  killHit(big) { this.tone(48, big ? 0.7 : 0.45, { slide: 28, vol: big ? 0.75 : 0.45, verb: true }); this.noise(big ? 0.7 : 0.4, { filter: 'lowpass', ff: 2200, slide: 90, vol: big ? 0.45 : 0.3, verb: true }); if (big) { this.noise(0.5, { filter: 'highpass', ff: 3000, slide: 800, vol: 0.18, at: this.t + 0.04 }); this.sting(); } },
+  objective() { [0, 4, 7, 12].forEach((st, i) => this.tone(523 * Math.pow(2, st / 12), 0.5, { type: 'triangle', vol: 0.1, at: this.t + i * 0.07, verb: true })); this.noise(0.15, { filter: 'bandpass', ff: 3500, q: 4, vol: 0.12 }); },
   gun() { this.noise(0.1, { ff: 2400, q: 1, vol: 0.55 }); this.tone(190, 0.18, { slide: 50, vol: 0.5, type: 'square', filter: 'lowpass', ff: 1400 }); this.noise(0.5, { filter: 'lowpass', ff: 900, slide: 150, vol: 0.35, verb: true }); },
   shotgun() { const t = this.t; this.noise(0.25, { ff: 1400, q: 0.8, vol: 0.7 }); this.tone(110, 0.4, { slide: 30, vol: 0.8 }); this.noise(0.7, { filter: 'lowpass', ff: 700, slide: 120, vol: 0.5, verb: true }); this.noise(0.04, { ff: 3000, vol: 0.3, at: t + 0.5 }); this.tone(300, 0.05, { type: 'square', vol: 0.1, at: t + 0.5 }); },
   tinnitus() { this.tone(4300, 3, { vol: 0.05, attack: 0.05 }); this.tone(5200, 2.2, { vol: 0.02, attack: 0.1 }); },
@@ -896,6 +930,38 @@ const FIN = {
   wall: { k: 'slam', label: 'SBATTI AL MURO', snd: 'wall' }
 };
 const FIN_T = { slam: [0.3, 0.72, 1.2], burn: [0.35, 1.4], drown: [0.35, 1.7], bin: [0.3, 0.85], zap: [0.3, 1.0] };
+const KT = {
+  slash: ['GOLA TAGLIATA!', '#ff2a3a'], stab: ['ACCOLTELLATO!', '#ff4a4a'], push: ['TRAPASSATO!', '#ff1a2a'], chop: ['SPACCATO!', '#ff8a2a'], saw: ['SQUARTATO!', '#ff6a1a'],
+  shoot: ['COLPO IN TESTA!', '#ffd23a'], blast: ['POLVERIZZATO!', '#ff9a2a'], slam: ['SBATTUTO!', '#ff3a4a'], burn: ['ARROSTITO!', '#ff7a1a'], drown: ['ANNEGATO!', '#5ac0ff'],
+  bin: ['SEPOLTO!', '#c8c8d0'], electro: ['FULMINATO!', '#8ab8ff'], snare: ['TAGLIOLA!', '#ff6a6a'], poison: ['AVVELENATO!', '#7aff8a'], crush: ['SCHIACCIATO!', '#ffcf6a'], explode: ['ESPLOSO!', '#ff9a2a']
+};
+const OBJ = {
+  wall: { t: 'Uccidi qualcuno sbattendolo al muro', pts: 300, ev: 'kill', f: (G, d) => d.fin === 'wall' },
+  burn: { t: 'Friggi qualcuno (fornello, griglia o falò)', pts: 350, ev: 'kill', f: (G, d) => d.finisher && d.style === 'burn', ok: G => G.objs.some(o => ['stove', 'grill', 'campfire'].includes(o.t)) },
+  drown: { t: 'Annega qualcuno', pts: 350, ev: 'kill', f: (G, d) => d.finisher && d.style === 'drown', ok: G => G.objs.some(o => ['sink', 'tub', 'toilet'].includes(o.t)) || G.tiles.includes('~') },
+  bin: { t: 'Chiudi una vittima in un contenitore', pts: 300, ev: 'kill', f: (G, d) => d.style === 'bin', ok: G => G.hides.length > 0 },
+  slamobj: { t: 'Sbatti qualcuno contro un oggetto', pts: 300, ev: 'kill', f: (G, d) => d.finisher && d.style === 'slam' && d.fin !== 'wall' && d.fin !== 'water' },
+  push: { t: 'Vinci una lotta col coltello', pts: 300, ev: 'kill', f: (G, d) => d.style === 'push' },
+  throat: { t: 'Taglia la gola a qualcuno alle spalle', pts: 250, ev: 'kill', f: (G, d) => d.style === 'slash' },
+  fuse: { t: 'Spegni la corrente dal quadro elettrico', pts: 250, ev: 'fuse', ok: G => G.lures.some(l => l.effect === 'fuse') },
+  camoff: { t: 'Disattiva le telecamere', pts: 300, ev: 'camoff', ok: G => G.cams.length > 0 && G.lures.some(l => l.effect === 'camoff') },
+  cut2: { t: 'Taglia 2 fili del telefono', pts: 250, need: 2, ev: 'cut', ok: G => G.phones.length >= 2 },
+  dress: { t: 'Indossa una divisa', pts: 300, ev: 'dress', ok: G => G.npcs.some(n => n.uniform) },
+  hide2: { t: 'Nascondi 2 corpi', pts: 300, need: 2, ev: 'hide', ok: G => G.hides.length > 0 },
+  silent2: { t: 'Fai 2 uccisioni silenziose', pts: 250, need: 2, ev: 'kill', f: (G, d) => d.silent },
+  trap: { t: 'Provoca un incidente con una trappola', pts: 350, ev: 'kill', f: (G, d) => d.trap, ok: G => G.lures.some(l => l.deadly || l.zone) },
+  explode: { t: 'Fai saltare in aria qualcuno', pts: 400, ev: 'kill', f: (G, d) => d.style === 'explode', ok: G => G.lures.some(l => l.deadly === 'explode') },
+  zone2: { t: 'Uccidi 2 persone con una trappola di massa', pts: 450, need: 2, ev: 'kill', f: (G, d) => d.zone, ok: G => G.lures.some(l => l.zone) },
+  poison: { t: 'Avvelena qualcuno', pts: 350, ev: 'kill', f: (G, d) => d.style === 'poison', ok: G => G.gadgets.some(g => g.id === 'poison') },
+  snare: { t: 'Uccidi qualcuno con la tagliola', pts: 350, ev: 'kill', f: (G, d) => d.style === 'snare', ok: G => G.gadgets.some(g => g.id === 'snare') },
+  weapon: { t: 'Uccidi con un\'arma speciale', pts: 300, ev: 'kill', f: (G, d) => d.weapon && d.weapon !== 'knife' && !d.trap, ok: G => G.pickups.length > 0 },
+  headshot: { t: 'Colpo in testa a distanza', pts: 350, ev: 'kill', f: (G, d) => d.style === 'shoot', ok: G => G.pickups.some(p => p.w === 'pistol') },
+  frenzy: { t: 'Scatena la frenesia (4 uccisioni di fila)', pts: 400, ev: 'frenzy' },
+  streamer: { t: 'Zittisci lo streamer prima che chiami la polizia', pts: 400, ev: 'kill', f: (G, d) => d.n.streamer && !G.policeCalled, ok: G => G.npcs.some(n => n.streamer) },
+  brute: { t: 'Sconfiggi l\'energumeno', pts: 450, ev: 'kill', f: (G, d) => d.n.brute, ok: G => G.npcs.some(n => n.brute) },
+  guard: { t: 'Elimina una guardia', pts: 400, ev: 'kill', f: (G, d) => d.n.guard && !d.n.brute, ok: G => G.npcs.some(n => n.guard && !n.brute) },
+  multi: { t: 'Uccidi due persone in meno di 2 secondi', pts: 400, ev: 'kill', f: (G, d) => d.multi }
+};
 const POISON_TAGS = new Set(['bar', 'eat', 'fridge', 'vend', 'break', 'bbq', 'cook', 'stall', 'fire']);
 
 /* ---- weapons ---- */
@@ -1743,6 +1809,7 @@ const Game = {
     // spread NPCs into their routines immediately
     this.npcs.forEach(n => { if (n.follower == null) this.chooseActivity(n, true); });
     this.npcs.forEach(n => { if (n.state === 'idle') this.chooseActivity(n, true); });
+    this.focus = null; this.impactT = 0; this.slashes = []; this.multiN = 0; this.objPts = 0; this.objDone = 0; this.pickObjectives();
     Sound.ambience(def.music);
     this.running = true; this.paused = false;
     FB.setPresence({ state: 'playing', level: def.id });
@@ -2402,7 +2469,7 @@ const Game = {
     const e = l.effect, x = l.x * TILE + TILE / 2, y = l.y * TILE + TILE / 2;
     if (on) {
       if (e === 'tv' && this.lightById.tv) { this.lightById.tv.on = false; Sound.powerDown(); this.npcs.forEach(m => { if (m.alive && CALM[m.state] && m.poi && m.poi.tag === 'tv') this.say(m, pick(['Ehi! Il film!', 'Cos\'è successo alla TV?!', 'Proprio sul più bello!']), 2.4); }); }
-      else if (e === 'fuse') { this.powerOff = true; Sound.powerDown(); UI.big('BLACKOUT', '#ffffff', ''); this.onPowerOff(1, 1e9); }
+      else if (e === 'fuse') { this.powerOff = true; Sound.powerDown(); UI.big('BLACKOUT', '#ffffff', ''); this.onPowerOff(1, 1e9); this.objEvent('fuse'); }
       else if (e === 'music') { this.musicOff = true; Sound.powerDown(); UI.toast('La musica si è fermata'); this.onMusicOff(l); }
       else if (e === 'water') Sound.water();
       else if (e === 'bell') Sound.bell();
@@ -2411,7 +2478,7 @@ const Game = {
       else if (e === 'alarm') Sound.alarm();
       else if (e === 'splash') Sound.splash();
       else if (e === 'zap') Sound.zap();
-      else if (e === 'camoff') { this.cams.forEach(c => { c.off = 35; c.sus = 0; }); Sound.zap(); UI.toast('Telecamere disattivate per 35 secondi'); }
+      else if (e === 'camoff') { this.cams.forEach(c => { c.off = 35; c.sus = 0; }); Sound.zap(); UI.toast('Telecamere disattivate per 35 secondi'); this.objEvent('camoff'); }
       else if (e === 'crash') Sound.boom();
       else if (e === 'bang') Sound.bang();
       else if (e === 'steam') Sound.noise(1.8, { filter: 'highpass', ff: 2500, vol: 0.15 });
@@ -2539,13 +2606,13 @@ const Game = {
       case 'kill': this.tryKill(c.n); break;
       case 'shoot': if (this.wallClear(P.x, P.y, c.n.x, c.n.y)) this.kill(c.n, { weapon: P.weapon.id }); else Sound.denied(); break;
       case 'pickup': { const w = WEAPONS[c.p.w]; c.p.taken = true; P.weapon = { id: c.p.w, uses: w.uses }; Sound.pickup(); UI.toast(`${w.icon} ${w.name}: ${w.uses} ${w.ranged ? 'colpi' : 'usi'}`); break; }
-      case 'dress': { const b = c.b; b.looted = true; P.disguise = b.uniform; P.disguiseLook = Object.assign({}, b.n.look); b.n.look = Object.assign({}, b.n.look, { shirt: '#d8d0c8', pants: '#555' }); Sound.pickup(); UI.toast('Travestito! Muoviti piano e non farti sporcare di sangue'); break; }
+      case 'dress': { const b = c.b; b.looted = true; P.disguise = b.uniform; P.disguiseLook = Object.assign({}, b.n.look); b.n.look = Object.assign({}, b.n.look, { shirt: '#d8d0c8', pants: '#555' }); Sound.pickup(); UI.toast('Travestito! Muoviti piano e non farti sporcare di sangue'); this.objEvent('dress'); break; }
       case 'unhide': this.unhide(); break;
       case 'hide': P.hidden = c.h; c.h.shake = 0.3; P.hx = P.x; P.hy = P.y; P.x = (c.h.x + c.h.w / 2) * TILE; P.y = (c.h.y + c.h.h / 2) * TILE; Sound.thud(); UI.toast('Nascosto. Muoviti per uscire.'); break;
       case 'carry': P.carrying = c.b; c.b.carried = true; Sound.thud(); break;
       case 'drop': P.carrying.carried = false; P.carrying = null; Sound.thud(); break;
-      case 'stash': { const b = P.carrying; b.hidden = true; b.carried = false; P.carrying = null; c.h.bodies++; c.h.shake = 0.4; this.st.hidden++; Sound.thud(); this.addScore(50, 'CORPO NASCOSTO', b.x, b.y); break; }
-      case 'cut': c.ph.cut = true; Sound.cut(); this.addScore(25, 'LINEA TAGLIATA', (c.ph.x + 0.5) * TILE, c.ph.y * TILE); break;
+      case 'stash': { const b = P.carrying; b.hidden = true; b.carried = false; P.carrying = null; c.h.bodies++; c.h.shake = 0.4; this.st.hidden++; this.objEvent('hide'); Sound.thud(); this.addScore(50, 'CORPO NASCOSTO', b.x, b.y); break; }
+      case 'cut': c.ph.cut = true; this.objEvent('cut'); Sound.cut(); this.addScore(25, 'LINEA TAGLIATA', (c.ph.x + 0.5) * TILE, c.ph.y * TILE); break;
       case 'lure': this.activateLure(c.l); break;
     }
   },
@@ -2657,11 +2724,11 @@ const Game = {
     if (!trap && wasLured) { mult *= 1.25; tags.push('ESCA'); }
     if (panicking) { mult *= 1.3; tags.push('ZITTITO'); }
     if (this.isDark()) { mult *= 1.2; tags.push('BLACKOUT'); }
-    if (this.time - this.lastKillT < 1.8) { mult *= 1.5; tags.push('MULTIPLA'); this.st.multi++; }
+    let isMulti = false; if (this.time - this.lastKillT < 1.8) { mult *= 1.5; tags.push('MULTIPLA'); this.st.multi++; isMulti = true; this.multiN++; } else this.multiN = 1;
     this.lastKillT = this.time;
     this.combo.n = this.combo.t > 0 ? this.combo.n + 1 : 1; this.combo.t = 7; this.combo.best = Math.max(this.combo.best, this.combo.n);
     if (this.frenzyT > 0) { mult *= 1.5; tags.push('FRENESIA'); this.frenzyT = Math.min(14, this.frenzyT + 3); this.frenzyMax = Math.max(this.frenzyMax, this.frenzyT); }
-    else if (this.combo.n >= 4) { this.frenzyT = 9; this.frenzyMax = 9; UI.big('FRENESIA!', '#ff2a2a', 'Più veloce · più letale · punti ×1.5'); Sound.frenzy(); }
+    else if (this.combo.n >= 4) { this.frenzyT = 9; this.frenzyMax = 9; UI.big('FRENESIA!', '#ff2a2a', 'Più veloce · più letale · punti ×1.5'); Sound.frenzy(); this.objEvent('frenzy'); }
     const pts = Math.round(100 * mult * this.combo.n);
     this.score += pts;
     this.floaters.push({ x: n.x, y: n.y - 30, text: '+' + pts, sub: tags.join(' · '), color: '#ff3b3b', life: 2.4 });
@@ -2684,6 +2751,16 @@ const Game = {
     if (wid === 'shotgun' && !chain) for (const m of this.npcs.slice()) if (m !== n && m.alive && dist(P.x, P.y, m.x, m.y) < TILE * 9 && dist(n.x, n.y, m.x, m.y) < TILE * 2.2 && Math.abs(angDiff(dirA, Math.atan2(m.y - P.y, m.x - P.x))) < 0.5 && this.wallClear(P.x, P.y, m.x, m.y)) this.kill(m, { weapon: 'shotgun', chain: true });
     // chainsaw cuts through whoever is in front
     if (wd.multi && !chain) for (const m of this.npcs.slice()) if (m !== n && m.alive && dist(P.x, P.y, m.x, m.y) < TILE * 1.9 && this.wallClear(P.x, P.y, m.x, m.y) && Math.abs(angDiff(dirA, Math.atan2(m.y - P.y, m.x - P.x))) < 1.4) this.kill(m, { weapon: 'saw', chain: true });
+    {
+      const kt = KT[style], mt = ['', '', 'DOPPIA!', 'TRIPLA!', 'MASSACRO!'][Math.min(4, this.multiN)];
+      UI.killText(this.multiN >= 2 ? mt : (kt ? kt[0] : 'UCCISO!'), this.multiN >= 2 ? '#ffb02a' : (kt ? kt[1] : '#ff3a4a'));
+      this.impactT = 0.24; this.focus = { x: n.x, y: n.y, t: 0.9 };
+      if (!['shoot', 'blast', 'electro', 'snare', 'poison', 'bin', 'burn', 'drown'].includes(style)) this.slashes.push({ x: n.x, y: n.y, a: dirA, life: 0.24, cross: !!o.finisher || style === 'push' || style === 'chop' || style === 'saw' });
+      const kb = ({ slash: 90, stab: 70, push: 140, chop: 260, shoot: 200, blast: 420, saw: 60 })[style] || 0; if (kb) { b.vx = Math.cos(dirA) * kb; b.vy = Math.sin(dirA) * kb; }
+      this.slowmo(o.finisher || style === 'push' ? 0.7 : 0.38, 0.35);
+      Sound.killHit(!!o.finisher || ['push', 'chop', 'saw', 'blast', 'explode'].includes(style));
+      this.objEvent('kill', { n, style, finisher: !!o.finisher, fin: o.fin, trap, silent, weapon: wid, multi: isMulti, zone: !!o.zone });
+    }
     this.checkWin();
   },
   victimAware(n) { const P = this.player; return !CALM[n.state] || n.sus > 0.45 || (n.watchT > 0 && this.sees(n, P.x, P.y) && !P.invisible); },
@@ -2712,10 +2789,10 @@ const Game = {
     Sound.scream(n.pitch); Sound.strain(); this.noise(n.x, n.y, TILE * 5, 0.4, n); this.shake = 5;
   },
   updateStruggle(dt) {
-    const S = this.struggle, P = this.player, n = S.n; S.t += dt; S.prog = Math.max(0, S.prog - 0.2 * dt);
+    const S = this.struggle, P = this.player, n = S.n; S.t += dt; this.focus = { x: (n.x + P.x) / 2, y: (n.y + P.y) / 2, t: 0.3 }; S.prog = Math.max(0, S.prog - 0.2 * dt);
     const presses = ((Input.hit('Space') || Input.hit('KeyF') || Input.hit('Enter')) ? 1 : 0) + (UI.btnPressed('action') ? 1 : 0) + Input.taps.length;
     if (presses) {
-      S.prog += presses * (n.drunk ? 0.2 : n.brute ? 0.07 : 0.11); Sound.scrapeHit(); this.shake = Math.max(this.shake, 3.5); if (Math.random() < 0.35) Sound.strain();
+      this.impactT = 0.12; S.prog += presses * (n.drunk ? 0.2 : n.brute ? 0.07 : 0.11); Sound.scrapeHit(); this.shake = Math.max(this.shake, 3.5); if (Math.random() < 0.35) Sound.strain();
       for (let i = 0; i < 4; i++) this.particles.push({ x: (P.x + n.x) / 2, y: (P.y + n.y) / 2, vx: rand(-120, 120), vy: rand(-120, 120), life: rand(0.15, 0.35), max: 0.35, size: rand(2, 4), type: 'spark' });
     }
     if (S.prog >= 1) { this.struggle = null; this.kill(n, { style: 'push', aware: true, blood: 1.7 }); return; }
@@ -2736,11 +2813,11 @@ const Game = {
     this.fin = { n, o, def, t: 0, i: 0, cx, cy }; Sound.strain(); this.killCamT = 1.9;
   },
   updateFinisher(dt) {
-    const F = this.fin; F.t += dt; const T = FIN_T[F.def.k];
+    const F = this.fin; F.t += dt; const T = FIN_T[F.def.k]; this.focus = { x: (F.n.x + this.player.x) / 2, y: (F.n.y + this.player.y) / 2, t: 0.3 };
     if (F.i < T.length && F.t >= T[F.i]) { const i = F.i++; this.finStage(F, i, i === T.length - 1); }
   },
   finStage(F, i, last) {
-    const n = F.n, d = F.def, k = d.k, cx = F.cx, cy = F.cy, ang = Math.atan2(n.y - cy, n.x - cx);
+    this.impactT = 0.22; const n = F.n, d = F.def, k = d.k, cx = F.cx, cy = F.cy, ang = Math.atan2(n.y - cy, n.x - cx);
     if (k === 'slam') {
       Sound.slam(d.snd); this.shake = 9 + i * 4; this.hitstop = 0.05; this.splatter(cx, cy, ang, 12 + i * 12, 0.9, [60, 240]);
       Render.splat(cx + Math.cos(ang) * 8, cy + Math.sin(ang) * 8, 7 + i * 4, 0.85); Render.smear(cx, cy, cx + rand(-5, 5), cy + 18 + i * 12, 7, 0.7); this.bloodScreen(1 + i, false);
@@ -2764,9 +2841,26 @@ const Game = {
   },
   finEnd(F) {
     const P = this.player, n = F.n, k = F.def.k; this.fin = null;
-    this.kill(n, { style: { slam: 'slam', burn: 'burn', drown: 'drown', bin: 'bin', zap: 'electro' }[k], finisher: true, aware: false, blood: { slam: 1.5, burn: 0.8, drown: 0.7, bin: 1.2, zap: 0.6 }[k], noise: { slam: 3.4, burn: 2.2, drown: 2.2, bin: 2.8, zap: 5 }[k], sx: P.x, sy: P.y });
-    if (k === 'bin') { const h = this.hides.find(h => h === F.o); if (h) { h.bodies++; h.shake = 0.5; } this.st.hidden++; }
-    if (k === 'zap') { this.blackoutT = 7; Sound.powerDown(); this.onPowerOff(1, TILE * 9); }
+    this.kill(n, { style: { slam: 'slam', burn: 'burn', drown: 'drown', bin: 'bin', zap: 'electro' }[k], finisher: true, aware: false, blood: { slam: 1.5, burn: 0.8, drown: 0.7, bin: 1.2, zap: 0.6 }[k], noise: { slam: 3.4, burn: 2.2, drown: 2.2, bin: 2.8, zap: 5 }[k], sx: P.x, sy: P.y, fin: F.o.t });
+    if (k === 'bin') { const h = this.hides.find(h => h === F.o); if (h) { h.bodies++; h.shake = 0.5; } this.st.hidden++; this.objEvent('hide'); }
+    if (k === 'zap') { this.blackoutT = 7; Sound.powerDown(); this.onPowerOff(1, TILE * 9); this.objEvent('fuse'); }
+  },
+  pickObjectives() {
+    const ids = Object.keys(OBJ).filter(id => !OBJ[id].ok || OBJ[id].ok(this)).sort(() => Math.random() - 0.5);
+    const pick3 = ids.slice(0, 3), easy = ['wall', 'fuse', 'silent2', 'hide2', 'cut2', 'dress', 'throat'].filter(id => ids.includes(id));
+    if (easy.length && !pick3.some(id => easy.includes(id))) pick3[2] = pick(easy);
+    this.objectives = [...new Set(pick3)].map(id => ({ id, n: 0, done: false }));
+  },
+  objEvent(type, d = {}) {
+    for (const o of this.objectives) {
+      if (o.done) continue; const def = OBJ[o.id]; if (def.ev !== type) continue; if (def.f && !def.f(this, d)) continue;
+      o.n++; if (o.n >= (def.need || 1)) this.objComplete(o);
+    }
+  },
+  objComplete(o) {
+    const def = OBJ[o.id]; o.done = true; this.score += def.pts; this.objPts += def.pts; this.objDone++;
+    const P = this.player; this.floaters.push({ x: P.x, y: P.y - 40, text: '+' + def.pts, sub: 'OBIETTIVO', color: '#ffd23a', life: 2.4 });
+    Sound.objective(); UI.objPop(def.t, def.pts);
   },
   breakDisguise() { const P = this.player; if (P.disguise) { P.disguise = null; P.disguiseLook = null; UI.toast('Travestimento scoperto!'); } },
   inSmoke(x, y) { for (const s of this.smokes) if (dist(x, y, s.x, s.y) < s.r) return true; return false; },
@@ -2822,7 +2916,7 @@ const Game = {
     if (crush) { Sound.boom(); Sound.tinnitus(); } else Sound.zap();
     this.shake = 18; this.flash = 0.6; this.flashColor = crush ? '255,200,120' : '140,180,255';
     const inZ = e => e.x / TILE >= x0 && e.x / TILE < x1 + 1 && e.y / TILE >= y0 && e.y / TILE < y1 + 1;
-    for (const m of this.npcs.slice()) if (m.alive && inZ(m)) this.kill(m, { trap: true, style: l.style || 'electro', sx: cx, sy: cy, blood: crush ? 2 : 0.6 });
+    for (const m of this.npcs.slice()) if (m.alive && inZ(m)) this.kill(m, { trap: true, zone: true, style: l.style || 'electro', sx: cx, sy: cy, blood: crush ? 2 : 0.6 });
     this.noise(cx, cy, TILE * 12, 0.5, null, true);
     if (!P.hidden && !this.ended && inZ(P)) { P.dead = true; this.gibs(P.x, P.y, 0, 8, Math.PI); this.splatter(P.x, P.y, 0, 40, Math.PI, [100, 340]); this.finish(false, 'boom'); }
   },
@@ -2907,7 +3001,7 @@ const Game = {
       return;
     }
   },
-  slowmo(dur, scale) { this.slowT = Math.max(this.slowT, dur); this.slowScale = scale; },
+  slowmo(dur, scale) { this.slowScale = this.slowT > 0 ? Math.min(this.slowScale, scale) : scale; this.slowT = Math.max(this.slowT, dur); },
 
   /* ---------------- end conditions ---------------- */
   checkWin() {
@@ -2943,7 +3037,8 @@ const Game = {
     }
     return { win: this.win, reason: this.reason, level: this.idx, levelId: this.def.id, levelName: this.def.name, time: t, kills: this.kills, total: this.npcs.length,
       witnesses: this.witnesses, escaped: this.escaped, police: this.policeCalled, combo: this.combo.best, base: this.score,
-      timeBonus, ghost, policePen, escPen, challenges, chBonus, score: total, rank, styles: this.styleCount };
+      timeBonus, ghost, policePen, escPen, challenges, chBonus, score: total, rank, styles: this.styleCount,
+      objectives: (this.objectives || []).map(o => ({ text: OBJ[o.id].t, done: o.done, pts: OBJ[o.id].pts })), objPts: this.objPts || 0 };
   },
 
   /* ---------------- main update ---------------- */
@@ -3027,7 +3122,16 @@ const Game = {
       if (stalk > 0.65 && this.time > this.whisperCd) { Sound.stalkWhisper(); this.whisperCd = this.time + 30; } }
     { const Pl = this.player; Pl.hpT += dt; if (Pl.hp < 3 && Pl.hpT > 22) { Pl.hp++; Pl.hpT = 0; UI.toast('Ti riprendi un po\'…'); } }
     if (this.punchT > 0) this.punchT -= dt; if (this.killCamT > 0) this.killCamT -= rdt;
-    for (const b of this.bodies) b.age = (b.age || 0) + dt;
+    if (this.impactT > 0) this.impactT -= rdt; if (this.focus) this.focus.t -= rdt;
+    for (const sl of this.slashes) sl.life -= dt; this.slashes = this.slashes.filter(sl => sl.life > 0);
+    for (const b of this.bodies) {
+      b.age = (b.age || 0) + dt;
+      if ((b.vx || b.vy) && !b.hidden && !b.carried) {
+        const nx = b.x + b.vx * dt, ny = b.y + b.vy * dt;
+        if (this.solidPx(nx, ny)) { Render.splat(b.x, b.y, 11, 0.85); b.vx = b.vy = 0; Sound.thud(); this.shake = Math.max(this.shake, 4); }
+        else { Render.smear(b.x, b.y, nx, ny, 9, 0.55); b.x = nx; b.y = ny; const f = Math.pow(0.03, dt); b.vx *= f; b.vy *= f; if (Math.hypot(b.vx, b.vy) < 10) b.vx = b.vy = 0; }
+      }
+    }
     // pools grow & age
     for (const p of this.pools) { p.age = (p.age || 0) + dt; if (p.r < p.max) p.r += dt * 9; }
     // arterial spurts from fresh bodies
@@ -3433,7 +3537,8 @@ const Render = {
     if (G.cine) z *= 1 + 1.3 * G.cineK;
     if (G.struggle || G.fin) z *= 1.2; else if (G.punchT > 0) z *= 1 + 0.12 * Math.min(1, G.punchT / 0.3); else if (G.killCamT > 0) z *= 1.1;
     cam.zoom = lerp(cam.zoom || z, z, 1 - Math.exp(-dt * 4));
-    const tx = P.x + Math.cos(P.ang) * (P.moving ? 40 : 0), ty = P.y + Math.sin(P.ang) * (P.moving ? 40 : 0);
+    let tx = P.x + Math.cos(P.ang) * (P.moving ? 40 : 0), ty = P.y + Math.sin(P.ang) * (P.moving ? 40 : 0);
+    if (G.focus && G.focus.t > 0) { tx = lerp(tx, G.focus.x, 0.55); ty = lerp(ty, G.focus.y, 0.55); }
     const k = 1 - Math.exp(-dt * 5); cam.x = lerp(cam.x, tx, k); cam.y = lerp(cam.y, ty, k);
     const hw = this.w / 2 / cam.zoom, hh = this.h / 2 / cam.zoom, MW = G.W * TILE, MH = G.H * TILE;
     cam.x = MW < hw * 2 ? MW / 2 : clamp(cam.x, hw, MW - hw);
@@ -3530,7 +3635,7 @@ const Render = {
     }
     // particles (pre-light)
     for (const p of G.particles) {
-      if (p.type === 'blood') { c.fillStyle = '#8a0010'; circ(c, p.x, p.y, p.size); }
+      if (p.type === 'blood') { const sp = Math.hypot(p.vx, p.vy); if (sp > 140) { c.strokeStyle = '#8a0010'; c.lineWidth = p.size * 0.8; c.lineCap = 'round'; c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x - p.vx * 0.035, p.y - p.vy * 0.035); c.stroke(); } else { c.fillStyle = '#8a0010'; circ(c, p.x, p.y, p.size); } }
       else if (p.type === 'water') { c.fillStyle = `rgba(150,210,255,${p.life / p.max})`; circ(c, p.x, p.y, p.size * 0.5); }
       else if (p.type === 'gib') { c.save(); c.translate(p.x, p.y); c.rotate(p.rot + p.life * 8); c.fillStyle = '#5a0008'; rr(c, -p.size, -p.size * 0.6, p.size * 2, p.size * 1.2, 2); c.fill(); c.fillStyle = '#b0202c'; rr(c, -p.size * 0.5, -p.size * 0.3, p.size, p.size * 0.6, 1); c.fill(); c.restore(); }
       else if (p.type === 'mist') { c.fillStyle = `rgba(130,0,12,${clamp(p.life / p.max, 0, 1) * 0.24})`; circ(c, p.x, p.y, p.size); }
@@ -3550,6 +3655,10 @@ const Render = {
     if (G.L.dance && musicOn) this.discoBeams(c, G, t);
     for (const pk of G.pickups) if (!pk.taken) { const x = pk.x * TILE, y = pk.y * TILE; if (!inView(x, y, 60)) continue; const g = c.createRadialGradient(x, y, 0, x, y, 52); g.addColorStop(0, `rgba(255,200,60,${0.2 + 0.1 * Math.sin(t * 4)})`); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(x - 52, y - 52, 104, 104); }
     for (const p of G.particles) if (p.type === 'fire') { const a = clamp(p.life / p.max, 0, 1); c.fillStyle = `rgba(255,${90 + 130 * a | 0},20,${a * 0.75})`; circ(c, p.x, p.y, p.size); }
+    for (const sl of G.slashes) {
+      const k = sl.life / 0.24; c.lineCap = 'round';
+      for (const q of sl.cross ? [0, 0.9] : [0]) for (const [lw, col] of [[12, `rgba(255,30,45,${k * 0.55})`], [4, `rgba(255,255,255,${k})`]]) { c.strokeStyle = col; c.lineWidth = lw; c.beginPath(); c.arc(sl.x - Math.cos(sl.a + q) * 6, sl.y - Math.sin(sl.a + q) * 6, 30 + (1 - k) * 18, sl.a + q - 1.15, sl.a + q + 1.15); c.stroke(); }
+    }
     for (const tr of G.tracers) { c.strokeStyle = `rgba(255,240,180,${tr.life / 0.14})`; c.lineWidth = 2; c.beginPath(); c.moveTo(tr.x0, tr.y0); c.lineTo(tr.x1, tr.y1); c.stroke(); }
     for (const f of G.boomFx) { const r = TILE * (3 + (1.2 - f.life) * 5), g = c.createRadialGradient(f.x, f.y, 0, f.x, f.y, r); g.addColorStop(0, `rgba(255,220,140,${f.life * 0.9})`); g.addColorStop(0.5, `rgba(255,110,30,${f.life * 0.4})`); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(f.x - r, f.y - r, r * 2, r * 2); }
     for (const p of G.particles) {
@@ -3687,6 +3796,13 @@ const Render = {
       c.fillStyle = g1; c.fillRect(0, 0, w * 0.25, h);
       const g2 = c.createLinearGradient(w, 0, w * 0.75, 0); g2.addColorStop(0, !k ? `rgba(255,20,40,${a})` : `rgba(30,90,255,${a})`); g2.addColorStop(1, 'rgba(0,0,0,0)');
       c.fillStyle = g2; c.fillRect(w * 0.75, 0, w * 0.25, h);
+    }
+    if (G.impactT > 0) {
+      const k = Math.min(1, G.impactT / 0.24), R2 = Math.max(w, h);
+      c.fillStyle = `rgba(255,255,255,${0.32 * k * k})`; c.fillRect(0, 0, w, h);
+      c.save(); c.translate(w / 2, h / 2); c.strokeStyle = `rgba(255,255,255,${0.5 * k})`; c.lineWidth = 2;
+      for (let i = 0; i < 36; i++) { const a = i / 36 * TAU + srand(i) * 0.15, r0 = R2 * (0.26 + srand(i * 3) * 0.14), r1 = R2 * 0.8; c.beginPath(); c.moveTo(Math.cos(a) * r0, Math.sin(a) * r0); c.lineTo(Math.cos(a) * r1, Math.sin(a) * r1); c.stroke(); }
+      c.restore();
     }
     if (G.killCamT > 0 || G.struggle || G.fin) { const k = G.struggle || G.fin ? 1 : Math.min(1, G.killCamT * 2.5), bh = h * 0.075 * k; c.fillStyle = '#000'; c.fillRect(0, 0, w, bh); c.fillRect(0, h - bh, w, bh); c.fillStyle = `rgba(90,0,8,${0.2 * k})`; c.fillRect(0, 0, w, h); }
     if (G.cine) { const k = 0.35 + 0.65 * G.cineK, pu = 0.5 + 0.5 * Math.sin(t * 5.5), g = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.15, w / 2, h / 2, Math.max(w, h) * 0.65); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(150,0,16,${(0.4 + 0.15 * pu) * k})`); c.fillStyle = g; c.fillRect(0, 0, w, h); }
@@ -4194,6 +4310,7 @@ const UI = {
     { const wp = G.player.weapon, wd = WEAPONS[wp ? wp.id : 'knife']; this.set('hudWeapon', `${wd.icon} <b>${wd.name.toUpperCase()}</b>${wp ? ' ×' + wp.uses : ''}`, 'innerHTML'); }
     $('#hudFrenzy').classList.toggle('hidden', !(G.frenzyT > 0)); if (G.frenzyT > 0) $('#hudFrenzyBar i').style.width = Math.min(100, G.frenzyT / G.frenzyMax * 100) + '%';
     $('#hudChase').classList.toggle('hidden', !G.chased);
+    this.set('hudObj', (G.objectives || []).map(o => { const d = OBJ[o.id]; return `<div class="ob${o.done ? ' done' : ''}">${o.done ? '✔' : '◇'} ${d.t}${d.need ? ` (${o.n}/${d.need})` : ''} <b>+${d.pts}</b></div>`; }).join(''), 'innerHTML');
     { const arm = G.npcs.some(n => n.alive && n.armed); $('#hudHp').style.display = arm || G.player.hp < 3 ? '' : 'none'; this.set('hudHp', [0, 1, 2].map(i => `<i class="${G.player.hp > i ? 'f' : ''}">♥</i>`).join(''), 'innerHTML'); }
     { const alt = G.context && G.context.alt; $('#grabBtn').classList.toggle('hidden', !alt); if (alt) this.set('grabLabel', alt.fin.def.label);
       $('#struggle').classList.toggle('hidden', !G.struggle); if (G.struggle) $('#struggleBar').style.width = Math.min(100, G.struggle.prog * 100) + '%'; }
@@ -4224,6 +4341,8 @@ const UI = {
     const el = $('#bigtext'); el.innerHTML = `<div style="color:${color}">${text}</div>${sub ? `<small>${sub}</small>` : ''}`;
     el.className = ''; void el.offsetWidth; el.className = 'show';
   },
+  killText(text, color) { const el = $('#killTxt'); el.textContent = text; el.style.color = color; el.style.setProperty('--tilt', (Math.random() * 8 - 4).toFixed(1) + 'deg'); el.className = ''; void el.offsetWidth; el.className = 'show'; },
+  objPop(text, pts) { const el = $('#objPop'); el.innerHTML = `<small>★ OBIETTIVO COMPLETATO</small>${text} <b>+${pts}</b>`; el.className = ''; void el.offsetWidth; el.className = 'show'; },
   toast(text) { const el = $('#toast'); el.textContent = text; el.className = ''; void el.offsetWidth; el.className = 'show'; },
   hint(text) { const el = $('#hint'); el.innerHTML = '<b>SUGGERIMENTO</b> ' + text; el.className = ''; void el.offsetWidth; el.className = 'show'; },
   combo(n) { const el = $('#combo'); el.textContent = `×${n}`; el.className = ''; void el.offsetWidth; el.className = 'show'; },
@@ -4242,7 +4361,7 @@ const UI = {
     let bloodGain = 0;
     if (r.win) {
       const rb = { S: 150, A: 100, B: 60, C: 30, D: 0 }[r.rank] || 0, cb = (r.challenges || []).filter(c => c.ok).length * 40, first = best ? 0 : 100;
-      bloodGain = Math.round(r.score / 12) + rb + cb + first; this.progress.blood = (this.progress.blood || 0) + bloodGain;
+      bloodGain = Math.round(r.score / 12) + rb + cb + first + (r.objectives || []).filter(o => o.done).length * 40; this.progress.blood = (this.progress.blood || 0) + bloodGain;
     }
     this.progress.shopV = (this.progress.shopV || 0) + (bloodGain ? 1 : 0);
     store.set('progress', this.progress);
@@ -4260,12 +4379,13 @@ const UI = {
             <div><span>Tempo</span><b>${mm}:${ss}</b></div>
             <div><span>Testimoni</span><b>${r.witnesses}</b></div>
             <div><span>Combo massima</span><b>×${r.combo}</b></div>
-            <div><span>Punti uccisioni</span><b>${r.base}</b></div>
+            <div><span>Punti azione</span><b>${r.base}</b></div>
             ${r.win ? `<div><span>Bonus tempo</span><b>+${r.timeBonus}</b></div>
             ${r.ghost ? `<div class="good"><span>Fantasma (nessun testimone)</span><b>+${r.ghost}</b></div>` : ''}
             ${r.police ? `<div class="bad"><span>Polizia chiamata</span><b>${r.policePen}</b></div>` : ''}
             ${r.escaped ? `<div class="bad"><span>Fuggiti</span><b>${r.escPen}</b></div>` : ''}` : ''}
             ${r.win ? (r.challenges || []).map(c => `<div class="ch ${c.ok ? 'ok' : 'no'}"><span>${c.ok ? '◆' : '◇'} ${c.text}</span><b>${c.ok ? '+300' : '—'}</b></div>`).join('') : ''}
+            ${r.win || r.score ? ((r.objectives || []).length ? `<div class="obr"><span>★ Obiettivi ${(r.objectives || []).filter(o => o.done).length}/${r.objectives.length}</span><b>+${r.objPts}</b></div>` : '') : ''}
             <div class="tot"><span>TOTALE</span><b>${r.score}</b></div>
             ${r.win ? `<div class="blood"><span>🩸 PUNTI SANGUE</span><b>+${bloodGain}</b></div><div class="net">Hai ${this.progress.blood} punti sangue da spendere nell'Armeria</div>` : ''}
             ${isRecord ? '<div class="rec">★ NUOVO RECORD ★</div>' : ''}
