@@ -288,10 +288,27 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 .resHead{filter:drop-shadow(0 6px 10px rgba(140,0,16,.7))}
 .rank{position:relative}
 .rank::before{content:'';position:absolute;inset:-35%;background:var(--splatA) center/contain no-repeat;opacity:.55;z-index:-1}
-#hud::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;background:var(--drips) top left/280px auto repeat-x,var(--splatA) top -90px left -90px/230px no-repeat,var(--splatB) top -80px right -80px/210px no-repeat}
 .cbtn{border-color:rgba(190,30,45,.55)}
 #hudScore{text-shadow:0 2px 0 #000,0 0 18px rgba(211,18,42,.9),0 6px 14px rgba(140,0,16,.8)}
 #boardList .row.me{box-shadow:inset 3px 0 0 #c4101f}
+/* shop */
+#shop .panel{width:min(980px,96vw);max-height:94vh;display:flex;flex-direction:column}
+#shopBal{font-family:Nosifer;font-size:clamp(16px,4vh,26px);color:var(--red2);text-shadow:0 0 14px rgba(211,18,42,.8);margin-left:auto}
+#shopBal b{color:var(--bone)}
+#shopMsg{font-family:'Special Elite';color:var(--mut);font-size:clamp(11px,2.3vh,14px);margin:0 0 10px}
+#shopList{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding-right:4px}
+.sitem{background:linear-gradient(180deg,#140a0e,#08060a);border:1px solid rgba(235,229,216,.14);padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.sitem.own{border-color:rgba(211,18,42,.55)}
+.sitem .ic{font-size:26px;line-height:1}
+.sitem h3{margin:2px 0 0;font-size:clamp(14px,2.8vh,18px);letter-spacing:.06em}
+.sitem p{margin:0;font-family:'Special Elite';font-size:12px;color:#bdb5a8;line-height:1.3;flex:1}
+.sitem .si{font-size:12px;color:var(--bone);letter-spacing:.08em}
+.sitem .buy{margin-top:4px;padding:8px 10px;font-size:13px;text-align:center;letter-spacing:.12em;background-size:100% 100%}
+.sitem .buy.broke{opacity:.5;filter:grayscale(.6)}
+.maxed{margin-top:4px;text-align:center;color:#7aff8a;font-size:12px;letter-spacing:.2em}
+.resList .blood{font-size:1.15em}.resList .blood b{color:#ff5a6a}
+.chip.lock{opacity:.55}.chip.shopchip{border-color:#c4101f;background:rgba(196,16,31,.2)}
+@media (max-height:560px){#shopList{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}.sitem{padding:6px 8px}.sitem p{display:none}.sitem .ic{font-size:20px}}
 </style>
 </head>
 <body>
@@ -335,6 +352,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
   </div>
   <div class="menuR">
     <button class="btn primary" data-go="levels">GIOCA</button>
+    <button class="btn" id="btnShop">ARMERIA 🩸</button>
     <button class="btn" data-go="board">CLASSIFICA</button>
     <button class="btn" data-go="howto">COME SI GIOCA</button>
     <button class="btn" data-go="options">OPZIONI</button>
@@ -345,6 +363,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 </div>
 
 <div id="levels" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Scegli la notte</h2><button class="btn back" data-go="menu">‹ INDIETRO</button></div><div id="levelCards"></div></div></div>
+<div id="shop" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Armeria</h2><div id="shopBal"></div><button class="btn back" id="shopBack">‹ INDIETRO</button></div><div id="shopMsg"></div><div id="shopList"></div></div></div>
 <div id="board" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Classifica</h2><button class="btn back" data-go="menu">‹ INDIETRO</button></div><div id="boardTabs"></div><div id="boardList"></div></div></div>
 <div id="howto" class="screen hidden"><div class="panel"><h2>Come si gioca</h2>
   <div class="how">
@@ -357,7 +376,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
     <div><h4>TELEFONI E POLIZIA</h4><p>Taglia i fili dei telefoni ☎ prima di iniziare. Se qualcuno completa la chiamata hai 50 secondi per finire il lavoro prima che arrivi la polizia.</p></div>
     <div><h4>POTERI DELL'OMBRA</h4><p><b>Ombra</b> (1): appari alle spalle del bersaglio. <b>Richiamo</b> (1): sussurri il suo nome e viene da te. <b>Blackout</b> (2): luci spente in tutto l'edificio. Uccidere ricarica l'energia; le combo ne danno di più.</p></div>
     <div><h4>SABOTAGGI E TRAPPOLE ✦</h4><p>I rombi gialli attirano la persona più vicina lontano dagli altri. Alcuni (gas, caldaia, amplificatore…) sono <b>trappole mortali</b>: chi va a controllare ci lascia la pelle, e spesso non solo lui.</p></div>
-    <div><h4>EQUIPAGGIAMENTO 🎒</h4><p>Prima di ogni livello scegli <b>2 gadget</b> (X e C): <b>Esca sonora</b> attira due persone dove la lanci, <b>Tagliola</b> uccide chi la pesta, <b>Fumogeno</b> ti rende invisibile nella nube, <b>Veleno</b> uccide con ritardo chi mangia o beve dal punto avvelenato.</p></div>
+    <div><h4>EQUIPAGGIAMENTO 🎒</h4><p>Vincendo i livelli guadagni <b>punti sangue 🩸</b>: nell'<b>Armeria</b> sblocchi e potenzi i gadget. Prima di ogni livello scegli <b>2 gadget</b> (X e C): <b>Esca sonora</b> attira due persone dove la lanci, <b>Tagliola</b> uccide chi la pesta, <b>Fumogeno</b> ti rende invisibile nella nube, <b>Veleno</b> uccide con ritardo chi mangia o beve dal punto avvelenato.</p></div>
     <div><h4>TRAVESTIMENTI E TELECAMERE 🎭</h4><p>Dal corpo di chi indossa una divisa puoi <b>prendere i vestiti</b>: finché non corri, non sei sporco di sangue e non trascini corpi, nessuno ti nota da vicino (i colleghi della stessa divisa ti smascherano a 3 caselle). Le <b>telecamere</b> avvisano la sicurezza: spegnile dal pannello, con un blackout o fumogeno, o evitale.</p></div>
     <div><h4>GENTE VIVA</h4><p>Le persone chiacchierano, ballano, brindano e si passano le voci: se uno sospetta qualcosa, avvisa l'altro. Se salta la corrente qualcuno corre al quadro per ripararla, e le urla attirano i curiosi. Ognuno ha un carattere (curioso, codardo, chiacchierone, paranoico, solitario) che vedi sul bersaglio.</p></div>
     <div><h4>FRENESIA 🩸</h4><p>Quattro uccisioni in combo scatenano la Frenesia: corri più veloce, colpisci da più lontano e ogni punto vale di più. Ogni nuova vittima la prolunga.</p></div>
@@ -766,6 +785,13 @@ const GADGETS = {
   smoke:  { name: 'Fumogeno', short: 'FUMO', icon: '💨', n: 2, desc: 'Nube che ti rende invisibile per 9 secondi' },
   poison: { name: 'Veleno', short: 'VELENO', icon: '☠️', n: 2, desc: 'Avvelena cibo e bevande: muore chi li usa' }
 };
+const SHOP = {
+  unlock: { bait: 0, snare: 150, smoke: 150, poison: 250 },
+  charge: [120, 220],      // +1 charge, up to +2 per gadget
+  shadow: [200, 350],      // +1 starting shadow energy, up to +2
+  axe: 400                 // start every level with an axe (2 uses)
+};
+const newShop = () => ({ own: ['bait'], ch: {}, shadow: 0, axe: false });
 const POISON_TAGS = new Set(['bar', 'eat', 'fridge', 'vend', 'break', 'bbq', 'cook', 'stall', 'fire']);
 
 /* ---- weapons ---- */
@@ -1399,7 +1425,9 @@ const Game = {
     this.frenzyT = 0; this.frenzyMax = 9; this.st = { silent: 0, weapon: 0, trap: 0, multi: 0, hidden: 0 }; this.lastKillT = -9;
     this.tracers = []; this.sched = []; this.screenBlood = []; this.boomFx = [];
     this.cams = (L.cams || []).map(c => ({ ...c, sus: 0, cd: 0, off: 0, a: c.ang }));
-    this.gadgets = (UI.loadout || ['bait', 'poison']).slice(0, 2).map(id => ({ id, n: GADGETS[id].n }));
+    const sh = (UI.progress && UI.progress.shop) || newShop();
+    this.gadgets = (UI.loadout || []).filter(id => sh.own.includes(id)).slice(0, 2).map(id => ({ id, n: GADGETS[id].n + ((sh.ch || {})[id] || 0) }));
+    this.charges = Math.min(3, 1 + (sh.shadow || 0)); if (sh.axe) this.player.weapon = { id: 'axe', uses: 2 };
     this.snares = []; this.smokes = []; this.devices = [];
     this.cam = { x: this.player.x, y: this.player.y, zoom: 1 };
     // spread NPCs into their routines immediately
@@ -3422,9 +3450,9 @@ const randomNick = () => pick(['Lama', 'Ombra', 'Corvo', 'Spettro', 'Gelo', 'Cen
 
 const UI = {
   loadout: store.get('loadout', ['bait', 'poison']),
-  scene: 'boot', btn: {}, hudCache: {}, progress: store.get('progress', { unlocked: 0, best: {}, kills: 0 }),
+  scene: 'boot', btn: {}, hudCache: {}, progress: store.get('progress', { unlocked: 0, best: {}, kills: 0 }), shopBack: 'menu',
   init() {
-    this.mm = $('#minimap');
+    this.mm = $('#minimap'); this.ensureShop();
     window.MB_PID = store.get('pid', null) || ('p' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36));
     store.set('pid', window.MB_PID);
     if (!store.get('nick', null)) store.set('nick', 'Ombra' + (1000 + Math.random() * 9000 | 0));
@@ -3443,12 +3471,14 @@ const UI = {
     nick.addEventListener('change', () => { const v = cleanNick(nick.value); const ok = v.length >= 2 ? v : store.get('nick'); nick.value = ok; store.set('nick', ok); store.set('nickSet', true); FB.saveProfile({}); FB.setPresence({}); FB.renameAll(); this.refreshMenu(); });
     $('#menuNick').addEventListener('click', () => { Sound.click(); this.askNick('menu'); });
     $('#nickOk').addEventListener('click', () => this.submitNick());
+    $('#btnShop').addEventListener('click', () => { Sound.click(); this.openShop('menu'); });
+    $('#shopBack').addEventListener('click', () => { Sound.click(); this.scene = this.shopBack === 'results' ? 'results' : 'menu'; this.show(this.shopBack); if (this.shopBack === 'levels') this.buildLevels(); });
     $('#nickRnd').addEventListener('click', () => { Sound.click(); $('#nickInput').value = randomNick(); $('#nickErr').textContent = ''; });
     $('#nickInput').addEventListener('input', e => { const v = e.target.value.replace(/[^\w àèéìòùÀÈÉÌÒÙ.\-]/g, ''); if (v !== e.target.value) e.target.value = v; });
     $('#optVol').value = Sound.vol; $('#optVol').addEventListener('input', e => Sound.setVol(+e.target.value));
     $('#optMus').value = Sound.musicVol; $('#optMus').addEventListener('input', e => Sound.setMusicVol(+e.target.value));
     $('#optGrain').checked = Render.grainOn; $('#optGrain').addEventListener('change', e => { Render.grainOn = e.target.checked; store.set('grain', Render.grainOn); });
-    $('#optReset').addEventListener('click', () => { if ($('#optReset').dataset.sure) { this.progress = { unlocked: 0, best: {}, kills: 0 }; store.set('progress', this.progress); $('#optReset').textContent = 'Progressi azzerati'; delete $('#optReset').dataset.sure; } else { $('#optReset').dataset.sure = 1; $('#optReset').textContent = 'Sicuro? Tocca di nuovo'; } });
+    $('#optReset').addEventListener('click', () => { if ($('#optReset').dataset.sure) { this.progress = { unlocked: 0, best: {}, kills: 0 }; this.ensureShop(); store.set('progress', this.progress); $('#optReset').textContent = 'Progressi azzerati'; delete $('#optReset').dataset.sure; } else { $('#optReset').dataset.sure = 1; $('#optReset').textContent = 'Sicuro? Tocca di nuovo'; } });
     // touch / HUD buttons
     document.querySelectorAll('[data-btn]').forEach(b => {
       const k = b.dataset.btn;
@@ -3473,6 +3503,27 @@ const UI = {
     $('#hudKeys').style.display = IS_TOUCH ? 'none' : '';
     document.body.classList.toggle('touch', IS_TOUCH);
     this.refreshMenu();
+  },
+  ensureShop() { const p = this.progress; if (!p.shop) p.shop = newShop(); if (p.blood == null) p.blood = 100; p.shopV = p.shopV || 0; this.loadout = (this.loadout || []).filter(id => p.shop.own.includes(id)); },
+  persist() { const p = this.progress; p.shopV = (p.shopV || 0) + 1; store.set('progress', p); FB.saveProfile({ unlocked: p.unlocked, kills: p.kills || 0, best: p.best, blood: p.blood, shop: p.shop, shopV: p.shopV }); },
+  openShop(back) { this.shopBack = back; this.scene = 'shop'; this.show('shop'); this.buildShop(); },
+  buildShop(msg) {
+    const p = this.progress, sh = p.shop; $('#shopBal').innerHTML = `🩸 <b>${p.blood}</b>`; $('#shopMsg').textContent = msg || 'Spendi i punti sangue guadagnati vincendo i livelli. Porti sempre 2 gadget a partita.';
+    const box = $('#shopList'); box.innerHTML = '';
+    const item = (icon, name, desc, info, label, cost, fn, own) => {
+      const d = document.createElement('div'); d.className = 'sitem' + (own ? ' own' : '');
+      d.innerHTML = `<div class="ic">${icon}</div><h3>${name}</h3><p>${desc}</p><div class="si">${info}</div>`;
+      if (label) { const b = document.createElement('button'); b.className = 'btn buy' + (p.blood < cost ? ' broke' : ''); b.textContent = `${label} · 🩸${cost}`; b.onclick = () => { if (p.blood < cost) { Sound.denied(); this.buildShop('Non hai abbastanza punti sangue.'); return; } p.blood -= cost; fn(); this.persist(); Sound.pickup(); this.buildShop('Acquistato!'); }; d.appendChild(b); }
+      else { const t = document.createElement('div'); t.className = 'maxed'; t.textContent = 'AL MASSIMO'; d.appendChild(t); }
+      box.appendChild(d);
+    };
+    for (const [id, g] of Object.entries(GADGETS)) {
+      const own = sh.own.includes(id), ex = (sh.ch || {})[id] || 0;
+      if (!own) item(g.icon, g.name, g.desc, `Cariche: ×${g.n}`, 'SBLOCCA', SHOP.unlock[id], () => { sh.own.push(id); }, false);
+      else item(g.icon, g.name, g.desc, `✔ Sbloccato · Cariche: ×${g.n + ex}`, ex < 2 ? '+1 CARICA' : null, SHOP.charge[ex] || 0, () => { sh.ch = sh.ch || {}; sh.ch[id] = ex + 1; }, true);
+    }
+    item('◐', 'Energia Ombra', 'Inizi ogni livello con più energia per Ombra, Richiamo e Blackout.', `Livello ${sh.shadow}/2`, sh.shadow < 2 ? '+1 ENERGIA' : null, SHOP.shadow[sh.shadow] || 0, () => { sh.shadow++; }, sh.shadow > 0);
+    item('🪓', 'Accetta in tasca', 'Inizi ogni livello con un\'accetta (2 colpi).', sh.axe ? '✔ Acquistata' : 'Non posseduta', sh.axe ? null : 'ACQUISTA', SHOP.axe, () => { sh.axe = true; }, sh.axe);
   },
   enter() {
     Sound.init(); goFull();
@@ -3516,6 +3567,7 @@ const UI = {
     this.progress.unlocked = Math.max(this.progress.unlocked, p.unlocked || 0);
     this.progress.kills = Math.max(this.progress.kills || 0, p.kills || 0);
     for (const [k, v] of Object.entries(p.best || {})) if (!this.progress.best[k] || v.score > this.progress.best[k].score) this.progress.best[k] = v;
+    if (p.shop && (p.shopV || 0) > (this.progress.shopV || 0)) { this.progress.shop = p.shop; this.progress.blood = p.blood; this.progress.shopV = p.shopV; this.ensureShop(); }
     store.set('progress', this.progress); this.refreshMenu();
   },
 
@@ -3614,16 +3666,22 @@ const UI = {
     this.show('lvlintro'); this.scene = 'lvlintro'; Sound.sting();
   },
   buildLoadout() {
+    this.ensureShop(); const sh = this.progress.shop;
     const box = $('#liLoad'); box.innerHTML = '<b>EQUIPAGGIAMENTO · SCEGLINE 2</b><div class="chips"></div>';
     const row = box.querySelector('.chips');
     for (const [id, g] of Object.entries(GADGETS)) {
-      const b = document.createElement('button'); b.className = 'chip' + (this.loadout.includes(id) ? ' on' : ''); b.innerHTML = `${g.icon} ${g.name} ×${g.n}<small>${g.desc}</small>`;
-      b.addEventListener('click', e => { e.stopPropagation(); Sound.click(); const i = this.loadout.indexOf(id); if (i >= 0) { if (this.loadout.length > 1) this.loadout.splice(i, 1); } else { this.loadout.push(id); if (this.loadout.length > 2) this.loadout.shift(); } store.set('loadout', this.loadout); this.buildLoadout(); });
+      const own = sh.own.includes(id), n = g.n + ((sh.ch || {})[id] || 0);
+      const b = document.createElement('button'); b.className = 'chip' + (own && this.loadout.includes(id) ? ' on' : '') + (own ? '' : ' lock');
+      b.innerHTML = own ? `${g.icon} ${g.name} ×${n}<small>${g.desc}</small>` : `🔒 ${g.name}<small>Sbloccalo nell'Armeria · 🩸${SHOP.unlock[id]}</small>`;
+      b.addEventListener('click', e => { e.stopPropagation(); if (!own) { Sound.denied(); return; } Sound.click(); const i = this.loadout.indexOf(id); if (i >= 0) { this.loadout.splice(i, 1); } else { this.loadout.push(id); if (this.loadout.length > 2) this.loadout.shift(); } store.set('loadout', this.loadout); this.buildLoadout(); });
       row.appendChild(b);
     }
+    const sb = document.createElement('button'); sb.className = 'chip shopchip'; sb.innerHTML = `🩸 ARMERIA<small>Hai ${this.progress.blood} punti sangue</small>`;
+    sb.addEventListener('click', e => { e.stopPropagation(); Sound.click(); this.openShop('levels'); }); row.appendChild(sb);
   },
   beginPlay() {
     if (this.scene !== 'lvlintro') return;
+    this.loadout = this.loadout.filter(id => this.progress.shop.own.includes(id));
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     Game.start(this.pendingLevel); this.scene = 'game';
     Game.cine = { t: 0, dur: 6.2, stage: -1 }; Game.cineK = 1; Game.cam.zoom = 3.2; document.body.classList.add('cine');
@@ -3662,7 +3720,7 @@ const UI = {
     { const wp = G.player.weapon, wd = WEAPONS[wp ? wp.id : 'knife']; this.set('hudWeapon', `${wd.icon} <b>${wd.name.toUpperCase()}</b>${wp ? ' ×' + wp.uses : ''}`, 'innerHTML'); }
     $('#hudFrenzy').classList.toggle('hidden', !(G.frenzyT > 0)); if (G.frenzyT > 0) $('#hudFrenzyBar i').style.width = Math.min(100, G.frenzyT / G.frenzyMax * 100) + '%';
     $('#hudChase').classList.toggle('hidden', !G.chased);
-    G.gadgets.forEach((g, i) => { const d = GADGETS[g.id]; this.set('gad' + i, `<span class="ic">${d.icon}</span>${d.short}<small>×${g.n}</small><span class="kb">${i ? 'C' : 'X'}</span>`, 'innerHTML'); $('#gad' + i).classList.toggle('na', g.n <= 0); });
+    for (let i = 0; i < 2; i++) { const g = G.gadgets[i], el = $('#gad' + i); el.style.display = g ? '' : 'none'; if (!g) continue; const d = GADGETS[g.id]; this.set('gad' + i, `<span class="ic">${d.icon}</span>${d.short}<small>×${g.n}</small><span class="kb">${i ? 'C' : 'X'}</span>`, 'innerHTML'); el.classList.toggle('na', g.n <= 0); }
     this.set('hudCombo', G.combo.t > 0 && G.combo.n > 1 ? `COMBO ×${G.combo.n}` : '');
     const cb = $('#hudComboBar'); if (cb) cb.style.width = (G.combo.t > 0 && G.combo.n > 1 ? G.combo.t / 7 * 100 : 0) + '%';
     // police
@@ -3704,6 +3762,12 @@ const UI = {
       if (r.level + 1 > this.progress.unlocked && r.level + 1 < LEVELS.length) this.progress.unlocked = r.level + 1;
     }
     this.progress.kills = (this.progress.kills || 0) + r.kills;
+    let bloodGain = 0;
+    if (r.win) {
+      const rb = { S: 150, A: 100, B: 60, C: 30, D: 0 }[r.rank] || 0, cb = (r.challenges || []).filter(c => c.ok).length * 40, first = best ? 0 : 100;
+      bloodGain = Math.round(r.score / 12) + rb + cb + first; this.progress.blood = (this.progress.blood || 0) + bloodGain;
+    }
+    this.progress.shopV = (this.progress.shopV || 0) + (bloodGain ? 1 : 0);
     store.set('progress', this.progress);
     const mm = Math.floor(r.time / 60), ss = String(Math.floor(r.time % 60)).padStart(2, '0');
     const styles = Object.entries(r.styles).map(([k, v]) => `<span>${k} ×${v}</span>`).join('');
@@ -3726,6 +3790,7 @@ const UI = {
             ${r.escaped ? `<div class="bad"><span>Fuggiti</span><b>${r.escPen}</b></div>` : ''}` : ''}
             ${r.win ? (r.challenges || []).map(c => `<div class="ch ${c.ok ? 'ok' : 'no'}"><span>${c.ok ? '◆' : '◇'} ${c.text}</span><b>${c.ok ? '+300' : '—'}</b></div>`).join('') : ''}
             <div class="tot"><span>TOTALE</span><b>${r.score}</b></div>
+            ${r.win ? `<div class="blood"><span>🩸 PUNTI SANGUE</span><b>+${bloodGain}</b></div><div class="net">Hai ${this.progress.blood} punti sangue da spendere nell'Armeria</div>` : ''}
             ${isRecord ? '<div class="rec">★ NUOVO RECORD ★</div>' : ''}
             <div class="styles">${styles}</div>
             <div class="net" id="resNet"></div>
@@ -3734,6 +3799,7 @@ const UI = {
         <div class="resBtns">
           ${next ? '<button class="btn primary" id="rNext">PROSSIMO LIVELLO</button>' : ''}
           <button class="btn ${next ? '' : 'primary'}" id="rRetry">${r.win ? 'RIGIOCA' : 'RIPROVA'}</button>
+          ${r.win ? '<button class="btn" id="rShop">🩸 ARMERIA</button>' : ''}
           <button class="btn" id="rMenu">MENU</button>
         </div>
         ${r.win && r.level + 1 >= LEVELS.length ? '<div class="muted">Hai completato tutti gli scenari disponibili. Nuovi livelli in arrivo…</div>' : ''}
@@ -3742,7 +3808,8 @@ const UI = {
     if (next) $('#rNext').onclick = () => { Sound.click(); this.startLevel(r.level + 1); };
     $('#rRetry').onclick = () => { Sound.click(); this.startLevel(r.level); };
     $('#rMenu').onclick = () => { Sound.click(); this.toMenu(); };
-    FB.saveProfile({ unlocked: this.progress.unlocked, kills: this.progress.kills, best: this.progress.best });
+    if (r.win) $('#rShop').onclick = () => { Sound.click(); this.openShop('results'); };
+    FB.saveProfile({ unlocked: this.progress.unlocked, kills: this.progress.kills, best: this.progress.best, blood: this.progress.blood, shop: this.progress.shop, shopV: this.progress.shopV });
     if (r.win) {
       FB.bumpStat('wins');
       const net = $('#resNet');
@@ -3872,7 +3939,7 @@ const V = '11.0.2';
 
     const ps = await get(r(`players/${pid}`));
     if (ps.exists()) UI.mergeProfile(ps.val());
-    FB.saveProfile({ unlocked: UI.progress.unlocked, kills: UI.progress.kills || 0, best: UI.progress.best });
+    FB.saveProfile({ unlocked: UI.progress.unlocked, kills: UI.progress.kills || 0, best: UI.progress.best, blood: UI.progress.blood, shop: UI.progress.shop, shopV: UI.progress.shopV });
     if (UI.worldStats().levels) FB.submitWorld(UI.worldStats()).catch(() => {});
     get(r('content/motd')).then(m => { if (m.exists()) UI.setMotd(m.val()); }).catch(() => {});
   } catch (e) {
