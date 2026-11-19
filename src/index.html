@@ -342,6 +342,10 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 @media (max-height:560px){#shopList{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}.sitem{padding:6px 8px}.sitem p{display:none}.sitem .ic{font-size:20px}}
 #throwBtn{width:clamp(56px,13vh,72px);height:clamp(56px,13vh,72px);font-size:10px;font-weight:700;text-align:center;line-height:1.1;padding:4px;border-color:#ffd23a;background:radial-gradient(circle at 40% 35%,rgba(255,210,60,.55),rgba(60,40,0,.9))}
 #grabBtn{width:clamp(70px,16vh,92px);height:clamp(70px,16vh,92px);font-size:10px;font-weight:700;text-align:center;line-height:1.1;padding:6px;border-color:#ffb02a;background:radial-gradient(circle at 40% 35%,rgba(255,150,30,.9),rgba(90,30,0,.92));box-shadow:0 0 18px rgba(255,150,30,.6);animation:killp .6s infinite alternate}
+#jumpMask{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);pointer-events:none}
+#jumpMask.on{display:flex;animation:jm .24s steps(4) forwards}
+#jumpMask svg{height:80vh;width:auto;max-width:96vw;filter:contrast(1.5) drop-shadow(0 0 28px #fff)}
+@keyframes jm{0%{opacity:0;transform:scale(.6)}25%{opacity:1;transform:scale(1.12)}100%{opacity:0;transform:scale(1.45)}}
 #struggle{position:fixed;left:50%;bottom:16%;transform:translateX(-50%);z-index:13;text-align:center;pointer-events:none;width:min(420px,80vw)}
 #struggle .sTxt{font-family:Nosifer;font-size:clamp(14px,3.6vh,24px);color:#ff2a3a;text-shadow:0 0 18px #f00,0 3px 0 #000;animation:cshake .1s steps(2) infinite}
 #struggle .sBar{height:14px;border:2px solid #ff2a3a;background:rgba(0,0,0,.7);margin-top:8px}
@@ -528,6 +532,7 @@ select{background:#111;border:1px solid #444;color:var(--bone);padding:8px 10px;
   </div>
   <div id="hudKeys">WASD muovi · SHIFT corri · SPAZIO azione · V presa / mutila · T lancia coltello · Q/E/R poteri · X/C gadget · clic = blocca bersaglio · ESC pausa</div>
 </div>
+<div id="jumpMask"><svg viewBox="0 0 200 260"><ellipse cx="100" cy="132" rx="78" ry="112" fill="#efe9dc"/><ellipse cx="68" cy="108" rx="17" ry="22" fill="#050505"/><ellipse cx="132" cy="108" rx="17" ry="22" fill="#050505"/><path d="M62 190 Q100 214 138 190" stroke="#101010" stroke-width="5" fill="none"/><path d="M100 126 l-8 30 h16z" fill="#c9c1b0"/><path d="M40 70 L60 96 L52 120" stroke="#8a0010" stroke-width="3" fill="none"/></svg></div>
 <div id="struggle" class="hidden"><div class="sTxt">PREMI AZIONE RIPETUTAMENTE!</div><div class="sBar"><i id="struggleBar"></i></div></div>
 <div id="touch" class="hidden"><div id="joyHint">◀ TRASCINA PER MUOVERTI ▶</div></div>
 <div id="joy"><div id="joyKnob"></div></div>
@@ -769,7 +774,8 @@ const Sound = {
   scrape() { this.noise(0.8, { filter: 'highpass', ff: 1800, slide: 6500, q: 3, vol: 0.18, attack: 0.05, verb: true }); this.tone(1900, 0.7, { type: 'sawtooth', slide: 3400, vol: 0.03 }); },
   cineHit() { this.tone(46, 1.5, { type: 'sawtooth', slide: 28, vol: 0.7, filter: 'lowpass', ff: 500, verb: true }); this.noise(0.6, { filter: 'lowpass', ff: 900, slide: 80, vol: 0.6 }); this.stab(); this.sting(); this.tone(200, 0.9, { type: 'sawtooth', slide: 70, vol: 0.12, filter: 'lowpass', ff: 700 }); },
   step() { this.stepSurf('.', 0.06); },
-  step() { this.stepSurf('.', 0.06); },
+  breathSoft(v = 1) { this.noise(0.9, { filter: 'bandpass', ff: 650, slide: 330, q: 1.1, vol: 0.09 * v, attack: 0.3, verb: true }); this.noise(0.8, { filter: 'bandpass', ff: 380, slide: 760, q: 1.1, vol: 0.06 * v, attack: 0.25, at: this.t + 1.0, verb: true }); },
+  moan(p = 1) { this.tone(150 * p, 0.9, { type: 'sawtooth', slide: 85 * p, vol: 0.13, filter: 'lowpass', ff: 650, verb: true }); this.noise(0.7, { filter: 'bandpass', ff: 520, q: 2, vol: 0.07, attack: 0.1 }); },
   setLevels(stalk, tens) { this.stalkV = stalk; this.tensV = tens; },
   /* ---------- Siren ---------- */
   startSiren() {
@@ -1045,11 +1051,11 @@ const KT = {
   bin: ['SEPOLTO!', '#c8c8d0'], electro: ['FULMINATO!', '#8ab8ff'], snare: ['TAGLIOLA!', '#ff6a6a'], poison: ['AVVELENATO!', '#7aff8a'], crush: ['SCHIACCIATO!', '#ffcf6a'], explode: ['ESPLOSO!', '#ff9a2a'],
   backstab: ['PUGNALATO ALLE SPALLE!', '#ff2a3a'], neck: ['LAMA NEL COLLO!', '#ff1a2a'], gut: ['SVENTRATO!', '#ff3a3a'], eye: ['DRITTO NELL\'OCCHIO!', '#ff4a5a'],
   frenzy: ['SCANNATO!', '#ff0a1a'], sleep: ['UCCISO NEL SONNO!', '#c88aff'], thrown: ['COLTELLO LANCIATO!', '#ffd23a'],
-  shred: ['TRITATO!', '#ff3a1a'], impale: ['IMPALATO!', '#ff2a4a'], decap: ['DECAPITATO!', '#ff1020'], melt: ['SCIOLTO!', '#9aff3a']
+  smash: ['FRACASSATO!', '#ffb02a'], hack: ['TRANCIATO!', '#ff2a2a'], shred: ['TRITATO!', '#ff3a1a'], impale: ['IMPALATO!', '#ff2a4a'], decap: ['DECAPITATO!', '#ff1020'], melt: ['SCIOLTO!', '#9aff3a']
 };
 const KNIFE_BACK = ['slash', 'slash', 'backstab', 'neck'], KNIFE_FRONT = ['stab', 'gut', 'eye', 'frenzy'], KNIFE_RAND = new Set(['slash', 'stab', 'backstab', 'neck', 'gut', 'eye', 'frenzy']);
 const KNIFE_TAG = { backstab: ['ALLE SPALLE', 1.1], neck: ['NEL COLLO', 1.2], gut: ['SVENTRATO', 1.2], eye: ['NELL\'OCCHIO', 1.2], frenzy: ['SCANNATO', 1.2], sleep: ['NEL SONNO', 1.35], thrown: ['A DISTANZA', 1.4] };
-const KT_ALT = { slash: ['SGOZZATO!', 'GOLA APERTA!'], stab: ['SVENTRATO!', 'INFILZATO!', 'TRAFITTO!'], chop: ['MACELLATO!', 'FATTO A PEZZI!'], slam: ['SFRACELLATO!', 'SPAPPOLATO!'], blast: ['DISINTEGRATO!'], push: ['PASSATO DA PARTE A PARTE!'] };
+const KT_ALT = { slash: ['SGOZZATO!', 'GOLA APERTA!'], stab: ['SVENTRATO!', 'INFILZATO!', 'TRAFITTO!'], chop: ['MACELLATO!', 'FATTO A PEZZI!'], smash: ['TESTA SPACCATA!', 'CRANIO IN FRANTUMI!'], hack: ['FATTO A FETTE!', 'MASSACRATO!'], slam: ['SFRACELLATO!', 'SPAPPOLATO!'], blast: ['DISINTEGRATO!'], push: ['PASSATO DA PARTE A PARTE!'] };
 const OBJ = {
   wall: { t: 'Uccidi qualcuno sbattendolo al muro', pts: 300, ev: 'kill', f: (G, d) => d.fin === 'wall' },
   burn: { t: 'Friggi qualcuno (fornello, griglia o falò)', pts: 350, ev: 'kill', f: (G, d) => d.finisher && d.style === 'burn', ok: G => G.objs.some(o => ['stove', 'grill', 'campfire'].includes(o.t)) },
@@ -1095,6 +1101,8 @@ const WEAPONS = {
   axe:    { name: 'Accetta', icon: '🪓', uses: 4, noise: 5, blood: 2, reach: 1.15, mult: 1.4, brutal: true, verb: 'SPACCA' },
   saw:    { name: 'Motosega', icon: '⚙️', uses: 3, noise: 13, blood: 4, reach: 1.5, mult: 2, brutal: true, multi: true, verb: 'SQUARTA' },
   shotgun: { name: 'Fucile a pompa', icon: '🔫', uses: 2, noise: 11, blood: 3, reach: 1, mult: 1.8, ranged: true, verb: 'SPARA' },
+  hammer: { name: 'Martello', icon: '🔨', uses: 4, noise: 6, blood: 2.2, reach: 1.1, mult: 1.5, brutal: true, verb: 'FRACASSA' },
+  machete: { name: 'Machete', icon: '🗡️', uses: 4, noise: 3, blood: 2.4, reach: 1.2, mult: 1.5, brutal: true, verb: 'TRANCIA' },
   pistol: { name: 'Pistola silenziata', icon: '🔫', uses: 4, noise: 4, blood: 1.4, reach: 1, mult: 1.2, ranged: true, verb: 'SPARA' }
 };
 
@@ -1974,6 +1982,7 @@ const Game = {
     this.objs = L.objs; this.hides = L.objs.filter(o => o.hide); this.hides.forEach(h => { h.bodies = 0; h.shake = 0; });
     this.phones = L.phones; this.lures = L.lures; this.lights = L.lights; this.pois = L.pois;
     this.pickups = (L.pickups || []).map(p => ({ ...p, taken: false })); this.events = (L.events || []).map(e => ({ ...e, done: false }));
+    this.scatterWeapons(idx);
     this.pois.forEach(p => { p.occ = null; });
     this.lightById = {}; this.lights.forEach(l => { this.lightById[l.id] = l; });
     this.precomputeLights();
@@ -1985,13 +1994,13 @@ const Game = {
       inDark: false, invisible: false, hidden: null, carrying: null, attackT: 0, blinkT: 0, shadowT: 0, vx: 0, vy: 0, dripT: 0,
       blood: 0, bloodMask: 0, weapon: null, stepD: 0, foot: 0, attackKind: 'stab', knifeOut: false, dead: false, disguise: null, disguiseLook: null, hp: 3, hpT: 0, stunT: 0
     };
-    this.npcs = L.npcs.map((d, i) => this.makeNPC(d, i));
+    this.npcs = L.npcs.map((d, i) => this.makeNPC(d, i)); this.assignRoles();
     this.randomizeRun();
     this.bodies = []; this.pools = []; this.particles = []; this.floaters = []; this.bubbles = [];
     this.score = 0; this.kills = 0; this.witnesses = 0; this.escaped = 0; this.time = 0; this.charges = 1;
     this.combo = { n: 0, t: 0, best: 0 }; this.police = null; this.blackoutT = 0; this.powerOff = false; this.musicOff = false;
     this.lock = null; this.target = null; this.ended = false; this.endT = 0; this.slowT = 0; this.slowScale = 1; this.hitstop = 0;
-    this.shake = 0; this.flash = 0; this.flashColor = '255,0,0'; this.hb = 0; this.lightDirty = true; this.styleCount = {};
+    this.shake = 0; this.flash = 0; this.flashColor = '255,0,0'; this.hb = 0; this.glimpseCd = rand(22, 38); this.glimpseN = 0; this.breathT = 1; this.lightDirty = true; this.styleCount = {};
     this.hintI = 0; this.hintT = 3; this.policeCalled = false; this.context = null;
     this.hintList = (idx > 0 && NEWS[def.id] ? ['NOVITÀ — ' + NEWS[def.id].join(' · ')] : []).concat(def.hints || []);
     this.cine = null; this.cineK = 0; this.fin = null; this.struggle = null; this.punchT = 0; this.killCamT = 0; this.whisperCd = 0;
@@ -2046,6 +2055,12 @@ const Game = {
     const cand = this.npcs.filter(n => n.alive && !n.guard && CALM[n.state] && n.state !== 'invest' && n.state !== 'look' && !n.lured).sort(() => Math.random() - 0.5);
     cand.slice(0, Math.max(1, Math.round(cand.length * rand(0.25, 0.5)))).forEach(n => { n.forceTag = tag; if (n.state === 'act') n.timer = Math.min(n.timer, rand(0.5, 4)); });
   },
+  assignRoles() {
+    if (UI.endless || this.idx < 1) return;
+    const pool = this.npcs.filter(n => !n.guard && !n.drunk && !n.streamer);
+    if (pool.length >= 3) { const f = pick(pool); f.final = true; f.role = 'final girl'; f.speedMul *= 1.12; }
+    if (this.idx === LEVELS.length - 1) { const b = this.npcs.find(n => n.brute); if (b) { b.boss = true; b.hp = 4; b.role = 'boss'; } }
+  },
   makeNPC(d, i) {
     return {
       id: i, name: d.name, look: d.look, routine: d.routine, speedMul: d.slow || 1, partner: d.partner, follower: d.follower,
@@ -2055,7 +2070,7 @@ const Game = {
       guard: !!d.guard, vulnT: 0, loseT: 0, radioT: 0, trapDone: false,
       trait: null, talk: null, talkCd: rand(3, 10), nervous: 0, fixer: false, lookT: 0,
       uniform: d.uniform || null, drunk: !!d.drunk, hero: !!d.hero, poison: 0,
-      streamer: !!d.streamer, brute: !!d.brute, armed: !!d.armed, shootT: 0,
+      streamer: !!d.streamer, brute: !!d.brute, armed: !!d.armed, shootT: 0, final: false, boss: false, hp: 1, locked: false, fcd: 0, talkT: 0,
       role: d.streamer ? 'streamer' : d.brute ? 'energumeno' : d.armed ? 'armato' : d.drunk ? 'ubriaco' : d.hero ? 'veterano' : d.guard ? 'guardia' : null
     };
   },
@@ -2330,6 +2345,18 @@ const Game = {
         n.anim = 'run';
         if (this.moveAlong(n, dt)) this.escape(n);
         break;
+      case 'fight': this.fightUpdate(n, dt); break;
+      case 'pray':
+        n.anim = 'cower'; n.timer -= dt; if ((n.talkT -= dt) <= 0) { n.talkT = rand(2.4, 3.6); this.say(n, pick(BEG), 2.2); }
+        if (n.timer <= 0) { this.say(n, 'Devo… devo scappare!', 2); this.afterShock(n); }
+        break;
+      case 'barricade':
+        n.anim = 'run'; if (this.moveAlong(n, dt)) this.lockIn(n);
+        break;
+      case 'locked':
+        n.anim = 'cower'; n.timer -= dt; if ((n.talkT -= dt) <= 0) { n.talkT = rand(3, 4.5); this.say(n, pick(['Non c\'è nessuno… non c\'è nessuno…', 'Shh… zitta, zitta…', 'Se ne andrà…', 'Ti prego, vai via…']), 2.4); }
+        if (n.timer <= 0) { this.unlock(n); this.say(n, 'Se n\'è andato?…', 2); this.afterShock(n); }
+        break;
       case 'chase': this.guardChase(n, dt); break;
       case 'search': this.guardSearch(n, dt); break;
       case 'cower':
@@ -2394,6 +2421,7 @@ const Game = {
     if (why === 'killer' || why === 'witness') this.breakDisguise();
     if (n.drunk && (why === 'witness' || why === 'killer') && Math.random() < 0.5) { this.say(n, pick(['Eh? Ho bevuto troppo…', 'Vedo doppio… o è sangue?', 'Hic! Chi è quello?']), 2.6); n.sus = 0.5; return; }
     if (n.guard) { this.alertGuard(n, why, sx, sy); return; }
+    if (n.final && !n.fought && (why === 'killer' || why === 'witness' || why === 'body')) { this.startFight(n); return; }
     if (n.lure) { this.fixLure(n.lure, null); n.lure = null; }
     n.fixer = false; this.release(n); n.state = 'shock'; n.timer = why === 'witness' || why === 'blast' ? 1.0 : 0.85; n.sus = 1; n.lured = false;
     n.watchAng = Math.atan2(sy - n.y, sx - n.x); n.path = [];
@@ -2407,6 +2435,47 @@ const Game = {
     this.flash = 0.5; this.flashColor = '255,30,40';
     this.noise(n.x, n.y, TILE * 6, 0.3, n);
   },
+  startFight(n) {
+    n.fought = true; if (n.lure) { this.fixLure(n.lure, null); n.lure = null; } n.fixer = false; this.release(n); n.lured = false; n.talk = null;
+    if (n.phone && n.phone.busy === n) n.phone.busy = null; n.phone = null;
+    n.state = 'fight'; n.timer = 16; n.fcd = 0.7; n.sus = 1; n.path = []; n.repath = 0; n.icon = null;
+    this.say(n, pick(['NON MI AVRAI!', 'Resto e combatto!', 'Vieni, maledetto!', 'Non ho paura!']), 2.6); Sound.scream(n.pitch * 0.9); Sound.spotted(); this.flash = 0.5; this.flashColor = '255,200,60';
+    UI.big('LA FINAL GIRL SI RIBELLA', '#ffd23a', 'Abbattila prima che raggiunga un telefono'); this.noise(n.x, n.y, TILE * 6, 0.3, n);
+  },
+  fightUpdate(n, dt) {
+    const P = this.player; n.anim = 'run'; n.timer -= dt; n.fcd -= dt;
+    const d = dist(n.x, n.y, P.x, P.y), lost = P.hidden || P.invisible;
+    if (lost) n.timer -= dt * 2;
+    n.repath -= dt; if (n.repath <= 0) { this.goTo(n, P.x, P.y, true); n.speed = 150; n.repath = 0.35; }
+    this.moveAlong(n, dt);
+    if (d < TILE * 2) n.ang += clamp(angDiff(n.ang, Math.atan2(P.y - n.y, P.x - n.x)), -10 * dt, 10 * dt);
+    if (d < 30 && n.fcd <= 0 && !lost && !this.ended && !this.struggle && !this.fin) {
+      n.fcd = 1.7;
+      if (Math.random() < 0.7 * this.mode.hit) {
+        P.hp--; P.hpT = 0; this.flash = 0.6; this.flashColor = '200,0,0'; this.shake = 14; this.bloodScreen(2, false); Sound.stab(); Sound.scream(n.pitch); P.stunT = 0.3; UI.toast(`LA FINAL GIRL TI HA COLPITO! ${Math.max(0, P.hp)}/3`);
+        const a = Math.atan2(P.y - n.y, P.x - n.x); this.moveCircle(P, Math.cos(a) * 20, Math.sin(a) * 20);
+        if (P.hp <= 0) this.finish(false, 'stabbed');
+      } else { this.shake = Math.max(this.shake, 5); Sound.denied(); }
+    }
+    if (n.timer <= 0) { n.fcd = 0; this.say(n, 'Devo chiamare aiuto!', 2); this.afterShock(n); }
+  },
+  startPray(n) { n.prayed = true; n.state = 'pray'; n.timer = rand(9, 15); n.path = []; n.talkT = 0; n.icon = null; this.say(n, 'Ti prego… ti prego…', 2.4); },
+  startBarricade(n) {
+    let best = null, bl = TILE * 15;
+    for (const h of this.hides) {
+      if (h.npcIn || this.player.hidden === h) continue;
+      const cx = (h.x + h.w / 2) * TILE, cy = (h.y + h.h / 2) * TILE, p = this.findPath(n.x, n.y, cx, cy);
+      if (p && p.len < bl) { bl = p.len; best = { h, p }; }
+    }
+    if (!best) return false;
+    n.barred = true; n.path = best.p; n.speed = 150; n.state = 'barricade'; n.hideTo = best.h; best.h.npcIn = n; n.icon = null;
+    this.say(n, pick(['Mi nascondo!', 'Non mi troverà!', 'Shh… shh…']), 2); return true;
+  },
+  lockIn(n) {
+    const h = n.hideTo; n.locked = true; n.state = 'locked'; n.timer = rand(16, 26); n.talkT = rand(1, 2); n.outPos = { x: n.x, y: n.y };
+    n.x = (h.x + h.w / 2) * TILE; n.y = (h.y + h.h / 2) * TILE; n.path = []; h.shake = 0.3; Sound.thud();
+  },
+  unlock(n) { const h = n.hideTo; n.locked = false; if (h) { h.npcIn = null; h.shake = 0.3; } if (n.outPos) { n.x = n.outPos.x; n.y = n.outPos.y; } },
   /* ----- guards ----- */
   alertGuard(n, why, sx, sy, noRelay) {
     n.fixer = false;
@@ -2599,6 +2668,11 @@ const Game = {
   },
   afterShock(n, exclude) {
     if (!n.wasWitness) { n.wasWitness = true; this.witnesses++; }
+    if (!n.guard && !n.final && !n.boss && this.idx >= 1) {
+      const r = Math.random();
+      if (!n.prayed && r < 0.2) { this.startPray(n); return; }
+      if (!n.barred && r < 0.38 && this.startBarricade(n)) return;
+    }
     if (this.police) { this.goCower(n); return; }
     if (n.trait === 'coward' && Math.random() < 0.5) {
       let eb = null, el = 1e9;
@@ -2785,7 +2859,7 @@ const Game = {
     }
     const mw = WEAPONS[this.meleeId()], kr = this.killRadius();
     let best = null, bd = kr;
-    for (const n of this.npcs) { if (!n.alive || !this.canKnife(n, mw)) continue; const d = dist(P.x, P.y, n.x, n.y); if (d < bd && this.wallClear(P.x, P.y, n.x, n.y)) { bd = d; best = n; } }
+    for (const n of this.npcs) { if (!n.alive || n.locked || !this.canKnife(n, mw)) continue; const d = dist(P.x, P.y, n.x, n.y); if (d < bd && this.wallClear(P.x, P.y, n.x, n.y)) { bd = d; best = n; } }
     if (P.weapon && WEAPONS[P.weapon.id].ranged) { const t = this.shootTarget(); if (t && t !== best) return { label: 'SPARA', kind: 'shoot', n: t }; }
     if (best && P.knifeOut && this.meleeId() === 'knife') {
       const fin = this.finisherFor(best), ctx = { label: 'RECUPERA IL COLTELLO', kind: 'noknife', n: best };
@@ -2804,6 +2878,7 @@ const Game = {
     for (const b of this.bodies) if (!b.hidden && dist(P.x, P.y, b.x, b.y) < TILE * 0.9) return { label: 'TRASCINA', kind: 'carry', b, mut: (b.mut || 0) < 3 && b.style !== 'explode' ? b : null };
     for (const ph of this.phones) if (!ph.cut && this.nearRect({ x: ph.x, y: ph.y, w: 1, h: 1 }, P.x, P.y) < TILE * 0.75) return { label: 'TAGLIA FILO', kind: 'cut', ph };
     for (const l of this.lures) if (dist(P.x, P.y, (l.x + 0.5) * TILE, (l.y + 0.5) * TILE) < TILE * 1.3) return { label: l.used ? 'ESAURITO' : l.active ? 'IN CORSO…' : l.cd > 0 ? `ATTENDI ${Math.ceil(l.cd)}s` : l.label.toUpperCase(), kind: 'lure', l };
+    for (const h of this.hides) if (h.npcIn && h.npcIn.locked && this.nearRect(h, P.x, P.y) < TILE * 0.9) return { label: 'SPALANCA', kind: 'flush', n: h.npcIn, h };
     for (const h of this.hides) if (this.nearRect(h, P.x, P.y) < TILE * 0.8) return { label: 'NASCONDITI', kind: 'hide', h };
     const w = this.windowNear(P.x, P.y); if (w) return { label: 'SFONDA FINESTRA', kind: 'window', w };
     return null;
@@ -2833,15 +2908,59 @@ const Game = {
     if (P.disguise) this.breakDisguise();
     this.objEvent('window'); UI.lifeBump('windows'); UI.toast('Finestra sfondata! Qualcuno ha sentito…');
   },
+  scatterWeapons(idx) {
+    if (idx < 1 || UI.endless) return;
+    const st = this.L.start, want = idx >= 3 ? ['hammer', 'machete'] : ['hammer'];
+    for (const w of want) for (let tries = 0; tries < 400; tries++) {
+      const tx = randi(2, this.W - 3), ty = randi(2, this.H - 3), i = ty * this.W + tx;
+      if (this.solid[i] || this.outside[i] || 'DWw'.includes(this.tiles[i])) continue;
+      if (dist(tx, ty, st.x, st.y) < 6 || this.pickups.some(p => dist(p.x, p.y, tx + 0.5, ty + 0.5) < 4)) continue;
+      if (this.hides.some(h => tx >= h.x - 1 && tx <= h.x + h.w && ty >= h.y - 1 && ty <= h.y + h.h)) continue;
+      this.pickups.push({ w, x: tx + 0.5, y: ty + 0.5, taken: false }); break;
+    }
+  },
+  /* ---------- dismemberment: limbs fly and stay on the floor ---------- */
+  addCuts(b, n, wide) { b.cuts = b.cuts || []; for (let i = 0; i < n; i++) b.cuts.push({ x: rand(-8, 6), y: rand(-8, 8), a: rand(0, TAU), l: rand(6, wide ? 15 : 9) }); if (b.cuts.length > 14) b.cuts.splice(0, b.cuts.length - 14); },
+  dismember(b, part, ang) {
+    b.lost = b.lost || []; if (b.lost.includes(part)) return false; b.lost.push(part);
+    const L = b.n.look || {}, skin = L.skin || '#d4a07a', ca = Math.cos(b.ang || 0), sa = Math.sin(b.ang || 0);
+    const off = { armA: [12, -16], armB: [-2, 16], legA: [-19, -5], legB: [-19, 5], head: [16, 0] }[part];
+    const wx = b.x + ca * off[0] - sa * off[1], wy = b.y + sa * off[0] + ca * off[1], a = ang + rand(-0.9, 0.9), sp = rand(120, 300);
+    if (part === 'head') this.particles.push({ x: wx, y: wy, vx: Math.cos(a) * sp * 0.6, vy: Math.sin(a) * sp * 0.6, life: 1.2, max: 1.2, size: 7, type: 'gib', rot: 0, head: true, skin });
+    else this.particles.push({ x: wx, y: wy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.5, 0.8), max: 0.8, size: 6, type: 'limb', part, rot: rand(0, TAU), skin, cloth: part.startsWith('leg') ? (L.pants || '#26262e') : (L.shirt || '#555') });
+    this.splatter(wx, wy, ang, 16, 1.1, [80, 280]); this.mist(wx, wy, 2); Render.splat(wx, wy, rand(7, 11), 0.9); Sound.crack(); Sound.squelch();
+    b.spurt = { t: 1.6, max: 1.6, k: 0, a: ang }; b.wound = (b.wound || 1) + 0.4;
+    return true;
+  },
+  dismemberRand(b, n, ang, pool) {
+    const avail = (pool || ['armA', 'armB', 'legA', 'legB']).filter(p => !(b.lost || []).includes(p)).sort(() => Math.random() - 0.5); let c = 0;
+    for (const p of avail.slice(0, n)) if (this.dismember(b, p, ang)) c++; return c;
+  },
+  autoDismember(b, style, ang) {
+    switch (style) {
+      case 'chop': if (Math.random() < 0.5) this.dismemberRand(b, 1, ang, ['armA', 'armB']); this.addCuts(b, 2, true); break;
+      case 'hack': if (Math.random() < 0.55) this.dismember(b, 'head', ang); else this.dismemberRand(b, 1, ang); this.addCuts(b, 3, true); break;
+      case 'saw': this.dismemberRand(b, 2, ang); this.addCuts(b, 4, true); break;
+      case 'blast': if (Math.random() < 0.4) this.dismemberRand(b, 1, ang, ['armA', 'armB']); break;
+      case 'shred': this.dismemberRand(b, 3, ang); this.addCuts(b, 5, true); break;
+      case 'explode': this.dismemberRand(b, 2, ang); break;
+      case 'smash': this.addCuts(b, 1); break;
+      case 'frenzy': this.addCuts(b, 5); break;
+      case 'gut': case 'backstab': this.addCuts(b, 2); break;
+      case 'stab': this.addCuts(b, 1); break;
+    }
+  },
   /* ---------- desecration: hack the corpse apart ---------- */
   mutilate(b) {
+    if (b.crawl) { b.crawl = null; this.addScore(120, 'ULTIMO RESPIRO', b.x, b.y); }
     const P = this.player, k = b.mut = (b.mut || 0) + 1, a = Math.atan2(b.y - P.y, b.x - P.x);
     P.ang = a; P.attackT = 0.3; P.attackKind = 'stab';
     Sound.chop(); Sound.squelch(); if (k > 1) Sound.crack(); this.shake = 8 + k * 3; this.hitstop = 0.05 + k * 0.02;
     this.splatter(b.x, b.y, rand(0, TAU), 18 + k * 10, Math.PI, [60, 260]); this.gibs(b.x, b.y, a, 2 + k * 2, Math.PI); this.mist(b.x, b.y, 2 + k);
     for (let i = 0; i < 2 + k; i++) Render.splat(b.x + rand(-30, 30), b.y + rand(-30, 30), rand(6, 12), 0.85);
     this.pools.push({ x: b.x + rand(-8, 8), y: b.y + rand(-8, 8), r: 2, max: rand(18, 28), seed: Math.random() * 100, age: 0 });
-    b.wound = (b.wound || 1) + 0.7; b.spurt = { t: 1, max: 1, k: 0, a: rand(0, TAU) };
+    b.wound = (b.wound || 1) + 0.7; b.spurt = { t: 1, max: 1, k: 0, a: rand(0, TAU) }; this.addCuts(b, 3, true);
+    if (k === 1) this.dismemberRand(b, 1, a, ['armA', 'armB']); else if (k === 2) this.dismemberRand(b, 1, a); else { this.dismember(b, 'head', a); this.dismemberRand(b, 1, a, ['legA', 'legB']); Render.bloodText(b.x, b.y, pick(['CORRI', 'TACI', 'MORTE', 'SOLO', 'MAI PIÙ', 'TUTTI']), rand(-0.5, 0.5) + (Math.random() < 0.5 ? 0 : Math.PI)); }
     P.blood = Math.min(1, P.blood + 0.25); P.bloodMask = Math.min(1, (P.bloodMask || 0) + 0.15); this.bloodScreen(1 + k, k === 3);
     if (k === 3) { b.split = true; this.gibs(b.x, b.y, a, 8, Math.PI); UI.killText('SCEMPIO!', '#ff0a1a'); this.addScore(150, 'SCEMPIO', b.x, b.y); this.slowmo(0.5, 0.4); this.objEvent('mutilate'); UI.lifeBump('mutfull'); }
     else this.addScore(40 * k, 'MUTILATO', b.x, b.y);
@@ -2888,6 +3007,7 @@ const Game = {
       case 'cut': c.ph.cut = true; this.objEvent('cut'); UI.lifeBump('cuts'); Sound.cut(); this.addScore(25, 'LINEA TAGLIATA', (c.ph.x + 0.5) * TILE, c.ph.y * TILE); break;
       case 'lure': this.activateLure(c.l); break;
       case 'window': this.breakWindow(c.w); break;
+      case 'flush': { const n = c.n; this.unlock(n); this.say(n, 'NOOOO!', 1.5); Sound.slam('metal'); this.shake = 10; this.kill(n, { style: pick(['gut', 'frenzy', 'neck']), aware: true, blood: 1.6 }); break; }
       case 'noknife': Sound.denied(); UI.toast('Il coltello è nel corpo che hai colpito: vai a riprenderlo'); break;
     }
   },
@@ -2926,10 +3046,16 @@ const Game = {
     const wd = trap ? { name: 'trap', blood: o.blood || 2, noise: 0, mult: 1 } : WEAPONS[wid];
     const sx = o.sx != null ? o.sx : P.x, sy = o.sy != null ? o.sy : P.y;
     const dirA = Math.atan2(n.y - sy, n.x - sx);
+    if (n.boss && n.hp > 0 && !trap) {
+      const dmg = o.finisher ? 2 : ({ axe: 2, saw: 3, hammer: 2, machete: 2, shotgun: 2, pistol: 1 })[wid] || (o.style === 'push' ? 2 : 1);
+      n.hp -= dmg;
+      if (n.hp > 0) { this.bossHit(n, dirA, dmg, wid, chain); return; }
+    }
+    const wasPray = n.state === 'pray' ? 'SUPPLICANTE' : n.state === 'locked' ? 'SCOVATO' : null;
     const aware = o.aware != null ? o.aware : !trap && (!CALM[n.state] || n.sus > 0.45 || (n.watchT > 0 && this.sees(n, P.x, P.y) && !P.invisible));
     const panicking = n.state === 'panic' || n.state === 'calling' || n.state === 'flee';
     const back = !trap && wid !== 'pistol' && wid !== 'shotgun' && Math.abs(angDiff(n.ang, dirA)) < 1.15;
-    let style = o.style && !trap ? o.style : trap ? (o.style || 'explode') : wid === 'pistol' ? 'shoot' : wid === 'shotgun' ? 'blast' : wid === 'axe' ? 'chop' : wid === 'saw' ? 'saw' : (back && !aware ? 'slash' : 'stab');
+    let style = o.style && !trap ? o.style : trap ? (o.style || 'explode') : wid === 'pistol' ? 'shoot' : wid === 'shotgun' ? 'blast' : wid === 'axe' ? 'chop' : wid === 'hammer' ? 'smash' : wid === 'machete' ? 'hack' : wid === 'saw' ? 'saw' : (back && !aware ? 'slash' : 'stab');
     // the knife is never the same twice
     if (wid === 'knife' && !trap && !o.style) style = n.anim === 'sleep' && !aware ? 'sleep' : style === 'slash' ? pick(KNIFE_BACK) : pick(KNIFE_FRONT);
     const bl = (o.blood || wd.blood) * (this.frenzyT > 0 && !trap ? 1.25 : 1);
@@ -2950,6 +3076,17 @@ const Game = {
         [0.11, 0.22].forEach(dl => this.sched.push({ t: dl, fn: () => { this.splatter(n.x, n.y, dirA + rand(-0.6, 0.6), 18 * bl, 1.1); Sound.squelch(); this.shake = 7; Render.splat(n.x + rand(-12, 12), n.y + rand(-12, 12), rand(5, 9), 0.8); if (dl > 0.2) Sound.crack(); } }));
         break;
       case 'chop': this.splatter(n.x, n.y, dirA, 42 * bl / 1.4, 1.1, [80, 320]); this.gibs(n.x, n.y, dirA, 4, 1); this.mist(n.x, n.y, 4); Sound.chop(); this.shake = 15; this.hitstop = 0.11; b.spurt = { t: 2, max: 2, k: 0, a: dirA }; break;
+      case 'smash': {
+        Sound.chop(); Sound.crack(); Sound.squelch(); this.shake = 16; this.hitstop = 0.13; this.slowmo(0.8, 0.3);
+        this.splatter(n.x, n.y, dirA, 40 * bl / 1.4, 1.2, [80, 330]); this.gibs(n.x, n.y, dirA, 4, 1.2); this.mist(n.x, n.y, 5); b.spurt = { t: 2.2, max: 2.2, k: 0, a: dirA };
+        for (let i = 0; i < 6; i++) this.particles.push({ x: n.x, y: n.y, vx: Math.cos(dirA + rand(-1.2, 1.2)) * rand(60, 220), vy: Math.sin(dirA + rand(-1.2, 1.2)) * rand(60, 220), life: rand(0.4, 0.9), max: 0.9, size: 1.8, type: 'debris' });
+        this.sched.push({ t: 0.16, fn: () => { Sound.crack(); this.splatter(n.x, n.y, dirA + rand(-0.5, 0.5), 20, 1, [60, 240]); Render.splat(n.x + Math.cos(dirA) * 14, n.y + Math.sin(dirA) * 14, 10, 0.9); } });
+        break;
+      }
+      case 'hack':
+        Sound.chop(); Sound.slash(); this.shake = 14; this.hitstop = 0.1; this.splatter(n.x, n.y, dirA, 38 * bl / 1.4, 0.9, [90, 340]); this.gibs(n.x, n.y, dirA, 3, 1); this.mist(n.x, n.y, 3); b.spurt = { t: 2.4, max: 2.4, k: 0, a: dirA };
+        [0.12, 0.24].forEach(dl => this.sched.push({ t: dl, fn: () => { Sound.chop(); Sound.squelch(); this.splatter(n.x, n.y, dirA + rand(-0.7, 0.7), 22 * bl, 1, [80, 300]); this.shake = 9; } }));
+        break;
       case 'saw':
         if (!chain) { Sound.sawBurst(); this.slowmo(1.1, 0.5); }
         this.shake = 12; b.split = true; this.gibs(n.x, n.y, dirA, 5, 1.4);
@@ -3006,7 +3143,7 @@ const Game = {
       case 'decap': {
         Sound.chop(); Sound.squelch(); this.shake = 18; this.hitstop = 0.14; this.slowmo(1, 0.3); b.headless = true;
         this.splatter(n.x, n.y, dirA, 36, 0.5, [100, 360]); this.gibs(n.x, n.y, dirA, 2, 0.4);
-        this.particles.push({ x: n.x, y: n.y, vx: Math.cos(dirA) * 160, vy: Math.sin(dirA) * 160, life: 1.4, max: 1.4, size: 7, type: 'gib', rot: 0, head: true });
+        this.particles.push({ x: n.x, y: n.y, vx: Math.cos(dirA) * 160, vy: Math.sin(dirA) * 160, life: 1.4, max: 1.4, size: 7, type: 'gib', rot: 0, head: true, skin: (n.look && n.look.skin) || '#d4a07a' });
         b.spurt = { t: 3.2, max: 3.2, k: 0, a: dirA }; break;
       }
       case 'melt':
@@ -3015,6 +3152,8 @@ const Game = {
         this.splatter(n.x, n.y, dirA, 12, Math.PI, [30, 120]); break;
       case 'electro': for (let i = 0; i < 26; i++) { const a = rand(0, TAU), sp = rand(60, 220); this.particles.push({ x: n.x, y: n.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.3, 0.9), max: 0.9, size: rand(2, 5), type: 'spark' }); } this.splatter(n.x, n.y, dirA, 8, Math.PI, [40, 140]); this.shake = 6; break;
     }
+    this.autoDismember(b, style, dirA);
+    if (!trap && !chain && this.idx >= 1 && ['stab', 'gut', 'backstab', 'thrown'].includes(style) && Math.random() < 0.3) b.crawl = { t: 0, max: rand(4, 6), k: 0.4 };
     if (!trap) {
       P.blood = Math.min(1, P.blood + 0.3 * Math.min(2, bl)); P.bloodMask = Math.min(1, (P.bloodMask || 0) + 0.18 * bl);
       if (nearP) this.bloodScreen(Math.min(5, Math.round(1 + bl * 1.3)), bl > 1.8);
@@ -3029,7 +3168,7 @@ const Game = {
     if (style === 'slash') { mult *= 1.2; tags.push('GOLA TAGLIATA'); }
     if (KNIFE_TAG[style]) { mult *= KNIFE_TAG[style][1]; tags.push(KNIFE_TAG[style][0]); }
     if (style === 'stab' && aware) tags.push('ACCOLTELLATO');
-    if (style === 'chop') tags.push('ACCETTATA'); if (style === 'saw') tags.push('SQUARTATO'); if (style === 'shoot') tags.push('COLPO IN TESTA');
+    if (style === 'chop') tags.push('ACCETTATA'); if (style === 'smash') tags.push('FRACASSATO'); if (style === 'hack') tags.push('TRANCIATO'); if (style === 'saw') tags.push('SQUARTATO'); if (style === 'shoot') tags.push('COLPO IN TESTA');
     if (style === 'push') { mult *= 1.4; tags.push('TRAPASSATO'); }
     if (o.finisher) { mult *= 1.8; tags.push(({ slam: 'SBATTUTO', burn: 'ARROSTITO', drown: 'ANNEGATO', bin: 'CHIUSO DENTRO', electro: 'ELETTROCUTATO', shred: 'TRITATO', crush: 'SCHIACCIATO', impale: 'IMPALATO', decap: 'DECAPITATO', melt: 'SCIOLTO' })[style] || 'FINISHER'); this.st.finisher = (this.st.finisher || 0) + 1; }
     let newTrap = false;
@@ -3041,6 +3180,9 @@ const Game = {
     if (!trap && P.shadowT > 0) { mult *= 1.25; tags.push('DALL\'OMBRA'); }
     if (!trap && wasLured) { mult *= 1.25; tags.push('ESCA'); }
     if (panicking) { mult *= 1.3; tags.push('ZITTITO'); }
+    if (wasPray) { mult *= 1.25; tags.push(wasPray); }
+    if (n.final) { this.addScore(500, 'FINAL GIRL', n.x, n.y); UI.lifeFlag && UI.lifeFlag('finalgirl'); }
+    if (n.boss) { this.addScore(1000, 'BOSS ABBATTUTO', n.x, n.y); UI.big('IL SOGGETTO 17 È CADUTO', '#ff3344', 'Nessuno ti può più fermare'); }
     if (this.isDark()) { mult *= 1.2; tags.push('BLACKOUT'); }
     let isMulti = false; if (this.time - this.lastKillT < 1.8) { mult *= 1.5; tags.push('MULTIPLA'); this.st.multi++; isMulti = true; this.multiN++; } else this.multiN = 1;
     this.lastKillT = this.time;
@@ -3055,7 +3197,7 @@ const Game = {
     // shadow energy
     let gain = aware ? 0.5 : 1; if (this.combo.n % 3 === 0) gain += 1;
     this.charges = Math.min(3, this.charges + gain);
-    this.punchT = 0.4; if (['slash', 'push', 'slam', 'chop', 'saw', 'burn', 'drown', 'bin', 'shred', 'crush', 'impale', 'decap', 'melt', 'neck', 'gut', 'eye', 'frenzy', 'thrown'].includes(style)) this.killCamT = 1.1; else if (style === 'stab') this.killCamT = 0.55;
+    this.punchT = 0.4; if (['slash', 'push', 'slam', 'chop', 'smash', 'hack', 'saw', 'burn', 'drown', 'bin', 'shred', 'crush', 'impale', 'decap', 'melt', 'neck', 'gut', 'eye', 'frenzy', 'thrown'].includes(style)) this.killCamT = 1.1; else if (style === 'stab') this.killCamT = 0.55;
     if (o.noise) this.noise(P.x, P.y, TILE * o.noise, 0.4, n);
     // weapon wear + noise
     if (!trap && !chain && P.weapon && P.weapon.id === wid && wid !== 'knife') { if (--P.weapon.uses <= 0) { P.weapon = null; UI.toast('Arma esaurita: torni al coltello'); } }
@@ -3075,13 +3217,26 @@ const Game = {
       if (this.multiN >= 3) UI.lifeFlag('triple'); if (this.combo.n >= 8) UI.lifeFlag('combo8');
       UI.killText(this.multiN >= 2 ? mt : ktx, this.multiN >= 2 ? '#ffb02a' : (kt ? kt[1] : '#ff3a4a'));
       this.impactT = 0.24; this.focus = { x: n.x, y: n.y, t: 0.9 };
-      if (!['shoot', 'blast', 'electro', 'snare', 'poison', 'bin', 'burn', 'drown', 'melt'].includes(style)) this.slashes.push({ x: n.x, y: n.y, a: dirA, life: 0.24, cross: !!o.finisher || style === 'push' || style === 'chop' || style === 'saw' });
-      const kb = ({ slash: 90, stab: 70, push: 140, chop: 260, shoot: 200, blast: 420, saw: 60, crush: 0, decap: 120 })[style] || 0; if (kb) { b.vx = Math.cos(dirA) * kb; b.vy = Math.sin(dirA) * kb; }
+      if (!['shoot', 'blast', 'electro', 'snare', 'poison', 'bin', 'burn', 'drown', 'melt'].includes(style)) this.slashes.push({ x: n.x, y: n.y, a: dirA, life: 0.24, cross: !!o.finisher || style === 'push' || style === 'chop' || style === 'smash' || style === 'hack' || style === 'saw' });
+      const kb = ({ slash: 90, stab: 70, push: 140, chop: 260, smash: 230, hack: 170, shoot: 200, blast: 420, saw: 60, crush: 0, decap: 120 })[style] || 0; if (kb) { b.vx = Math.cos(dirA) * kb; b.vy = Math.sin(dirA) * kb; }
       this.slowmo(o.finisher || style === 'push' ? 0.7 : 0.38, 0.35);
-      Sound.killHit(!!o.finisher || ['push', 'chop', 'saw', 'blast', 'explode', 'shred', 'crush', 'impale', 'decap'].includes(style));
+      Sound.killHit(!!o.finisher || ['push', 'chop', 'smash', 'hack', 'saw', 'blast', 'explode', 'shred', 'crush', 'impale', 'decap'].includes(style));
       this.objEvent('kill', { n, style, finisher: !!o.finisher, fin: o.fin, trap, silent, weapon: wid, multi: isMulti, zone: !!o.zone, newTrap });
     }
     this.checkWin();
+  },
+  bossHit(n, dirA, dmg, wid, chain) {
+    const P = this.player;
+    if (this.struggle && this.struggle.n === n) this.struggle = null;
+    P.attackKind = ({ axe: 'chop', hammer: 'smash', machete: 'hack', saw: 'saw', pistol: 'shoot', shotgun: 'blast' })[wid] || 'stab'; P.attackT = 0.3; P.ang = dirA;
+    if (n.state !== 'chase') this.alertGuard(n, 'killer', P.x, P.y); n.state = 'chase'; n.vulnT = 1.4; n.sus = 1;
+    this.splatter(n.x, n.y, dirA, 30 + dmg * 8, 0.9, [80, 320]); this.gibs(n.x, n.y, dirA, 2 + dmg, 1); this.mist(n.x, n.y, 4);
+    for (let i = 0; i < 3 + dmg; i++) Render.splat(n.x + rand(-26, 26), n.y + rand(-26, 26), rand(6, 12), 0.85);
+    Sound.chop(); Sound.squelch(); Sound.scream(n.pitch * 0.55); Sound.killHit(true); this.shake = 18; this.hitstop = 0.12; this.slowmo(0.7, 0.3); this.bloodScreen(2, true);
+    this.moveCircle(n, Math.cos(dirA) * 46, Math.sin(dirA) * 46);
+    this.floaters.push({ x: n.x, y: n.y - 34, text: '♥'.repeat(Math.max(0, n.hp)) + '♡'.repeat(Math.max(0, 4 - n.hp)), sub: 'SOGGETTO 17', color: '#ff6a6a', life: 2 });
+    UI.big(n.hp > 1 ? 'COLPITO!' : 'È ALLE CORDE!', '#ff8a2a', 'Colpiscilo ancora');
+    if (!chain && P.weapon && P.weapon.id === wid && wid !== 'knife') { if (--P.weapon.uses <= 0) { P.weapon = null; UI.toast('Arma esaurita: torni al coltello'); } }
   },
   victimAware(n) { const P = this.player; return !CALM[n.state] || n.sus > 0.45 || (n.watchT > 0 && this.sees(n, P.x, P.y) && !P.invisible); },
   finisherFor(n) {
@@ -3397,6 +3552,7 @@ const Game = {
     this.ended = true; this.endT = 0; this.win = win; this.reason = reason; Sound.setLevels(0, 0);
     if (win) { this.slowmo(1.6, 0.25); Sound.win(); UI.big(this.escaped ? 'LAVORO SPORCO' : 'NESSUN SOPRAVVISSUTO', '#ff2a2a', ''); }
     else if (reason === 'guard') { Sound.whistle(); Sound.stopSiren(); this.flash = 0.6; this.flashColor = '60,120,255'; UI.big('PRESO!', '#4aa3ff', 'Una guardia ti ha bloccato'); }
+    else if (reason === 'stabbed') { Sound.stopSiren(); UI.big('ACCOLTELLATO', '#ff3344', 'La final girl non si è arresa'); }
     else if (reason === 'shot') { Sound.stopSiren(); UI.big('ABBATTUTO', '#ff3344', 'Il fuoco nemico ti ha steso'); }
     else if (reason === 'boom') { Sound.stopSiren(); UI.big('SALTATO IN ARIA', '#ff9a2a', 'Eri troppo vicino alla trappola'); }
     else { Sound.sirenLevel(0.25); UI.big('LA POLIZIA È QUI', '#4aa3ff', 'Ti hanno circondato'); }
@@ -3521,6 +3677,30 @@ const Game = {
         else { Render.smear(b.x, b.y, nx, ny, 9, 0.55); b.x = nx; b.y = ny; const f = Math.pow(0.03, dt); b.vx *= f; b.vy *= f; if (Math.hypot(b.vx, b.vy) < 10) b.vx = b.vy = 0; }
       }
     }
+    // slasher atmosphere: soft breathing in the dark, the glimpse (a victim half-sees the mask), crawling victims
+    if (!this.ended && !this.cine) {
+      const Pl = this.player;
+      if ((this.breathT -= dt) <= 0) { const q = Pl.hidden ? 1 : Pl.invisible ? 0.7 : 0; if (q) { Sound.breathSoft(q); this.breathT = rand(2.6, 3.6); } else this.breathT = 0.6; }
+      this.glimpseCd -= dt;
+      if (this.glimpseCd <= 0 && this.glimpseN < 4 && this.idx >= 1 && !this.police && !this.chased && !this.struggle && !this.fin && Pl.invisible) {
+        const v = this.npcs.find(n => n.alive && !n.guard && CALM[n.state] && !n.lured && dist(n.x, n.y, Pl.x, Pl.y) < TILE * 5.5 && dist(n.x, n.y, Pl.x, Pl.y) > TILE * 1.6 && Math.abs(angDiff(n.ang, Math.atan2(Pl.y - n.y, Pl.x - n.x))) < 1.0 && this.los(n.x, n.y, Pl.x, Pl.y));
+        if (v) {
+          v.watchT = 2.6; v.watchAng = Math.atan2(Pl.y - v.y, Pl.x - v.x); v.sus = Math.max(v.sus, 0.22); v.nervous = 6;
+          this.say(v, pick(['…Chi è là?', 'Mi è sembrato di vedere qualcuno…', 'C\'è qualcuno?', 'Che brutta sensazione…', 'Quella… era una maschera?']), 2.4);
+          Sound.sting(); Sound.heartbeat(0.9); UI.maskFlash(); this.flash = 0.35; this.flashColor = '255,255,255'; this.shake = Math.max(this.shake, 6);
+          this.glimpseN++; this.glimpseCd = rand(50, 90);
+        }
+      }
+      for (const b of this.bodies) {
+        const cr = b.crawl; if (!cr) continue;
+        if (b.hidden || Pl.carrying === b) { b.crawl = null; continue; }
+        cr.t += dt;
+        if (cr.t >= cr.max) { b.crawl = null; b.spurt = { t: 1.4, max: 1.4, k: 0, a: b.ang + Math.PI }; Sound.gurgle(0.8); this.splatter(b.x, b.y, b.ang, 14, 1, [40, 140]); continue; }
+        const sp = 26 * (1 - cr.t / cr.max * 0.55), nx = b.x + Math.cos(b.ang) * sp * dt, ny = b.y + Math.sin(b.ang) * sp * dt;
+        if (!this.solidPx(nx, ny)) { Render.smear(b.x, b.y, nx, ny, 7, 0.6); b.x = nx; b.y = ny; }
+        if ((cr.k -= dt) <= 0) { cr.k = rand(0.9, 1.4); Sound.moan(b.n.pitch); if (Math.random() < 0.6) Render.splat(b.x - Math.cos(b.ang) * 10, b.y - Math.sin(b.ang) * 10, rand(3, 6), 0.75); }
+      }
+    }
     // pools grow & age
     for (const p of this.pools) { p.age = (p.age || 0) + dt; if (p.r < p.max) p.r += dt * 9; }
     // arterial spurts from fresh bodies
@@ -3538,12 +3718,18 @@ const Game = {
     for (const p of this.particles) {
       p.life -= dt;
       const nx = p.x + p.vx * dt, ny = p.y + p.vy * dt;
+      if (p.type === 'limb') {
+        if (this.solidPx(nx, ny)) { p.vx *= -0.3; p.vy *= -0.3; } else { p.x = nx; p.y = ny; }
+        p.vx *= 0.93; p.vy *= 0.93; p.tr = (p.tr || 0) + dt; if (p.tr > 0.05) { p.tr = 0; Render.drip(p.x, p.y, 3); }
+        if (p.life <= 0) { Render.limb(p.x, p.y, p.rot, p.part, p.skin, p.cloth); Render.splat(p.x, p.y, 7, 0.85); Sound.thud && Sound.thud(); }
+        continue;
+      }
       if (p.type === 'blood' || p.type === 'gib') {
         if (this.solidPx(nx, ny)) { Render.splat(p.x, p.y, p.size * (p.type === 'gib' ? 1.6 : 1.3), 0.7); p.life = 0; continue; }
         p.x = nx; p.y = ny; p.vx *= p.type === 'gib' ? 0.93 : 0.9; p.vy *= p.type === 'gib' ? 0.93 : 0.9;
         p.tr = (p.tr || 0) + dt;
         if (p.tr > (p.type === 'gib' ? 0.04 : 0.05) && (p.size > 2.6 || p.type === 'gib')) { p.tr = 0; Render.drip(p.x, p.y, p.size * (p.type === 'gib' ? 0.7 : 0.35)); }
-        if (p.life <= 0) Render.drip(p.x, p.y, p.size * 0.9);
+        if (p.life <= 0) { Render.drip(p.x, p.y, p.size * 0.9); if (p.head) Render.headDecal(p.x, p.y, p.skin); }
         continue;
       }
       p.x = nx; p.y = ny;
@@ -3947,6 +4133,25 @@ const Render = {
     if (!this.dctx) return; const c = this.dctx;
     c.save(); c.strokeStyle = `rgba(${70 + Math.random() * 25 | 0},0,8,${a})`; c.lineWidth = w; c.lineCap = 'round'; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.restore();
   },
+  limb(x, y, rot, part, skin, cloth) {
+    if (!this.dctx) return; const c = this.dctx; c.save(); c.translate(x, y); c.rotate(rot);
+    c.fillStyle = 'rgba(90,0,10,0.55)'; ell(c, 0, 0, 16, 9);
+    if (part.startsWith('arm')) { c.fillStyle = cloth; rr(c, -11, -3, 16, 6, 3); c.fill(); c.fillStyle = skin; circ(c, 8, 0, 3.2); c.fillStyle = '#8a0a14'; ell(c, -11, 0, 3, 3.6); c.fillStyle = '#e8dcc8'; circ(c, -12, 0, 1.6); }
+    else { c.fillStyle = cloth; rr(c, -13, -4, 20, 8, 3); c.fill(); c.fillStyle = '#111'; rr(c, 6, -4, 8, 8, 3); c.fill(); c.fillStyle = '#8a0a14'; ell(c, -13, 0, 3.4, 4.2); c.fillStyle = '#e8dcc8'; circ(c, -14, 0, 1.8); }
+    c.restore();
+  },
+  headDecal(x, y, skin) {
+    if (!this.dctx) return; const c = this.dctx; c.save(); c.translate(x, y);
+    c.fillStyle = 'rgba(90,0,10,0.6)'; ell(c, 0, 0, 14, 10); c.fillStyle = skin || '#d0a080'; circ(c, 0, 0, 7); c.fillStyle = '#2a1a10'; ell(c, -2, 0, 5, 6); c.fillStyle = '#8a0010'; circ(c, 5, 1, 3.5); c.fillStyle = '#e8dcc8'; circ(c, 4, -2, 1.2);
+    c.restore();
+  },
+  bloodText(x, y, txt, ang) {
+    if (!this.dctx) return; const c = this.dctx; c.save(); c.translate(x, y + 26); c.rotate(ang * 0.25);
+    c.font = 'bold 26px "Brush Script MT", "Comic Sans MS", cursive'; c.textAlign = 'center'; c.fillStyle = 'rgba(120,0,12,0.85)'; c.fillText(txt, 0, 0);
+    const w = c.measureText(txt).width; c.strokeStyle = 'rgba(110,0,12,0.8)'; c.lineWidth = 1.6;
+    for (let i = 0; i < 6; i++) { const dx = -w / 2 + Math.random() * w; c.beginPath(); c.moveTo(dx, 2); c.lineTo(dx + rand(-1, 1), 6 + Math.random() * 14); c.stroke(); }
+    c.restore();
+  },
   footprint(x, y, ang, left, a) {
     if (!this.dctx) return; const c = this.dctx;
     c.save(); c.translate(x, y); c.rotate(ang); c.translate(-3, left ? -5 : 5); c.fillStyle = `rgba(95,0,10,${a})`; ell(c, 0, 0, 6.2, 3.6); ell(c, 8, 0, 3.8, 3.1); c.restore();
@@ -4083,18 +4288,20 @@ const Render = {
     for (const sn of G.snares) { c.save(); c.translate(sn.x, sn.y); c.strokeStyle = '#9aa0a8'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 9, 0, TAU); c.stroke(); c.fillStyle = '#6a6e74'; for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; c.beginPath(); c.moveTo(Math.cos(a) * 9, Math.sin(a) * 9); c.lineTo(Math.cos(a + 0.2) * 5, Math.sin(a + 0.2) * 5); c.lineTo(Math.cos(a - 0.2) * 5, Math.sin(a - 0.2) * 5); c.fill(); } c.restore(); }
     for (const d of G.devices) { const pu = 0.5 + 0.5 * Math.sin(t * 9); c.fillStyle = '#222'; rr(c, d.x - 8, d.y - 5, 16, 10, 2); c.fill(); c.fillStyle = '#888'; circ(c, d.x - 3, d.y, 3); c.strokeStyle = `rgba(255,220,100,${0.2 + 0.5 * pu})`; c.lineWidth = 2; c.beginPath(); c.arc(d.x, d.y, 12 + pu * 14, 0, TAU); c.stroke(); }
     // bodies
-    for (const b of G.bodies) if (!b.hidden && inView(b.x, b.y, 40)) drawPerson(c, b.x, b.y, b.ang, b.n.look, 'dead', t, 0, { burnt: b.burnt, split: b.split, wound: b.wound, style: b.style, knife: b.knife, tw: (b.age || 9) < 1.5 ? 1.5 - b.age : 0 });
+    for (const b of G.bodies) if (!b.hidden && inView(b.x, b.y, 40)) drawPerson(c, b.x, b.y, b.ang, b.n.look, 'dead', t, 0, { burnt: b.burnt, split: b.split, wound: b.wound, style: b.style, lost: b.lost, cuts: b.cuts, knife: b.knife, tw: b.crawl ? 0.6 : (b.age || 9) < 1.5 ? 1.5 - b.age : 0 });
     // characters (y-sorted)
     const list = G.npcs.filter(n => n.alive && inView(n.x, n.y, 40));
     list.push(G.player); list.sort((a, b) => a.y - b.y);
     for (const e of list) {
       if (e === G.player) { if (!e.hidden && !e.dead) { if (e.disguise) drawPerson(c, e.x, e.y, e.ang, e.disguiseLook, e.moving ? 'walk' : 'idle', t, e.walkPh || 0, { moving: e.moving }); else drawKiller(c, e, t); } continue; }
+      if (e.locked) { const bl = Math.sin(t * 1.7 + e.id * 3) > 0.96 ? 0.3 : 2.2; c.fillStyle = 'rgba(255,255,255,0.9)'; circ(c, e.x - 4, e.y - 2, bl); circ(c, e.x + 4, e.y - 2, bl); continue; }
       drawPerson(c, e.x, e.y, e.ang, e.look, e.moving ? (e.anim === 'run' || e.anim === 'panic' ? 'panic' : 'walk') : e.anim, t, e.walkPh, { moving: e.moving, drunk: e.drunk, big: e.brute, armed: e.armed, streamer: e.streamer });
     }
     // particles (pre-light)
     for (const p of G.particles) {
       if (p.type === 'blood') { const sp = Math.hypot(p.vx, p.vy); if (sp > 140) { c.strokeStyle = '#8a0010'; c.lineWidth = p.size * 0.8; c.lineCap = 'round'; c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x - p.vx * 0.035, p.y - p.vy * 0.035); c.stroke(); } else { c.fillStyle = '#8a0010'; circ(c, p.x, p.y, p.size); } }
       else if (p.type === 'water') { c.fillStyle = `rgba(150,210,255,${p.life / p.max})`; circ(c, p.x, p.y, p.size * 0.5); }
+      else if (p.type === 'limb') { c.save(); c.translate(p.x, p.y); c.rotate(p.rot + p.life * 12); c.fillStyle = p.cloth; rr(c, -9, -2.6, 14, 5.2, 2.5); c.fill(); c.fillStyle = p.skin; circ(c, 7, 0, 2.8); c.fillStyle = '#9a0a16'; circ(c, -9, 0, 2.6); c.restore(); }
       else if (p.type === 'gib' && p.head) { c.save(); c.translate(p.x, p.y); c.rotate(p.life * 9); c.fillStyle = '#d0a080'; circ(c, 0, 0, 7); c.fillStyle = '#2a1a10'; ell(c, -2, 0, 5, 6); c.fillStyle = '#8a0010'; circ(c, 5, 0, 3.5); c.restore(); }
       else if (p.type === 'debris') { c.save(); c.translate(p.x, p.y); c.rotate(p.life * 6); c.fillStyle = `rgba(150,140,130,${clamp(p.life / p.max, 0, 1)})`; c.fillRect(-p.size, -p.size * 0.4, p.size * 2, p.size * 0.8); c.restore(); }
       else if (p.type === 'gib') { c.save(); c.translate(p.x, p.y); c.rotate(p.rot + p.life * 8); c.fillStyle = '#5a0008'; rr(c, -p.size, -p.size * 0.6, p.size * 2, p.size * 1.2, 2); c.fill(); c.fillStyle = '#b0202c'; rr(c, -p.size * 0.5, -p.size * 0.3, p.size, p.size * 0.6, 1); c.fill(); c.restore(); }
@@ -4154,6 +4361,8 @@ const Render = {
     c.strokeStyle = `rgba(255,210,60,${0.5 + 0.4 * pu})`; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 16 + pu * 3, 0, TAU); c.stroke();
     c.rotate(-0.6 + Math.sin(t * 2) * 0.1);
     if (p.w === 'axe') { c.fillStyle = '#6a4a2a'; c.fillRect(-13, -2, 26, 4); c.fillStyle = '#c0c8d0'; c.beginPath(); c.moveTo(3, -2); c.lineTo(10, -12); c.lineTo(16, -9); c.lineTo(15, 3); c.lineTo(3, 2); c.closePath(); c.fill(); c.fillStyle = 'rgba(130,0,10,0.7)'; c.fillRect(12, -9, 3, 10); }
+    else if (p.w === 'hammer') { c.fillStyle = '#6a4a2a'; c.fillRect(-13, -2, 26, 4); c.fillStyle = '#5a5e66'; rr(c, 6, -8, 11, 14, 2); c.fill(); c.fillStyle = 'rgba(130,0,10,0.7)'; c.fillRect(14, -6, 3, 10); }
+    else if (p.w === 'machete') { c.fillStyle = '#2a1a10'; c.fillRect(-13, -2, 9, 4); c.fillStyle = '#cdd3d9'; c.beginPath(); c.moveTo(-4, -2.5); c.lineTo(14, -4); c.lineTo(19, 0); c.lineTo(14, 3); c.lineTo(-4, 2.5); c.closePath(); c.fill(); c.fillStyle = 'rgba(130,0,10,0.7)'; c.fillRect(8, -2, 7, 4); }
     else if (p.w === 'saw') { c.fillStyle = '#d9772b'; rr(c, -12, -7, 18, 14, 3); c.fill(); c.fillStyle = '#333'; rr(c, -9, -10, 8, 4, 2); c.fill(); c.fillStyle = '#8a9096'; rr(c, 6, -3.5, 16, 7, 2); c.fill(); c.fillStyle = '#333'; for (let k = 0; k < 7; k++) c.fillRect(7 + k * 2.2, -5, 1.2, 2); c.fillStyle = 'rgba(130,0,10,0.7)'; c.fillRect(14, -3, 6, 6); }
     else if (p.w === 'shotgun') { c.fillStyle = '#4a3220'; rr(c, -14, -3, 14, 6, 2); c.fill(); c.fillStyle = '#25272b'; rr(c, -2, -2, 26, 4, 1.5); c.fill(); }
     else { c.fillStyle = '#25272b'; rr(c, -10, -3, 16, 6, 2); c.fill(); c.fillRect(-9, 0, 6, 9); c.fillStyle = '#111'; rr(c, 6, -2.4, 12, 4.8, 2); c.fill(); }
@@ -4380,14 +4589,18 @@ function drawPerson(c, x, y, ang, L, anim, t, ph, o = {}) {
     if (o.tw) c.translate(Math.sin(t * 40) * o.tw * 1.8, Math.cos(t * 33) * o.tw * 1.3);
     c.rotate(ang); if (o.style === 'crush') c.scale(1.2, 0.72);
     const bn = o.burnt, sh = bn ? '#1c1814' : mix(L.shirt, '#555555', 0.35), sk = bn ? '#2a2018' : mix(L.skin, '#9a9a9a', 0.45), pn = bn ? '#14110e' : L.pants, sp = o.split ? 16 : 0, wd = o.wound || 1;
-    c.fillStyle = pn; rr(c, -30 - sp, -8, 22, 6, 3); c.fill(); rr(c, -30 - sp, 2, 22, 6, 3); c.fill();
+    const ls = o.lost || [], stump = (x, y) => { c.fillStyle = '#7a1018'; ell(c, x, y, 3.4, 3.6); c.fillStyle = '#e8dcc8'; circ(c, x, y, 1.3); };
+    c.fillStyle = pn; if (ls.includes('legA')) { rr(c, -18, -8, 8, 6, 3); c.fill(); stump(-11, -5); } else { rr(c, -30 - sp, -8, 22, 6, 3); c.fill(); }
+    c.fillStyle = pn; if (ls.includes('legB')) { rr(c, -18, 2, 8, 6, 3); c.fill(); stump(-11, 5); } else { rr(c, -30 - sp, 2, 22, 6, 3); c.fill(); }
     if (o.split) { c.fillStyle = '#4a0006'; ell(c, -12 - sp / 2, 0, 13, 12); c.fillStyle = '#8a0010'; ell(c, -10 - sp / 2, 0, 8, 7); c.strokeStyle = '#b01a2a'; c.lineWidth = 3; c.beginPath(); c.moveTo(-16, -5); c.quadraticCurveTo(-26, 7, -12, 9); c.moveTo(-8, 4); c.quadraticCurveTo(-18, -9, -22, 2); c.stroke(); }
-    c.strokeStyle = sh; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); c.moveTo(4, -9); c.lineTo(14, -22); c.moveTo(2, 9); c.lineTo(-4, 22); c.stroke();
-    c.fillStyle = sk; circ(c, 14, -22, 3); circ(c, -4, 22, 3);
+    c.strokeStyle = sh; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); if (!ls.includes('armA')) { c.moveTo(4, -9); c.lineTo(14, -22); } if (!ls.includes('armB')) { c.moveTo(2, 9); c.lineTo(-4, 22); } c.stroke();
+    c.fillStyle = sk; if (!ls.includes('armA')) circ(c, 14, -22, 3); else stump(5, -10); if (!ls.includes('armB')) circ(c, -4, 22, 3); else stump(2, 10);
     c.fillStyle = sh; ell(c, -2, 0, 12, 10.5);
     c.fillStyle = 'rgba(120,0,10,0.8)'; ell(c, 2, 2, 5 + wd * 2.4, 3.5 + wd * 1.6); c.fillStyle = 'rgba(170,10,24,0.55)'; ell(c, 0, 1, 3 + wd, 2 + wd * 0.8);
+    for (const k of o.cuts || []) { c.lineCap = 'round'; c.strokeStyle = 'rgba(40,0,6,0.9)'; c.lineWidth = 2.4; c.beginPath(); c.moveTo(k.x, k.y); c.lineTo(k.x + Math.cos(k.a) * k.l, k.y + Math.sin(k.a) * k.l); c.stroke(); c.strokeStyle = 'rgba(200,24,40,0.85)'; c.lineWidth = 0.9; c.stroke(); }
     if (bn) { c.fillStyle = 'rgba(0,0,0,0.5)'; ell(c, -2, 0, 11, 9.5); }
-    if (o.style === 'decap') { c.fillStyle = '#5a0008'; ell(c, 12, 0, 6, 6); c.fillStyle = '#b01a2a'; ell(c, 12, 0, 4, 4.4); c.fillStyle = '#e8dcc8'; circ(c, 12, 0, 1.6); c.fillStyle = 'rgba(120,0,10,0.7)'; ell(c, 26, 0, 14, 9); }
+    if (o.style === 'decap' || ls.includes('head')) { c.fillStyle = '#5a0008'; ell(c, 12, 0, 6, 6); c.fillStyle = '#b01a2a'; ell(c, 12, 0, 4, 4.4); c.fillStyle = '#e8dcc8'; circ(c, 12, 0, 1.6); c.fillStyle = 'rgba(120,0,10,0.7)'; ell(c, 26, 0, 14, 9); }
+    else if (o.style === 'smash') { c.fillStyle = '#5a0008'; ell(c, 17, 0, 9, 7.5); c.fillStyle = '#b01a2a'; ell(c, 18, 1, 6, 4.6); c.fillStyle = '#d8ccb6'; circ(c, 14, -3, 1.4); circ(c, 20, 3, 1.2); circ(c, 16, 4, 1); c.fillStyle = L.hair || '#222'; ell(c, 12, 0, 4, 6); }
     else headDraw(c, Object.assign({}, L, { skin: sk }), 16, 0);
     if (o.style === 'neck') { c.fillStyle = 'rgba(140,0,14,0.9)'; ell(c, 11, -4, 5, 4); }
     if (o.style === 'eye') { c.fillStyle = '#200004'; circ(c, 19, -3, 2.6); c.fillStyle = 'rgba(140,0,14,0.8)'; ell(c, 22, -3, 4, 2); }
@@ -4441,7 +4654,7 @@ function drawKiller(c, P, t) {
   c.fillStyle = 'rgba(0,0,0,0.45)'; ell(c, 2, 4, 17, 14);
   if (P.attackT > 0 && P.attackKind === 'saw') c.translate(rand(-1.6, 1.6), rand(-1.6, 1.6));
   c.rotate(P.ang);
-  const wid = P.attackT > 0 ? (P.attackKind === 'shoot' ? 'pistol' : P.attackKind === 'blast' ? 'shotgun' : P.attackKind === 'chop' ? 'axe' : P.attackKind === 'saw' ? 'saw' : 'knife') : (P.weapon ? P.weapon.id : 'knife');
+  const wid = P.attackT > 0 ? (P.attackKind === 'shoot' ? 'pistol' : P.attackKind === 'blast' ? 'shotgun' : P.attackKind === 'chop' ? 'axe' : P.attackKind === 'smash' ? 'hammer' : P.attackKind === 'hack' ? 'machete' : P.attackKind === 'saw' ? 'saw' : 'knife') : (P.weapon ? P.weapon.id : 'knife');
   const atkMax = wid === 'saw' ? 1 : 0.3;
   let lunge = 0; if (P.attackT > 0 && wid !== 'pistol') lunge = Math.sin((1 - P.attackT / atkMax) * Math.PI) * (wid === 'saw' ? 8 : 12);
   c.translate(lunge, 0);
@@ -4450,7 +4663,7 @@ function drawKiller(c, P, t) {
   if (mv) { ell(c, s * 8, -6, 7, 4); ell(c, -s * 8, 6, 7, 4); }
   if (P.blood > 0.1) { c.fillStyle = `rgba(120,0,10,${P.blood * 0.8})`; if (mv) { ell(c, s * 8 + 2, -6, 4, 3); ell(c, -s * 8 + 2, 6, 4, 3); } }
   c.fillStyle = '#0c0b0f'; ell(c, -8, 0, 9 + (mv ? Math.abs(s) * 2 : 0), 14);
-  const two = wid === 'axe' || wid === 'saw';
+  const two = wid === 'axe' || wid === 'saw' || wid === 'hammer';
   const hl = two ? [8, -9] : mv ? [-s * 7, -16] : [2, -16], hr = [7 + (P.attackT > 0 && wid !== 'saw' ? 12 : 0), two ? 9 : 15];
   c.strokeStyle = '#141318'; c.lineWidth = 6; c.lineCap = 'round';
   c.beginPath(); c.moveTo(0, -12); c.lineTo(hl[0], hl[1]); c.moveTo(0, 12); c.lineTo(hr[0], hr[1]); c.stroke();
@@ -4469,6 +4682,14 @@ function drawKiller(c, P, t) {
     c.fillStyle = '#6a4a2a'; c.fillRect(-6, -1.8, 30, 3.6);
     c.fillStyle = '#c4ccd4'; c.beginPath(); c.moveTo(17, -1.8); c.lineTo(23, -11); c.lineTo(30, -8); c.lineTo(28, 4); c.lineTo(17, 1.8); c.closePath(); c.fill();
     c.fillStyle = `rgba(140,0,10,${0.45 + bl * 0.45})`; c.beginPath(); c.moveTo(23, -9); c.lineTo(30, -7); c.lineTo(28, 3); c.lineTo(22, 1); c.fill();
+  } else if (wid === 'hammer') {
+    c.rotate(P.attackT > 0 ? -1.0 + (1 - P.attackT / 0.3) * 1.8 : 0.25);
+    c.fillStyle = '#6a4a2a'; c.fillRect(-6, -1.8, 30, 3.6); c.fillStyle = '#5a5e66'; rr(c, 20, -7.5, 11, 15, 2); c.fill(); c.fillStyle = '#8a9098'; c.fillRect(29, -7, 2.4, 14);
+    c.fillStyle = `rgba(140,0,10,${0.4 + bl * 0.5})`; c.fillRect(27, -6, 4, 12);
+  } else if (wid === 'machete') {
+    c.rotate(P.attackT > 0 ? -0.5 + (1 - P.attackT / 0.3) * 1.2 : 0.1);
+    c.fillStyle = '#2a1a10'; c.fillRect(-5, -2.2, 10, 4.4); c.fillStyle = '#cdd3d9'; c.beginPath(); c.moveTo(5, -2.6); c.lineTo(31, -4); c.lineTo(37, 0); c.lineTo(31, 3); c.lineTo(5, 2.6); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(255,255,255,0.85)'; c.fillRect(8, -1.6, 22, 0.8); c.fillStyle = `rgba(140,0,10,${0.45 + bl * 0.45})`; c.beginPath(); c.moveTo(14, -2.8); c.lineTo(31, -3.8); c.lineTo(37, 0); c.lineTo(31, 2.6); c.lineTo(14, 2.4); c.fill();
   } else if (wid === 'saw') {
     c.fillStyle = '#d9772b'; rr(c, -4, -7, 18, 14, 3); c.fill(); c.fillStyle = '#2a2a2a'; rr(c, -1, -10, 8, 4, 2); c.fill();
     c.fillStyle = '#9aa0a6'; rr(c, 13, -3.5, 22, 7, 2); c.fill();
@@ -4497,7 +4718,7 @@ function drawKiller(c, P, t) {
   if (MK === MASKS.porcelain || MK.drip) { c.strokeStyle = '#9a0010'; c.lineWidth = 0.9; c.beginPath(); c.moveTo(1, -6); c.lineTo(4, -3); c.lineTo(3, 0); c.lineTo(6, 3); c.stroke(); }
   const bm = P.bloodMask || 0;
   if (bm > 0.1) { c.fillStyle = `rgba(150,0,14,${Math.min(0.9, bm + 0.25)})`; for (let k = 0; k < 4 + bm * 8; k++) circ(c, 2 + srand(k + 3) * 7, -6 + srand(k * 7 + 1) * 12, 0.7 + srand(k * 3) * 1.4); c.fillRect(3.4, 3.5, 1.6, 2 + bm * 4); ell(c, 5, 2.6, 2.6, 2.1); }
-  if (P.attackT > 0 && (wid === 'knife' || wid === 'axe')) { c.strokeStyle = `rgba(255,240,240,${P.attackT * 2})`; c.lineWidth = 2; c.beginPath(); c.arc(4, 4, wid === 'axe' ? 36 : 30, -0.9, 0.9); c.stroke(); }
+  if (P.attackT > 0 && (wid === 'knife' || wid === 'axe' || wid === 'hammer' || wid === 'machete')) { c.strokeStyle = `rgba(255,240,240,${P.attackT * 2})`; c.lineWidth = 2; c.beginPath(); c.arc(4, 4, wid === 'axe' ? 36 : 30, -0.9, 0.9); c.stroke(); }
   c.restore();
 }
 'use strict';
@@ -4666,6 +4887,7 @@ const cleanNick = v => String(v || '').replace(/[^\w àèéìòùÀÈÉÌÒÙ.\-
 const randomNick = () => pick(['Lama', 'Ombra', 'Corvo', 'Spettro', 'Gelo', 'Cenere', 'Veleno', 'Ruggine', 'Notte', 'Sangue']) + pick(['Nera', 'Muta', 'Pallida', 'Cieca', 'Fredda', 'Rossa', 'Vuota']) + (10 + Math.random() * 89 | 0);
 
 const UI = {
+  maskFlash() { const el = $('#jumpMask'); if (!el) return; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(this._mf); this._mf = setTimeout(() => el.classList.remove('on'), 260); },
   mode: store.get('diff', 'normal'), fx: store.get('fx', 'high'), endless: false, endlessSel: false,
   loadout: store.get('loadout', ['bait', 'poison']),
   scene: 'boot', btn: {}, hudCache: {}, progress: store.get('progress', { unlocked: 0, best: {}, kills: 0 }), shopBack: 'menu',
@@ -5058,7 +5280,7 @@ const UI = {
     const next = r.win && r.level + 1 < LEVELS.length;
     $('#results').innerHTML = `
       <div class="resWrap">
-        <div class="resHead ${r.win ? 'win' : 'lose'}">${r.endless ? 'MATTATOIO' : r.win ? 'LIVELLO COMPLETATO' : r.reason === 'boom' ? 'ESPLOSO' : r.reason === 'shot' ? 'ABBATTUTO' : 'PRESO'}</div>
+        <div class="resHead ${r.win ? 'win' : 'lose'}">${r.endless ? 'MATTATOIO' : r.win ? 'LIVELLO COMPLETATO' : r.reason === 'boom' ? 'ESPLOSO' : (r.reason === 'shot' || r.reason === 'stabbed') ? 'ABBATTUTO' : 'PRESO'}</div>
         <div class="resLvl">${r.levelName}</div>
         ${newAch.length ? `<div class="resAch">🏆 ${newAch.map(x => `${x.icon} ${x.name} <b>+🩸${x.r}</b>`).join(' · ')}</div>` : ''}
         <div class="resBody">
