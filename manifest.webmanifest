@@ -1,0 +1,22 @@
+{
+  "name": "Maschera Bianca",
+  "short_name": "Maschera Bianca",
+  "description": "Slasher horror stealth: uccidi nel buio, nascondi i corpi, scappa dalla polizia. 9 livelli, finali spettacolari, modalità infinita.",
+  "lang": "it",
+  "start_url": "./index.html",
+  "scope": "./",
+  "id": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape",
+  "background_color": "#050407",
+  "theme_color": "#8a0010",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

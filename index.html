@@ -2,11 +2,17 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#050407">
+<meta name="theme-color" content="#8a0010">
+<meta name="apple-mobile-web-app-title" content="Maschera Bianca">
+<meta name="description" content="Maschera Bianca — slasher horror stealth. 9 livelli, finali spettacolari, modalità infinita.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Maschera Bianca</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nosifer&family=Oswald:wght@300;500;700&family=Special+Elite&display=swap" rel="stylesheet">
@@ -346,6 +352,38 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 .resList .net{font-size:.85em}
 .resBtns{gap:8px}.resBtns .btn{padding:.9vh 14px;font-size:clamp(11px,2.4vh,15px);letter-spacing:.15em}
 @media (max-height:430px){.resList .styles,.resList .net,.resWrap .muted{display:none}.resList>div{padding:.05vh 0}}
+/* sticky headers + compact layouts */
+.panel>.panelHead{position:sticky;top:-1px;z-index:6;background:rgba(8,6,10,.97);padding-bottom:6px}
+.creditsTxt{font-family:'Special Elite';font-size:clamp(11px,2.3vh,14px);line-height:1.5;color:#cfc6b8;max-width:640px}
+.creditsTxt p{margin:0 0 1.2vh}.creditsTxt b{color:var(--red2);letter-spacing:.08em}
+select{background:#111;border:1px solid #444;color:var(--bone);padding:8px 10px;font-family:Oswald;font-size:15px;max-width:100%}
+.liCols{display:flex;gap:clamp(12px,3vw,40px);align-items:flex-start;justify-content:center;width:100%;max-width:1000px}
+#trophyList{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding-right:4px;max-height:66vh}
+#trophies .panel{width:min(980px,96vw);max-height:94vh;display:flex;flex-direction:column}
+#trophyCount{font-family:Nosifer;color:var(--red2);font-size:clamp(14px,3.6vh,22px);margin-left:auto}
+.tcard{background:linear-gradient(180deg,#140a0e,#08060a);border:1px solid rgba(235,229,216,.12);padding:8px 10px;display:flex;gap:10px;align-items:flex-start;opacity:.55}
+.tcard.on{opacity:1;border-color:#d4a82a;box-shadow:inset 0 0 24px rgba(212,168,42,.15)}
+.tcard .ic{font-size:24px;line-height:1;filter:grayscale(1)}.tcard.on .ic{filter:none}
+.tcard h3{margin:0;font-size:clamp(13px,2.6vh,16px);letter-spacing:.05em}.tcard p{margin:2px 0 0;font-family:'Special Elite';font-size:11.5px;color:#bdb5a8;line-height:1.3}
+.tcard .bar{height:4px;background:#222;margin-top:4px}.tcard .bar i{display:block;height:100%;background:#d4a82a}
+#achPop{position:fixed;left:50%;bottom:14%;transform:translateX(-50%);z-index:40;pointer-events:none;text-align:center;font-family:Oswald;font-weight:700;letter-spacing:.08em;font-size:clamp(12px,2.8vh,18px);color:#fff;background:linear-gradient(90deg,rgba(0,0,0,0),rgba(90,70,0,.9),rgba(0,0,0,0));padding:8px 44px;opacity:0;white-space:nowrap}
+#achPop small{display:block;color:#ffd23a;letter-spacing:.3em;font-size:.62em}
+#achPop.show{animation:objpop 4s ease forwards}
+@media (max-height:520px){
+  #menu{gap:clamp(10px,3vw,30px)}
+  .menuL .mask{width:clamp(44px,16vh,80px)}.menuL .title{font-size:clamp(18px,7vh,40px)}.tag{display:none}
+  .menuR{display:grid;grid-template-columns:1fr 1fr;gap:5px 7px;min-width:min(440px,58vw)}
+  .menuR .btn{padding:6px 10px;font-size:12px;letter-spacing:.14em;text-align:center}.menuR .btn.primary{grid-column:1/-1}
+  .menuFoot{font-size:10px;gap:12px}
+  #lvlintro{gap:.6vh;padding-top:2vh}#liBlurb,#liSub{display:none}
+  #liName{font-size:clamp(20px,7vh,40px)}.obj{padding:5px 12px;font-size:11px}
+  .chip small{display:none}.chip{padding:4px 8px;font-size:11px}#liLoad>b,#liChal b{font-size:9px}
+  #liChal{font-size:11px;line-height:1.35;max-width:300px}
+  #boot .mask{width:clamp(44px,14vh,100px)}#boot .title{font-size:clamp(22px,7vh,50px)}
+  #nick{gap:1vh}#nick .mask{width:clamp(36px,10vh,80px)}#nick h2{font-size:clamp(16px,5vh,28px)}#nickInput{padding:7px 10px;font-size:17px}
+  .opt{gap:7px 12px;font-size:13px;grid-template-columns:130px 1fr}
+  #pause{gap:.8vh}#pause .btn{min-width:230px;padding:7px 14px}
+}
 </style>
 </head>
 <body>
@@ -367,6 +405,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
   <div class="title">MASCHERA<br><em>BIANCA</em></div>
   <div class="tap">TOCCA OVUNQUE PER ENTRARE</div>
   <div class="sub">Gioca con le cuffie. Su smartphone il gioco va a schermo intero in orizzontale.</div>
+  <div class="sub" style="color:#c0606a">🔞 Violenza esplicita e sangue · sconsigliato ai minori di 18 anni</div>
 </div>
 
 
@@ -388,21 +427,24 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
     <div class="tag">Non correre. Non parlare. Aspetta nel buio.</div>
   </div>
   <div class="menuR">
-    <button class="btn primary" data-go="levels">GIOCA</button>
+    <button class="btn primary" id="btnPlay">GIOCA</button>
+    <button class="btn" id="btnEndless">MATTATOIO ∞</button>
     <button class="btn" id="btnShop">ARMERIA 🩸</button>
+    <button class="btn" id="btnTrophies">TROFEI 🏆</button>
     <button class="btn" data-go="board">CLASSIFICA</button>
     <button class="btn" data-go="howto">COME SI GIOCA</button>
     <button class="btn" data-go="options">OPZIONI</button>
     <button class="btn" id="btnIntro">INTRO</button>
+    <button class="btn hidden" id="btnInstall">⬇ INSTALLA IL GIOCO</button>
   </div>
   <div id="motd" class="hidden"></div>
   <div class="menuFoot"><span id="online"><i class="off"></i> connessione…</span><span>Killer: <b id="menuNick" class="nickBtn" title="Cambia nome"></b> ✎</span><span>Vittime totali: <b id="menuKills">0</b></span></div>
 </div>
 
-<div id="levels" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Scegli la notte</h2><button class="btn back" data-go="menu">‹ INDIETRO</button></div><div id="levelCards"></div></div></div>
+<div id="levels" class="screen hidden"><div class="panel"><div class="panelHead"><h2 id="levelsTitle">Scegli la notte</h2><button class="btn back" data-go="menu">‹ INDIETRO</button></div><div id="levelCards"></div></div></div>
 <div id="shop" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Armeria</h2><div id="shopBal"></div><button class="btn back" id="shopBack">‹ INDIETRO</button></div><div id="shopMsg"></div><div id="shopList"></div></div></div>
 <div id="board" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Classifica</h2><button class="btn back" data-go="menu">‹ INDIETRO</button></div><div id="boardTabs"></div><div id="boardList"></div></div></div>
-<div id="howto" class="screen hidden"><div class="panel"><h2>Come si gioca</h2>
+<div id="howto" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Come si gioca</h2><button class="btn back" data-go="menu">‹ INDIETRO</button></div>
   <div class="how">
     <div><h4>OBIETTIVO</h4><p>Elimina tutte le persone nell'edificio. Se qualcuno arriva in ritardo, dovrai eliminare anche lui. Finisci il livello per sbloccare lo scenario successivo e completa le <b>SFIDE</b> per i bonus.</p></div>
     <div><h4>COMANDI</h4><p>PC: <kbd>WASD</kbd> muovi · <kbd>Shift</kbd> corri · <kbd>Spazio</kbd> azione · <kbd>Q</kbd> Ombra · <kbd>E</kbd> Richiamo · <kbd>R</kbd> Blackout · clic su una vittima per bloccarla come bersaglio · <kbd>Esc</kbd> pausa.<br>Smartphone: trascina a sinistra per muoverti, pulsanti a destra, tocca una vittima per bloccarla come bersaglio.</p></div>
@@ -420,22 +462,33 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
     <div><h4>FRENESIA 🩸</h4><p>Quattro uccisioni in combo scatenano la Frenesia: corri più veloce, colpisci da più lontano e ogni punto vale di più. Ogni nuova vittima la prolunga.</p></div>
     <div><h4>CORPI E NASCONDIGLI</h4><p>Trascina i corpi negli armadi e nei cassonetti ◉, e nasconditi lì dentro anche tu. Un corpo in vista fa scattare l'allarme. Attento al sangue: lascia impronte.</p></div>
   </div>
-  <button class="btn back" data-go="menu">‹ INDIETRO</button></div></div>
-<div id="options" class="screen hidden"><div class="panel"><h2>Opzioni</h2>
+  </div></div>
+<div id="options" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Opzioni</h2><button class="btn back" data-go="menu">‹ INDIETRO</button></div>
   <div class="opt">
     <label>NOME KILLER</label><input id="optNick" type="text" maxlength="16">
-    <label>EFFETTI</label><input id="optVol" type="range" min="0" max="1" step="0.05">
+    <label>EFFETTI SONORI</label><input id="optVol" type="range" min="0" max="1" step="0.05">
     <label>MUSICA</label><input id="optMus" type="range" min="0" max="1" step="0.05">
+    <label>DIFFICOLTÀ</label><select id="optDiff"><option value="easy">Facile</option><option value="normal">Normale</option><option value="hard">Incubo (×1.5 punti)</option></select>
+    <label>QUALITÀ GRAFICA</label><select id="optFx"><option value="high">Alta (massimo splatter)</option><option value="mid">Media</option><option value="low">Bassa (telefoni lenti)</option></select>
     <label>GRANA FILM</label><input id="optGrain" type="checkbox">
     <label>PROGRESSI</label><button class="btn" id="optReset" style="font-size:13px">Azzera progressi</button>
+    <label>INFO</label><button class="btn" data-go="credits" style="font-size:13px">Crediti, privacy e avvisi</button>
   </div>
-  <button class="btn back" data-go="menu">‹ INDIETRO</button></div></div>
-
+</div></div>
+<div id="trophies" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Trofei</h2><div id="trophyCount"></div><button class="btn back" id="trophyBack">‹ INDIETRO</button></div><div id="trophyList"></div></div></div>
+<div id="credits" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Info e crediti</h2><button class="btn back" data-go="options">‹ INDIETRO</button></div>
+  <div class="creditsTxt">
+    <p><b>MASCHERA BIANCA</b> · slasher horror stealth · © 2026. Tutti i diritti riservati.</p>
+    <p><b>⚠ AVVISO CONTENUTI.</b> Il gioco contiene violenza esplicita, sangue e scene di orrore. Sconsigliato ai minori di 18 anni. Ogni riferimento a persone o fatti reali è casuale.</p>
+    <p><b>Audio e grafica.</b> Tutti i suoni, la musica e le immagini sono generati in tempo reale dal gioco, senza file esterni.</p>
+    <p><b>Privacy.</b> I progressi sono salvati sul tuo dispositivo. Per la classifica online vengono inviati solo il nick scelto, i punteggi e statistiche di gioco anonime (tramite Firebase). Non raccogliamo email, posizione o altri dati personali.</p>
+    <p><b>Installazione.</b> Puoi installare il gioco sul telefono o sul PC dal menu (INSTALLA IL GIOCO) e giocare anche offline.</p>
+  </div>
+</div></div>
 <div id="lvlintro" class="screen hidden">
   <div id="liNum"></div><div id="liName"></div><div id="liSub"></div><div id="liBlurb"></div>
   <div class="obj">OBIETTIVO: elimina <b id="liCount"></b> persone · nessuno deve completare una chiamata</div>
-  <div id="liChal"></div>
-  <div id="liLoad"></div>
+  <div class="liCols"><div id="liChal"></div><div id="liLoad"></div></div>
   <div class="tap" style="letter-spacing:.4em;animation:blink 1.6s infinite;margin-top:2vh">TOCCA PER ENTRARE</div>
 </div>
 
@@ -466,7 +519,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 <div id="touch" class="hidden"><div id="joyHint">◀ TRASCINA PER MUOVERTI ▶</div></div>
 <div id="joy"><div id="joyKnob"></div></div>
 
-<div id="killTxt"></div><div id="objPop"></div><div id="bigtext"></div><div id="toast"></div><div id="hint"></div><div id="combo"></div>
+<div id="achPop"></div><div id="killTxt"></div><div id="objPop"></div><div id="bigtext"></div><div id="toast"></div><div id="hint"></div><div id="combo"></div>
 
 <div id="cine" class="hidden"><div class="cbar t"></div><div class="cbar b"></div><svg class="cmask" id="cMask"><use href="#maskSym"/></svg><div class="cflash" id="cFlash"></div><div id="cSub"></div><div id="cLine"></div><div class="cskip">TOCCA PER SALTARE ›</div></div>
 <div id="pause" class="screen hidden">
@@ -930,6 +983,36 @@ const FIN = {
   wall: { k: 'slam', label: 'SBATTI AL MURO', snd: 'wall' }
 };
 const FIN_T = { slam: [0.3, 0.72, 1.2], burn: [0.35, 1.4], drown: [0.35, 1.7], bin: [0.3, 0.85], zap: [0.3, 1.0] };
+const DIFF = {
+  easy: { n: 'FACILE', view: 0.85, sus: 0.75, police: 70, hit: 0.7, hp: 3, score: 0.8 },
+  normal: { n: 'NORMALE', view: 1, sus: 1, police: 50, hit: 1, hp: 3, score: 1 },
+  hard: { n: 'INCUBO ×1.5', view: 1.15, sus: 1.35, police: 38, hit: 1.3, hp: 2, score: 1.5 }
+};
+const ACH = [
+  { id: 'first', n: 'Primo sangue', d: 'Fai la tua prima uccisione', stat: 'kills', goal: 1 },
+  { id: 'win1', n: 'Prima notte', d: 'Completa un livello' },
+  { id: 'ghost', n: 'Fantasma', d: 'Vinci un livello senza testimoni' },
+  { id: 'srank', n: 'Perfezione', d: 'Ottieni il voto S' },
+  { id: 'allclear', n: 'Mattatore', d: 'Completa tutti i livelli' },
+  { id: 'heads', n: 'Collezionista', d: 'Decapita 10 persone', stat: 'heads', goal: 10 },
+  { id: 'fins', n: 'Regista dell\'orrore', d: '25 finali ambientali', stat: 'finishers', goal: 25 },
+  { id: 'push', n: 'Mani forti', d: 'Vinci una lotta col coltello' },
+  { id: 'massacro', n: 'Massacro', d: 'Uccidi 4 persone in rapida successione' },
+  { id: 'frenzy', n: 'Fuori controllo', d: 'Scatena la frenesia' },
+  { id: 'traps', n: 'Ingegnere del caos', d: '10 morti per trappola', stat: 'traps', goal: 10 },
+  { id: 'wall', n: 'Muro del pianto', d: 'Uccidi qualcuno sbattendolo al muro' },
+  { id: 'disguise', n: 'Mille volti', d: 'Indossa una divisa' },
+  { id: 'brute', n: 'Davide e Golia', d: 'Sconfiggi un energumeno' },
+  { id: 'streamer', n: 'Fine della diretta', d: 'Zittisci uno streamer prima della polizia' },
+  { id: 'zone3', n: 'Strage di massa', d: '3 vittime con una sola trappola' },
+  { id: 'speed', n: 'Lampo', d: 'Vinci in meno del 60% del tempo par' },
+  { id: 'hard', n: 'Incubo', d: 'Vinci un livello in difficoltà Incubo' },
+  { id: 'endless', n: 'Mattatoio', d: '30 vittime in modalità infinita' },
+  { id: 'rich', n: 'Ricco di sangue', d: 'Guadagna 3000 punti sangue in totale', stat: 'bloodEarned', goal: 3000 },
+  { id: 'arsenal', n: 'Arsenale', d: 'Sblocca tutti i gadget' },
+  { id: 'kills200', n: 'Serial killer', d: '200 vittime in totale', stat: 'kills', goal: 200 },
+  { id: 'saw3', n: 'Motosega!', d: 'Uccidi 3 persone con un solo colpo di motosega' }
+];
 const KT = {
   slash: ['GOLA TAGLIATA!', '#ff2a3a'], stab: ['ACCOLTELLATO!', '#ff4a4a'], push: ['TRAPASSATO!', '#ff1a2a'], chop: ['SPACCATO!', '#ff8a2a'], saw: ['SQUARTATO!', '#ff6a1a'],
   shoot: ['COLPO IN TESTA!', '#ffd23a'], blast: ['POLVERIZZATO!', '#ff9a2a'], slam: ['SBATTUTO!', '#ff3a4a'], burn: ['ARROSTITO!', '#ff7a1a'], drown: ['ANNEGATO!', '#5ac0ff'],
@@ -1797,6 +1880,8 @@ const Game = {
     this.lock = null; this.target = null; this.ended = false; this.endT = 0; this.slowT = 0; this.slowScale = 1; this.hitstop = 0;
     this.shake = 0; this.flash = 0; this.flashColor = '255,0,0'; this.hb = 0; this.lightDirty = true; this.styleCount = {};
     this.hintI = 0; this.hintT = 3; this.policeCalled = false; this.context = null;
+    this.dm = DIFF[UI.diff] || DIFF.normal; this.pcap = ({ high: 900, mid: 450, low: 220 })[UI.fx] || 900; this.heads = []; this.endless = !!UI.endless; this.wave = 0; this.waveT = 12;
+    this.player.hp = this.dm.hp; this.player.hpMax = this.dm.hp;
     this.cine = null; this.cineK = 0; this.fin = null; this.struggle = null; this.punchT = 0; this.killCamT = 0; this.whisperCd = 0;
     this.frenzyT = 0; this.frenzyMax = 9; this.st = { silent: 0, weapon: 0, trap: 0, multi: 0, hidden: 0 }; this.lastKillT = -9;
     this.tracers = []; this.sched = []; this.screenBlood = []; this.boomFx = [];
@@ -1809,7 +1894,7 @@ const Game = {
     // spread NPCs into their routines immediately
     this.npcs.forEach(n => { if (n.follower == null) this.chooseActivity(n, true); });
     this.npcs.forEach(n => { if (n.state === 'idle') this.chooseActivity(n, true); });
-    this.focus = null; this.impactT = 0; this.slashes = []; this.multiN = 0; this.objPts = 0; this.objDone = 0; this.pickObjectives();
+    this.focus = null; this.impactT = 0; this.slashes = []; this.multiN = 0; this.objPts = 0; this.objDone = 0; if (this.endless) this.events = []; this.pickObjectives(); if (this.endless) this.objectives = [];
     Sound.ambience(def.music);
     this.running = true; this.paused = false;
     FB.setPresence({ state: 'playing', level: def.id });
@@ -2142,7 +2227,7 @@ const Game = {
 
   perceive(n, dt) {
     const P = this.player, dark = this.isDark(), g = n.guard && !n.hero;
-    const R = VIEW * (g ? 1.3 : 1) * (dark ? 0.45 : 1) * (n.drunk ? 0.6 : 1), fov = FOV * (g ? 1.15 : 1);
+    const R = VIEW * (g ? 1.3 : 1) * (dark ? 0.45 : 1) * (n.drunk ? 0.6 : 1) * this.dm.view, fov = FOV * (g ? 1.15 : 1);
     let sees = false;
     if (!P.hidden && !this.ended) {
       const d = dist(n.x, n.y, P.x, P.y);
@@ -2156,7 +2241,7 @@ const Game = {
             const er = inDark ? R * 0.5 : R;
             if (d < er) {
               sees = true;
-              const rate = (inDark ? 0.45 : 1) * (1.3 - d / er) * (P.sprint ? 1.4 : 1) * (P.carrying ? 2.2 : 1) * 0.75 * (g ? 1.7 : 1) * (n.drunk ? 0.45 : 1) * (n.trait === 'paranoid' ? 1.3 : 1) * (P.blood > 0.5 ? 1.15 : 1);
+              const rate = (inDark ? 0.45 : 1) * (1.3 - d / er) * (P.sprint ? 1.4 : 1) * (P.carrying ? 2.2 : 1) * 0.75 * this.dm.sus * (g ? 1.7 : 1) * (n.drunk ? 0.45 : 1) * (n.trait === 'paranoid' ? 1.3 : 1) * (P.blood > 0.5 ? 1.15 : 1);
               n.sus = Math.min(1, n.sus + rate * dt);
             }
           }
@@ -2230,14 +2315,14 @@ const Game = {
     const P = this.player, d = dist(n.x, n.y, P.x, P.y), a = Math.atan2(P.y - n.y, P.x - n.x);
     Sound.gun(); this.tracers.push({ x0: n.x + Math.cos(a) * 14, y0: n.y + Math.sin(a) * 14, x1: P.x + rand(-6, 6), y1: P.y + rand(-6, 6), life: 0.12 });
     this.noise(n.x, n.y, TILE * 10, 0.4, n, true); n.ang = a;
-    if (Math.random() < clamp(0.62 - d / (TILE * 9) * 0.4, 0.2, 0.6) * (P.sprint ? 0.7 : 1) * (P.hidden ? 0 : 1)) {
-      P.hp--; P.hpT = 0; this.flash = 0.6; this.flashColor = '200,0,0'; this.shake = 14; this.bloodScreen(2, false); Sound.stab(); P.stunT = 0.2; UI.toast(`COLPITO! ${Math.max(0, P.hp)}/3`);
+    if (Math.random() < clamp(0.62 - d / (TILE * 9) * 0.4, 0.2, 0.6) * this.dm.hit * (P.sprint ? 0.7 : 1) * (P.hidden ? 0 : 1)) {
+      P.hp--; P.hpT = 0; this.flash = 0.6; this.flashColor = '200,0,0'; this.shake = 14; this.bloodScreen(2, false); Sound.stab(); P.stunT = 0.2; UI.toast(`COLPITO! ${Math.max(0, P.hp)}/${P.hpMax}`);
       if (P.hp <= 0) this.finish(false, 'shot');
     } else { this.shake = Math.max(this.shake, 5); for (let i = 0; i < 6; i++) this.particles.push({ x: P.x + rand(-14, 14), y: P.y + rand(-14, 14), vx: rand(-90, 90), vy: rand(-90, 90), life: rand(0.15, 0.3), max: 0.3, size: 2.5, type: 'spark' }); }
   },
   guardSees(n, omni) {
     const P = this.player; if (P.hidden || this.ended) return false;
-    const d = dist(n.x, n.y, P.x, P.y), R = VIEW * 1.3 * (this.isDark() ? 0.45 : 1);
+    const d = dist(n.x, n.y, P.x, P.y), R = VIEW * 1.3 * (this.isDark() ? 0.45 : 1) * this.dm.view;
     if (d > R) return false;
     if (P.invisible && d > TILE * 2) return false;
     if (this.inSmoke(P.x, P.y) && d > TILE * 1.5) return false;
@@ -2432,7 +2517,7 @@ const Game = {
   },
   callPolice(n, silent) {
     if (this.police) return;
-    this.police = { t: 50, max: 50 }; this.policeCalled = true;
+    { const pt = this.dm.police * (this.endless ? 1.3 : 1); this.police = { t: pt, max: pt }; } this.policeCalled = true;
     if (!silent) UI.big('POLIZIA IN ARRIVO', '#4aa3ff', 'Finisci il lavoro prima che arrivino!');
     Sound.startSiren(); Sound.sirenLevel(0.01);
     FB.bumpStat('policeCalls');
@@ -2606,7 +2691,7 @@ const Game = {
       case 'kill': this.tryKill(c.n); break;
       case 'shoot': if (this.wallClear(P.x, P.y, c.n.x, c.n.y)) this.kill(c.n, { weapon: P.weapon.id }); else Sound.denied(); break;
       case 'pickup': { const w = WEAPONS[c.p.w]; c.p.taken = true; P.weapon = { id: c.p.w, uses: w.uses }; Sound.pickup(); UI.toast(`${w.icon} ${w.name}: ${w.uses} ${w.ranged ? 'colpi' : 'usi'}`); break; }
-      case 'dress': { const b = c.b; b.looted = true; P.disguise = b.uniform; P.disguiseLook = Object.assign({}, b.n.look); b.n.look = Object.assign({}, b.n.look, { shirt: '#d8d0c8', pants: '#555' }); Sound.pickup(); UI.toast('Travestito! Muoviti piano e non farti sporcare di sangue'); this.objEvent('dress'); break; }
+      case 'dress': { const b = c.b; b.looted = true; P.disguise = b.uniform; P.disguiseLook = Object.assign({}, b.n.look); b.n.look = Object.assign({}, b.n.look, { shirt: '#d8d0c8', pants: '#555' }); Sound.pickup(); UI.toast('Travestito! Muoviti piano e non farti sporcare di sangue'); this.objEvent('dress'); UI.ach('disguise'); break; }
       case 'unhide': this.unhide(); break;
       case 'hide': P.hidden = c.h; c.h.shake = 0.3; P.hx = P.x; P.hy = P.y; P.x = (c.h.x + c.h.w / 2) * TILE; P.y = (c.h.y + c.h.h / 2) * TILE; Sound.thud(); UI.toast('Nascosto. Muoviti per uscire.'); break;
       case 'carry': P.carrying = c.b; c.b.carried = true; Sound.thud(); break;
@@ -2628,13 +2713,13 @@ const Game = {
   /* ---------------- killing & gore ---------------- */
   splatter(x, y, ang, amount, spread, spd) {
     const n = Math.round(amount); spd = spd || [60, 260];
-    for (let i = 0; i < n && this.particles.length < 900; i++) {
+    for (let i = 0; i < n && this.particles.length < this.pcap; i++) {
       const a = ang + rand(-spread, spread), sp = rand(spd[0], spd[1]);
       this.particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.35, 0.9), max: 0.9, size: rand(1.6, 5.4), type: 'blood' });
     }
   },
   gibs(x, y, ang, n, spread) {
-    for (let i = 0; i < n && this.particles.length < 900; i++) { const a = ang + rand(-spread, spread), sp = rand(80, 300); this.particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.5, 1.2), max: 1.2, size: rand(3, 6.5), type: 'gib', rot: rand(0, 6) }); }
+    for (let i = 0; i < n && this.particles.length < this.pcap; i++) { const a = ang + rand(-spread, spread), sp = rand(80, 300); this.particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.5, 1.2), max: 1.2, size: rand(3, 6.5), type: 'gib', rot: rand(0, 6) }); }
   },
   mist(x, y, n) { for (let i = 0; i < n; i++) this.particles.push({ x: x + rand(-6, 6), y: y + rand(-6, 6), vx: rand(-40, 40), vy: rand(-40, 40), life: rand(0.5, 1.1), max: 1.1, size: rand(6, 14), type: 'mist' }); },
   bloodScreen(n, big) {
@@ -2701,6 +2786,8 @@ const Game = {
       case 'explode': this.splatter(n.x, n.y, dirA, 44, Math.PI, [120, 380]); this.gibs(n.x, n.y, dirA, 8, Math.PI); this.mist(n.x, n.y, 5); break;
       case 'electro': for (let i = 0; i < 26; i++) { const a = rand(0, TAU), sp = rand(60, 220); this.particles.push({ x: n.x, y: n.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.3, 0.9), max: 0.9, size: rand(2, 5), type: 'spark' }); } this.splatter(n.x, n.y, dirA, 8, Math.PI, [40, 140]); this.shake = 6; break;
     }
+    if (!trap && (style === 'chop' || style === 'saw' || (style === 'slash' && Math.random() < 0.25) || (style === 'blast' && Math.random() < 0.5))) this.decap(n, b, dirA);
+    else if (trap && style === 'explode' && Math.random() < 0.4) this.decap(n, b, dirA);
     if (!trap) {
       P.blood = Math.min(1, P.blood + 0.3 * Math.min(2, bl)); P.bloodMask = Math.min(1, (P.bloodMask || 0) + 0.18 * bl);
       if (nearP) this.bloodScreen(Math.min(5, Math.round(1 + bl * 1.3)), bl > 1.8);
@@ -2728,7 +2815,7 @@ const Game = {
     this.lastKillT = this.time;
     this.combo.n = this.combo.t > 0 ? this.combo.n + 1 : 1; this.combo.t = 7; this.combo.best = Math.max(this.combo.best, this.combo.n);
     if (this.frenzyT > 0) { mult *= 1.5; tags.push('FRENESIA'); this.frenzyT = Math.min(14, this.frenzyT + 3); this.frenzyMax = Math.max(this.frenzyMax, this.frenzyT); }
-    else if (this.combo.n >= 4) { this.frenzyT = 9; this.frenzyMax = 9; UI.big('FRENESIA!', '#ff2a2a', 'Più veloce · più letale · punti ×1.5'); Sound.frenzy(); this.objEvent('frenzy'); }
+    else if (this.combo.n >= 4) { this.frenzyT = 9; this.frenzyMax = 9; UI.big('FRENESIA!', '#ff2a2a', 'Più veloce · più letale · punti ×1.5'); Sound.frenzy(); this.objEvent('frenzy'); UI.ach('frenzy'); }
     const pts = Math.round(100 * mult * this.combo.n);
     this.score += pts;
     this.floaters.push({ x: n.x, y: n.y - 30, text: '+' + pts, sub: tags.join(' · '), color: '#ff3b3b', life: 2.4 });
@@ -2753,12 +2840,15 @@ const Game = {
     if (wd.multi && !chain) for (const m of this.npcs.slice()) if (m !== n && m.alive && dist(P.x, P.y, m.x, m.y) < TILE * 1.9 && this.wallClear(P.x, P.y, m.x, m.y) && Math.abs(angDiff(dirA, Math.atan2(m.y - P.y, m.x - P.x))) < 1.4) this.kill(m, { weapon: 'saw', chain: true });
     {
       const kt = KT[style], mt = ['', '', 'DOPPIA!', 'TRIPLA!', 'MASSACRO!'][Math.min(4, this.multiN)];
-      UI.killText(this.multiN >= 2 ? mt : (kt ? kt[0] : 'UCCISO!'), this.multiN >= 2 ? '#ffb02a' : (kt ? kt[1] : '#ff3a4a'));
+      UI.killText(this.multiN >= 2 ? mt : (b.headless ? 'DECAPITATO!' : kt ? kt[0] : 'UCCISO!'), this.multiN >= 2 ? '#ffb02a' : (b.headless ? '#ff1a2a' : kt ? kt[1] : '#ff3a4a'));
       this.impactT = 0.24; this.focus = { x: n.x, y: n.y, t: 0.9 };
       if (!['shoot', 'blast', 'electro', 'snare', 'poison', 'bin', 'burn', 'drown'].includes(style)) this.slashes.push({ x: n.x, y: n.y, a: dirA, life: 0.24, cross: !!o.finisher || style === 'push' || style === 'chop' || style === 'saw' });
       const kb = ({ slash: 90, stab: 70, push: 140, chop: 260, shoot: 200, blast: 420, saw: 60 })[style] || 0; if (kb) { b.vx = Math.cos(dirA) * kb; b.vy = Math.sin(dirA) * kb; }
       this.slowmo(o.finisher || style === 'push' ? 0.7 : 0.38, 0.35);
       Sound.killHit(!!o.finisher || ['push', 'chop', 'saw', 'blast', 'explode'].includes(style));
+      UI.stat('kills'); if (o.finisher) UI.stat('finishers'); if (trap) UI.stat('traps');
+      if (style === 'push') UI.ach('push'); if (this.multiN >= 4) UI.ach('massacro'); if (o.fin === 'wall') UI.ach('wall'); if (n.brute) UI.ach('brute'); if (n.streamer && !this.policeCalled) UI.ach('streamer');
+      if (wid === 'saw' && !chain && this.bodies.filter(bb => !(bb.age > 0.05) && bb.style === 'saw').length >= 3) UI.ach('saw3');
       this.objEvent('kill', { n, style, finisher: !!o.finisher, fin: o.fin, trap, silent, weapon: wid, multi: isMulti, zone: !!o.zone });
     }
     this.checkWin();
@@ -2862,6 +2952,24 @@ const Game = {
     const P = this.player; this.floaters.push({ x: P.x, y: P.y - 40, text: '+' + def.pts, sub: 'OBIETTIVO', color: '#ffd23a', life: 2.4 });
     Sound.objective(); UI.objPop(def.t, def.pts);
   },
+  spawnWave() {
+    this.wave++; const L = this.L, defs = L.npcs.filter(d => !d.guard && !d.partner && d.follower == null), gd = L.npcs.filter(d => d.guard && !d.brute);
+    const k = Math.min(6, 2 + Math.floor(this.wave / 2)), list = [];
+    for (let i = 0; i < k; i++) list.push(pick(defs));
+    if (this.wave % 3 === 0 && gd.length) list.push(pick(gd));
+    for (const d of list) {
+      const n = this.makeNPC(Object.assign({}, d), this.npcs.length), ex = pick(L.exits); n.x = ex.x * TILE + rand(-20, 20); n.y = ex.y * TILE + rand(-20, 20);
+      n.trait = Math.random() < 0.5 ? pick(['curious', 'coward', 'chatty', 'paranoid', 'loner']) : null; this.npcs.push(n); this.chooseActivity(n);
+    }
+    this.waveT = Math.max(14, 30 - this.wave * 1.2); UI.big('ONDATA ' + this.wave, '#ff3344', list.length + ' nuove vittime'); Sound.bell();
+  },
+  decap(n, b, dirA) {
+    b.headless = true; const a = dirA + rand(-0.5, 0.5), sp = rand(170, 310);
+    this.heads.push({ x: n.x + Math.cos(dirA) * 10, y: n.y + Math.sin(dirA) * 10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, rot: rand(0, 6), vr: rand(-14, 14), look: n.look, age: 0 });
+    this.splatter(n.x, n.y, dirA, 22, 0.5, [80, 260]); Sound.crack(); this.score += 150; this.styleCount['DECAPITATO'] = (this.styleCount['DECAPITATO'] || 0) + 1;
+    if (b.spurt) { b.spurt.t = 3; b.spurt.max = 3; } else b.spurt = { t: 3, max: 3, k: 0, a: dirA };
+    this.st.heads = (this.st.heads || 0) + 1; UI.stat('heads');
+  },
   breakDisguise() { const P = this.player; if (P.disguise) { P.disguise = null; P.disguiseLook = null; UI.toast('Travestimento scoperto!'); } },
   inSmoke(x, y) { for (const s of this.smokes) if (dist(x, y, s.x, s.y) < s.r) return true; return false; },
   attract(x, y, k, r, line) {
@@ -2916,7 +3024,9 @@ const Game = {
     if (crush) { Sound.boom(); Sound.tinnitus(); } else Sound.zap();
     this.shake = 18; this.flash = 0.6; this.flashColor = crush ? '255,200,120' : '140,180,255';
     const inZ = e => e.x / TILE >= x0 && e.x / TILE < x1 + 1 && e.y / TILE >= y0 && e.y / TILE < y1 + 1;
+    const k0 = this.kills;
     for (const m of this.npcs.slice()) if (m.alive && inZ(m)) this.kill(m, { trap: true, zone: true, style: l.style || 'electro', sx: cx, sy: cy, blood: crush ? 2 : 0.6 });
+    if (this.kills - k0 >= 3) UI.ach('zone3');
     this.noise(cx, cy, TILE * 12, 0.5, null, true);
     if (!P.hidden && !this.ended && inZ(P)) { P.dead = true; this.gibs(P.x, P.y, 0, 8, Math.PI); this.splatter(P.x, P.y, 0, 40, Math.PI, [100, 340]); this.finish(false, 'boom'); }
   },
@@ -3005,7 +3115,7 @@ const Game = {
 
   /* ---------------- end conditions ---------------- */
   checkWin() {
-    if (this.ended) return;
+    if (this.ended || this.endless) return;
     if (this.npcs.every(n => !n.alive)) {
       const pend = this.events.find(e => !e.done);
       if (pend) { this.spawnEvent(pend); return; }
@@ -3032,12 +3142,13 @@ const Game = {
     const chBonus = challenges.filter(c => c.ok).length * 300;
     const total = this.win ? Math.max(0, this.score + timeBonus + ghost + policePen + escPen + chBonus) : this.score;
     let rank = 'D';
-    if (this.win) {
+    if (this.endless) rank = this.kills >= 45 ? 'S' : this.kills >= 30 ? 'A' : this.kills >= 18 ? 'B' : this.kills >= 8 ? 'C' : 'D';
+    else if (this.win) {
       if (this.escaped) rank = 'C'; else if (this.policeCalled) rank = 'B'; else if (this.witnesses) rank = 'A'; else rank = 'S';
     }
     return { win: this.win, reason: this.reason, level: this.idx, levelId: this.def.id, levelName: this.def.name, time: t, kills: this.kills, total: this.npcs.length,
       witnesses: this.witnesses, escaped: this.escaped, police: this.policeCalled, combo: this.combo.best, base: this.score,
-      timeBonus, ghost, policePen, escPen, challenges, chBonus, score: total, rank, styles: this.styleCount,
+      timeBonus, ghost, policePen, escPen, challenges, chBonus, score: Math.round(total * this.dm.score), rank, styles: this.styleCount, diff: UI.diff, endless: this.endless, wave: this.wave,
       objectives: (this.objectives || []).map(o => ({ text: OBJ[o.id].t, done: o.done, pts: OBJ[o.id].pts })), objPts: this.objPts || 0 };
   },
 
@@ -3074,9 +3185,10 @@ const Game = {
     if (!this.ended) {
       if ((this.socialT -= dt) <= 0) { this.socialT = 0.5; this.startTalks(); }
       this.updateCams(dt);
+      if (this.endless) { this.waveT -= dt; if (this.waveT <= 0 || !this.npcs.some(n => n.alive)) this.spawnWave(); }
       for (const l of this.lures) if (l.zoneT > 0 && (l.zoneT -= dt) <= 0) this.zoneKill(l);
       for (let i = this.snares.length - 1; i >= 0; i--) { const sn = this.snares[i], v = this.npcs.find(n => n.alive && dist(n.x, n.y, sn.x, sn.y) < TILE * 0.55); if (v) { this.snares.splice(i, 1); this.kill(v, { trap: true, style: 'snare', sx: sn.x, sy: sn.y, blood: 1.4 }); } }
-      for (const sm of this.smokes) { sm.t -= dt; if (Math.random() < dt * 14 && this.particles.length < 700) this.particles.push({ x: sm.x + rand(-sm.r, sm.r) * 0.8, y: sm.y + rand(-sm.r, sm.r) * 0.8, vx: rand(-8, 8), vy: rand(-8, 8), life: 2.2, max: 2.2, size: rand(14, 24), type: 'smoke' }); }
+      for (const sm of this.smokes) { sm.t -= dt; if (Math.random() < dt * 14 && this.particles.length < this.pcap) this.particles.push({ x: sm.x + rand(-sm.r, sm.r) * 0.8, y: sm.y + rand(-sm.r, sm.r) * 0.8, vx: rand(-8, 8), vy: rand(-8, 8), life: 2.2, max: 2.2, size: rand(14, 24), type: 'smoke' }); }
       this.smokes = this.smokes.filter(sm => sm.t > 0);
       for (const d of this.devices) d.t -= dt; this.devices = this.devices.filter(d => d.t > 0);
       for (const n of this.npcs) if (n.alive && n.poison > 0) {
@@ -3092,7 +3204,7 @@ const Game = {
       for (const n of this.npcs) {
         if (!n.alive || n.state !== 'act') continue;
         if (!n.talk && !(n.bubbleT > 0) && n.anim !== 'sleep' && Math.random() < dt * 0.035) this.say(n, pick(CHATTER[n.lastTag] || CHATTER.any), 2.4);
-        if (n.anim === 'dance' && mus && Math.random() < dt * 0.9 && this.particles.length < 700) this.particles.push({ x: n.x + rand(-10, 10), y: n.y - 14, vx: rand(-10, 10), vy: rand(-30, -18), life: 1.5, max: 1.5, size: 12, type: 'note', col: Math.floor(rand(0, 360)) });
+        if (n.anim === 'dance' && mus && Math.random() < dt * 0.9 && this.particles.length < this.pcap) this.particles.push({ x: n.x + rand(-10, 10), y: n.y - 14, vx: rand(-10, 10), vy: rand(-30, -18), life: 1.5, max: 1.5, size: 12, type: 'note', col: Math.floor(rand(0, 360)) });
         if (n.poi && n.poi.tag === 'fire' && Math.random() < dt * 0.12) this.particles.push({ x: n.x, y: n.y - 14, vx: rand(-6, 6), vy: -22, life: 1.6, max: 1.6, size: 12, type: 'note', col: 40 });
       }
     }
@@ -3120,8 +3232,17 @@ const Game = {
       const tens = Math.max(maxSus * 0.9, this.chased ? 1 : 0, this.police ? 0.6 + 0.4 * (1 - this.police.t / this.police.max) : 0, this.frenzyT > 0 ? 0.5 : 0, this.struggle ? 1 : 0);
       Sound.setLevels(this.ended ? 0 : stalk, this.ended ? 0 : tens);
       if (stalk > 0.65 && this.time > this.whisperCd) { Sound.stalkWhisper(); this.whisperCd = this.time + 30; } }
-    { const Pl = this.player; Pl.hpT += dt; if (Pl.hp < 3 && Pl.hpT > 22) { Pl.hp++; Pl.hpT = 0; UI.toast('Ti riprendi un po\'…'); } }
+    { const Pl = this.player; Pl.hpT += dt; if (Pl.hp < Pl.hpMax && Pl.hpT > 22) { Pl.hp++; Pl.hpT = 0; UI.toast('Ti riprendi un po\'…'); } }
     if (this.punchT > 0) this.punchT -= dt; if (this.killCamT > 0) this.killCamT -= rdt;
+    for (const h of this.heads) {
+      h.age += dt;
+      if (Math.hypot(h.vx, h.vy) > 6) {
+        let nx = h.x + h.vx * dt, ny = h.y + h.vy * dt;
+        if (this.solidPx(nx, ny)) { if (!this.solidPx(nx, h.y)) h.vy *= -0.55; else if (!this.solidPx(h.x, ny)) h.vx *= -0.55; else { h.vx *= -0.5; h.vy *= -0.5; } Sound.thud(); nx = h.x; ny = h.y; }
+        else Render.smear(h.x, h.y, nx, ny, 7, 0.6);
+        h.x = nx; h.y = ny; h.rot += h.vr * dt; const f = Math.pow(0.07, dt); h.vx *= f; h.vy *= f; h.vr *= f;
+      } else if (!h.rest) { h.rest = true; Render.splat(h.x, h.y, 12, 0.9); }
+    }
     if (this.impactT > 0) this.impactT -= rdt; if (this.focus) this.focus.t -= rdt;
     for (const sl of this.slashes) sl.life -= dt; this.slashes = this.slashes.filter(sl => sl.life > 0);
     for (const b of this.bodies) {
@@ -3176,7 +3297,7 @@ const Game = {
       if (n.anim === 'smoke' && Math.random() < dt * 2) this.particles.push({ x: n.x + Math.cos(n.ang) * 10, y: n.y + Math.sin(n.ang) * 10, vx: rand(-8, 8), vy: rand(-20, -5), life: 2, max: 2, size: 3, type: 'smoke' });
       if (n.anim === 'kiss' && Math.random() < dt * 0.8) this.particles.push({ x: n.x + Math.cos(n.ang) * 14, y: n.y - 10, vx: rand(-6, 6), vy: -18, life: 1.6, max: 1.6, size: 6, type: 'heart' });
     }
-    for (const o of this.objs) if (o.t === 'campfire' && Math.random() < dt * 14 && this.particles.length < 700) this.particles.push({ x: (o.x + 0.5) * TILE + rand(-8, 8), y: (o.y + 0.5) * TILE + rand(-4, 6), vx: rand(-10, 10), vy: rand(-50, -20), life: rand(0.5, 1), max: 1, size: rand(4, 8), type: 'fire' });
+    for (const o of this.objs) if (o.t === 'campfire' && Math.random() < dt * 14 && this.particles.length < this.pcap) this.particles.push({ x: (o.x + 0.5) * TILE + rand(-8, 8), y: (o.y + 0.5) * TILE + rand(-4, 6), vx: rand(-10, 10), vy: rand(-50, -20), life: rand(0.5, 1), max: 1, size: rand(4, 8), type: 'fire' });
     // context + target
     this.context = this.ended || this.fin || this.struggle ? null : this.computeContext();
     this.target = this.currentTarget();
@@ -3286,8 +3407,9 @@ const Render = {
     this.drips = Array.from({ length: 22 }, (_, i) => ({ x: (i + Math.random() * 0.8) / 22, len: rand(40, 170), per: rand(5, 11), off: rand(0, 11), w: rand(2, 5) }));
     addEventListener('resize', () => this.resize()); this.resize();
   },
+  setFx(fx) { this.lowFx = fx === 'low'; if (this.canvas) this.resize(); },
   resize() {
-    this.dpr = Math.min(devicePixelRatio || 1, IS_TOUCH ? 1.75 : 2);
+    this.dpr = this.lowFx ? 1 : Math.min(devicePixelRatio || 1, IS_TOUCH ? 1.75 : 2);
     this.w = innerWidth; this.h = innerHeight;
     this.canvas.width = Math.round(this.w * this.dpr); this.canvas.height = Math.round(this.h * this.dpr);
     this.canvas.style.width = this.w + 'px'; this.canvas.style.height = this.h + 'px';
@@ -3625,7 +3747,8 @@ const Render = {
     for (const sn of G.snares) { c.save(); c.translate(sn.x, sn.y); c.strokeStyle = '#9aa0a8'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 9, 0, TAU); c.stroke(); c.fillStyle = '#6a6e74'; for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; c.beginPath(); c.moveTo(Math.cos(a) * 9, Math.sin(a) * 9); c.lineTo(Math.cos(a + 0.2) * 5, Math.sin(a + 0.2) * 5); c.lineTo(Math.cos(a - 0.2) * 5, Math.sin(a - 0.2) * 5); c.fill(); } c.restore(); }
     for (const d of G.devices) { const pu = 0.5 + 0.5 * Math.sin(t * 9); c.fillStyle = '#222'; rr(c, d.x - 8, d.y - 5, 16, 10, 2); c.fill(); c.fillStyle = '#888'; circ(c, d.x - 3, d.y, 3); c.strokeStyle = `rgba(255,220,100,${0.2 + 0.5 * pu})`; c.lineWidth = 2; c.beginPath(); c.arc(d.x, d.y, 12 + pu * 14, 0, TAU); c.stroke(); }
     // bodies
-    for (const b of G.bodies) if (!b.hidden && inView(b.x, b.y, 40)) drawPerson(c, b.x, b.y, b.ang, b.n.look, 'dead', t, 0, { burnt: b.burnt, split: b.split, wound: b.wound, style: b.style, tw: (b.age || 9) < 1.5 ? 1.5 - b.age : 0 });
+    for (const b of G.bodies) if (!b.hidden && inView(b.x, b.y, 40)) drawPerson(c, b.x, b.y, b.ang, b.n.look, 'dead', t, 0, { burnt: b.burnt, split: b.split, wound: b.wound, style: b.style, headless: b.headless, tw: (b.age || 9) < 1.5 ? 1.5 - b.age : 0 });
+    for (const h of G.heads) if (inView(h.x, h.y, 30)) { c.save(); c.translate(h.x, h.y); c.rotate(h.rot); headDraw(c, Object.assign({}, h.look, { skin: mix(h.look.skin, '#9a9a9a', 0.35) }), 0, 0); c.fillStyle = 'rgba(130,0,12,0.85)'; ell(c, -4, 0, 5, 6.5); c.restore(); }
     // characters (y-sorted)
     const list = G.npcs.filter(n => n.alive && inView(n.x, n.y, 40));
     list.push(G.player); list.sort((a, b) => a.y - b.y);
@@ -3907,8 +4030,8 @@ function drawPerson(c, x, y, ang, L, anim, t, ph, o = {}) {
     c.fillStyle = sh; ell(c, -2, 0, 12, 10.5);
     c.fillStyle = 'rgba(120,0,10,0.8)'; ell(c, 2, 2, 5 + wd * 2.4, 3.5 + wd * 1.6); c.fillStyle = 'rgba(170,10,24,0.55)'; ell(c, 0, 1, 3 + wd, 2 + wd * 0.8);
     if (bn) { c.fillStyle = 'rgba(0,0,0,0.5)'; ell(c, -2, 0, 11, 9.5); }
-    headDraw(c, Object.assign({}, L, { skin: sk }), 16, 0);
-    if (o.style === 'slash') { c.strokeStyle = 'rgba(150,0,16,0.95)'; c.lineWidth = 2.4; c.beginPath(); c.moveTo(11, -6); c.quadraticCurveTo(13, 0, 11, 6); c.stroke(); c.fillStyle = 'rgba(130,0,14,0.7)'; ell(c, 10, 0, 4, 7); }
+    if (!o.headless) headDraw(c, Object.assign({}, L, { skin: sk }), 16, 0); else { c.fillStyle = '#7a000c'; ell(c, 13, 0, 5, 7); c.fillStyle = '#b01426'; ell(c, 14, 0, 2.5, 3.5); }
+    if (o.style === 'slash' && !o.headless) { c.strokeStyle = 'rgba(150,0,16,0.95)'; c.lineWidth = 2.4; c.beginPath(); c.moveTo(11, -6); c.quadraticCurveTo(13, 0, 11, 6); c.stroke(); c.fillStyle = 'rgba(130,0,14,0.7)'; ell(c, 10, 0, 4, 7); }
     if (o.style === 'shoot') { c.fillStyle = 'rgba(120,0,10,0.9)'; circ(c, 19, 1, 4.5); c.fillStyle = '#300'; circ(c, 20, 0, 1.6); }
     if (o.style === 'chop') { c.fillStyle = 'rgba(120,0,10,0.9)'; ell(c, 12, 2, 7, 5); }
     c.restore(); return;
@@ -4040,6 +4163,7 @@ const randomNick = () => pick(['Lama', 'Ombra', 'Corvo', 'Spettro', 'Gelo', 'Cen
 
 const UI = {
   loadout: store.get('loadout', ['bait', 'poison']),
+  diff: store.get('diff', 'normal'), fx: store.get('fx', 'high'), endless: false, endlessSel: false,
   scene: 'boot', btn: {}, hudCache: {}, progress: store.get('progress', { unlocked: 0, best: {}, kills: 0 }), shopBack: 'menu',
   init() {
     this.mm = $('#minimap'); this.ensureShop();
@@ -4056,12 +4180,29 @@ const UI = {
       b.addEventListener('pointerenter', () => Sound.hover());
     });
     $('#btnIntro').addEventListener('click', () => this.playIntro());
+    // PWA install
+    const standalone = matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone;
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); this.installEvt = e; if (!standalone) $('#btnInstall').classList.remove('hidden'); });
+    window.addEventListener('appinstalled', () => { $('#btnInstall').classList.add('hidden'); this.installEvt = null; });
+    if (!standalone && /iphone|ipad|ipod/i.test(navigator.userAgent)) $('#btnInstall').classList.remove('hidden');
+    $('#btnInstall').addEventListener('click', async () => {
+      Sound.click();
+      if (this.installEvt) { this.installEvt.prompt(); try { await this.installEvt.userChoice; } catch (e) { /* ignore */ } this.installEvt = null; $('#btnInstall').classList.add('hidden'); }
+      else alert('Su iPhone/iPad: tocca Condividi ⎋ e poi "Aggiungi a Home".');
+    });
     // options
     const nick = $('#optNick'); nick.value = store.get('nick');
     nick.addEventListener('change', () => { const v = cleanNick(nick.value); const ok = v.length >= 2 ? v : store.get('nick'); nick.value = ok; store.set('nick', ok); store.set('nickSet', true); FB.saveProfile({}); FB.setPresence({}); FB.renameAll(); this.refreshMenu(); });
     $('#menuNick').addEventListener('click', () => { Sound.click(); this.askNick('menu'); });
     $('#nickOk').addEventListener('click', () => this.submitNick());
     $('#btnShop').addEventListener('click', () => { Sound.click(); this.openShop('menu'); });
+    $('#btnPlay').addEventListener('click', () => { Sound.click(); this.endlessSel = false; this.endless = false; this.show('levels'); });
+    $('#btnEndless').addEventListener('click', () => { Sound.click(); this.endlessSel = true; this.show('levels'); });
+    $('#btnTrophies').addEventListener('click', () => { Sound.click(); this.openTrophies(); });
+    $('#trophyBack').addEventListener('click', () => { Sound.click(); this.scene = 'menu'; this.show('menu'); });
+    $('#optDiff').value = this.diff; $('#optDiff').addEventListener('change', e => { this.diff = e.target.value; store.set('diff', this.diff); });
+    $('#optFx').value = this.fx; $('#optFx').addEventListener('change', e => { this.fx = e.target.value; store.set('fx', this.fx); Render.setFx(this.fx); });
+    Render.setFx(this.fx);
     $('#shopBack').addEventListener('click', () => { Sound.click(); this.scene = this.shopBack === 'results' ? 'results' : 'menu'; this.show(this.shopBack); if (this.shopBack === 'levels') this.buildLevels(); });
     $('#nickRnd').addEventListener('click', () => { Sound.click(); $('#nickInput').value = randomNick(); $('#nickErr').textContent = ''; });
     $('#nickInput').addEventListener('input', e => { const v = e.target.value.replace(/[^\w àèéìòùÀÈÉÌÒÙ.\-]/g, ''); if (v !== e.target.value) e.target.value = v; });
@@ -4094,8 +4235,23 @@ const UI = {
     document.body.classList.toggle('touch', IS_TOUCH);
     this.refreshMenu();
   },
-  ensureShop() { const p = this.progress; if (!p.shop) p.shop = newShop(); if (p.blood == null) p.blood = 100; p.shopV = p.shopV || 0; this.loadout = (this.loadout || []).filter(id => p.shop.own.includes(id)); },
+  ensureShop() { const p = this.progress; if (!p.shop) p.shop = newShop(); if (p.blood == null) p.blood = 100; p.shopV = p.shopV || 0; if (!p.ach) p.ach = {}; if (!p.stats) p.stats = { kills: 0, heads: 0, finishers: 0, traps: 0, bloodEarned: 0 }; this.loadout = (this.loadout || []).filter(id => p.shop.own.includes(id)); },
   persist() { const p = this.progress; p.shopV = (p.shopV || 0) + 1; store.set('progress', p); FB.saveProfile({ unlocked: p.unlocked, kills: p.kills || 0, best: p.best, blood: p.blood, shop: p.shop, shopV: p.shopV }); },
+  ach(id) {
+    const p = this.progress; if (!p.ach || p.ach[id]) return; const a = ACH.find(x => x.id === id); if (!a) return;
+    p.ach[id] = Date.now(); p.blood = (p.blood || 0) + 50; this.persist(); this.achPop(a); Sound.objective();
+  },
+  stat(k, n = 1) { const p = this.progress; if (!p.stats) return; p.stats[k] = (p.stats[k] || 0) + n; for (const a of ACH) if (a.stat === k && p.stats[k] >= a.goal) this.ach(a.id); store.set('progress', p); },
+  achPop(a) { const el = $('#achPop'); el.innerHTML = `<small>🏆 TROFEO SBLOCCATO · +50 🩸</small>${a.n}`; el.className = ''; void el.offsetWidth; el.className = 'show'; },
+  openTrophies() { this.scene = 'trophies'; this.show('trophies'); this.buildTrophies(); },
+  buildTrophies() {
+    const p = this.progress, box = $('#trophyList'); box.innerHTML = ''; let n = 0;
+    for (const a of ACH) {
+      const on = !!p.ach[a.id]; if (on) n++; const pr = a.goal && !on ? Math.min(100, (p.stats[a.stat] || 0) / a.goal * 100) : 0;
+      const d = document.createElement('div'); d.className = 'tcard' + (on ? ' on' : ''); d.innerHTML = `<div class="ic">🏆</div><div><h3>${a.n}</h3><p>${a.d}</p>${a.goal && !on ? `<div class="bar"><i style="width:${pr}%"></i></div>` : ''}</div>`; box.appendChild(d);
+    }
+    $('#trophyCount').textContent = `${n}/${ACH.length}`;
+  },
   openShop(back) { this.shopBack = back; this.scene = 'shop'; this.show('shop'); this.buildShop(); },
   buildShop(msg) {
     const p = this.progress, sh = p.shop; $('#shopBal').innerHTML = `🩸 <b>${p.blood}</b>`; $('#shopMsg').textContent = msg || 'Spendi i punti sangue guadagnati vincendo i livelli. Porti sempre 2 gadget a partita.';
@@ -4103,7 +4259,7 @@ const UI = {
     const item = (icon, name, desc, info, label, cost, fn, own) => {
       const d = document.createElement('div'); d.className = 'sitem' + (own ? ' own' : '');
       d.innerHTML = `<div class="ic">${icon}</div><h3>${name}</h3><p>${desc}</p><div class="si">${info}</div>`;
-      if (label) { const b = document.createElement('button'); b.className = 'btn buy' + (p.blood < cost ? ' broke' : ''); b.textContent = `${label} · 🩸${cost}`; b.onclick = () => { if (p.blood < cost) { Sound.denied(); this.buildShop('Non hai abbastanza punti sangue.'); return; } p.blood -= cost; fn(); this.persist(); Sound.pickup(); this.buildShop('Acquistato!'); }; d.appendChild(b); }
+      if (label) { const b = document.createElement('button'); b.className = 'btn buy' + (p.blood < cost ? ' broke' : ''); b.textContent = `${label} · 🩸${cost}`; b.onclick = () => { if (p.blood < cost) { Sound.denied(); this.buildShop('Non hai abbastanza punti sangue.'); return; } p.blood -= cost; fn(); this.persist(); Sound.pickup(); if (p.shop.own.length >= 4) this.ach('arsenal'); this.buildShop('Acquistato!'); }; d.appendChild(b); }
       else { const t = document.createElement('div'); t.className = 'maxed'; t.textContent = 'AL MASSIMO'; d.appendChild(t); }
       box.appendChild(d);
     };
@@ -4189,6 +4345,7 @@ const UI = {
 
   /* ---------- level select ---------- */
   buildLevels() {
+    $('#levelsTitle').textContent = this.endlessSel ? 'Mattatoio ∞ · scegli il luogo' : 'Scegli la notte';
     const box = $('#levelCards'); box.innerHTML = '';
     LEVELS.forEach((L, i) => {
       const locked = i > this.progress.unlocked, best = this.progress.best[L.id];
@@ -4197,7 +4354,7 @@ const UI = {
         <h3>${L.name}</h3><div class="csub">${L.sub}</div><p>${L.blurb}</p>
         <div class="cbest">${locked ? '🔒 Completa il livello precedente' : best ? `Record <b>${best.score}</b> · voto <b style="color:${RANK_COL[best.rank]}">${best.rank}</b>` : 'Mai giocato'}</div>`;
       this.drawThumb(d.querySelector('canvas'), L);
-      if (!locked) d.addEventListener('click', () => { Sound.click(); this.startLevel(i); });
+      if (!locked) d.addEventListener('click', () => { Sound.click(); this.endless = this.endlessSel; this.startLevel(i); });
       box.appendChild(d);
     });
     const d = document.createElement('div'); d.className = 'card locked soon';
@@ -4225,14 +4382,14 @@ const UI = {
     const tok = this.boardTok = (this.boardTok || 0) + 1;
     const tabs = $('#boardTabs'); tabs.innerHTML = '';
     const mk = (key, label) => { const b = document.createElement('button'); b.className = 'tab' + (key === id ? ' on' : ''); b.textContent = label; b.onclick = () => { Sound.click(); this.buildBoard(key); }; tabs.appendChild(b); };
-    mk('world', '🌍 MONDIALE'); LEVELS.forEach(L => mk(L.id, L.name));
+    mk('world', '🌍 MONDIALE'); mk('endless', '∞ MATTATOIO'); LEVELS.forEach(L => mk(L.id, L.name));
     const list = $('#boardList'), world = id === 'world', me = this.worldStats();
     list.innerHTML = '<div class="muted">Caricamento…</div>';
     let rows = null; try { rows = await (world ? FB.getWorld() : FB.getLeaderboard(id)); } catch (e) { rows = null; }
     if (tok !== this.boardTok) return;
     const foot = `<div class="boardMe">Giochi come <b style="color:var(--bone)">${esc(this.nick())}</b> · punteggio mondiale <b style="color:var(--bone)">${me.score}</b> · ${me.levels}/${LEVELS.length} livelli</div>`;
     if (!rows) {
-      const best = this.progress.best[id];
+      const best = id === 'endless' ? (this.progress.endlessBest ? Object.assign({ rank: '-' }, this.progress.endlessBest) : null) : this.progress.best[id];
       list.innerHTML = `<div class="muted">Classifica online non disponibile qui.</div>` + (world
         ? `<div class="row world me"><span>1</span><span>${esc(this.nick())}</span><span>${me.levels}★</span><span>${me.score}</span></div>`
         : best ? `<div class="row me"><span>1</span><span>${esc(this.nick())}</span><span style="color:${RANK_COL[best.rank]}">${best.rank}</span><span>${best.score}</span></div>` : '') + foot;
@@ -4249,8 +4406,9 @@ const UI = {
     Game.running = false; Sound.stopSiren();
     $('#liNum').textContent = 'LIVELLO ' + (i + 1);
     $('#liName').textContent = L.name; $('#liSub').textContent = L.sub; $('#liBlurb').textContent = L.blurb;
-    const bb = L.build(); $('#liCount').textContent = bb.npcs.length + (bb.events || []).length;
-    const ch = (L.challenges || []).map(id => CHALLENGES[id].t);
+    const bb = L.build();
+    $('.obj').innerHTML = this.endless ? 'MATTATOIO: ondate infinite · uccidi più persone che puoi prima che arrivi la polizia' : `OBIETTIVO: elimina <b id="liCount">${bb.npcs.length + (bb.events || []).length}</b> persone · nessuno deve completare una chiamata`;
+    const ch = this.endless ? [] : (L.challenges || []).map(id => CHALLENGES[id].t);
     $('#liChal').innerHTML = ch.length ? '<b>SFIDE BONUS · +300 CIASCUNA</b>' + ch.map(t => '◆ ' + t).join('<br>') : '';
     this.buildLoadout();
     this.show('lvlintro'); this.scene = 'lvlintro'; Sound.sting();
@@ -4268,6 +4426,10 @@ const UI = {
     }
     const sb = document.createElement('button'); sb.className = 'chip shopchip'; sb.innerHTML = `🩸 ARMERIA<small>Hai ${this.progress.blood} punti sangue</small>`;
     sb.addEventListener('click', e => { e.stopPropagation(); Sound.click(); this.openShop('levels'); }); row.appendChild(sb);
+    const lab = document.createElement('b'); lab.textContent = 'DIFFICOLTÀ'; lab.style.marginTop = '4px'; box.appendChild(lab);
+    const dr = document.createElement('div'); dr.className = 'chips';
+    for (const [id, d] of Object.entries(DIFF)) { const b = document.createElement('button'); b.className = 'chip' + (this.diff === id ? ' on' : ''); b.textContent = d.n; b.addEventListener('click', e => { e.stopPropagation(); Sound.click(); this.diff = id; store.set('diff', id); $('#optDiff').value = id; this.buildLoadout(); }); dr.appendChild(b); }
+    box.appendChild(dr);
   },
   beginPlay() {
     if (this.scene !== 'lvlintro') return;
@@ -4304,14 +4466,14 @@ const UI = {
     this.cineUI();
     const alive = G.npcs.filter(n => n.alive).length;
     this.set('hudScore', String(G.score));
-    this.set('hudVictims', G.npcs.map(n => `<span class="${n.alive ? 'v' : n.escaped ? 'e' : 'd'}" title="${n.name}"></span>`).join(''), 'innerHTML');
+    this.set('hudVictims', (G.endless ? G.npcs.filter(n => n.alive).slice(-14) : G.npcs).map(n => `<span class="${n.alive ? 'v' : n.escaped ? 'e' : 'd'}" title="${n.name}"></span>`).join(''), 'innerHTML');
     const pend = G.events.filter(e => !e.done).length;
-    this.set('hudLeft', alive + (alive === 1 ? ' rimasta' : ' rimaste') + (pend ? ` · +${pend} in arrivo` : ''));
+    this.set('hudLeft', G.endless ? `ONDATA ${G.wave} · ${alive} vittime · ${G.kills} uccise` : alive + (alive === 1 ? ' rimasta' : ' rimaste') + (pend ? ` · +${pend} in arrivo` : ''));
     { const wp = G.player.weapon, wd = WEAPONS[wp ? wp.id : 'knife']; this.set('hudWeapon', `${wd.icon} <b>${wd.name.toUpperCase()}</b>${wp ? ' ×' + wp.uses : ''}`, 'innerHTML'); }
     $('#hudFrenzy').classList.toggle('hidden', !(G.frenzyT > 0)); if (G.frenzyT > 0) $('#hudFrenzyBar i').style.width = Math.min(100, G.frenzyT / G.frenzyMax * 100) + '%';
     $('#hudChase').classList.toggle('hidden', !G.chased);
     this.set('hudObj', (G.objectives || []).map(o => { const d = OBJ[o.id]; return `<div class="ob${o.done ? ' done' : ''}">${o.done ? '✔' : '◇'} ${d.t}${d.need ? ` (${o.n}/${d.need})` : ''} <b>+${d.pts}</b></div>`; }).join(''), 'innerHTML');
-    { const arm = G.npcs.some(n => n.alive && n.armed); $('#hudHp').style.display = arm || G.player.hp < 3 ? '' : 'none'; this.set('hudHp', [0, 1, 2].map(i => `<i class="${G.player.hp > i ? 'f' : ''}">♥</i>`).join(''), 'innerHTML'); }
+    { const arm = G.npcs.some(n => n.alive && n.armed); $('#hudHp').style.display = arm || G.player.hp < G.player.hpMax ? '' : 'none'; this.set('hudHp', Array.from({ length: G.player.hpMax }, (_, i) => `<i class="${G.player.hp > i ? 'f' : ''}">♥</i>`).join(''), 'innerHTML'); }
     { const alt = G.context && G.context.alt; $('#grabBtn').classList.toggle('hidden', !alt); if (alt) this.set('grabLabel', alt.fin.def.label);
       $('#struggle').classList.toggle('hidden', !G.struggle); if (G.struggle) $('#struggleBar').style.width = Math.min(100, G.struggle.prog * 100) + '%'; }
     for (let i = 0; i < 2; i++) { const g = G.gadgets[i], el = $('#gad' + i); el.style.display = g ? '' : 'none'; if (!g) continue; const d = GADGETS[g.id]; this.set('gad' + i, `<span class="ic">${d.icon}</span>${d.short}<small>×${g.n}</small><span class="kb">${i ? 'C' : 'X'}</span>`, 'innerHTML'); el.classList.toggle('na', g.n <= 0); }
@@ -4351,8 +4513,9 @@ const UI = {
   async results(r) {
     this.scene = 'results'; Game.running = false;
     $('#hud').classList.add('hidden'); $('#touch').classList.add('hidden');
-    const best = this.progress.best[r.levelId];
-    const isRecord = r.win && (!best || r.score > best.score);
+    const best = this.progress.best[r.levelId], eb = this.progress.endlessBest;
+    const isRecord = r.endless ? (!eb || r.score > eb.score) : r.win && (!best || r.score > best.score);
+    if (r.endless) { if (isRecord) this.progress.endlessBest = { score: r.score, kills: r.kills, wave: r.wave, time: Math.round(r.time) }; if (r.kills >= 30) this.ach('endless'); }
     if (r.win) {
       if (isRecord) this.progress.best[r.levelId] = { score: r.score, rank: r.rank, time: Math.round(r.time) };
       if (r.level + 1 > this.progress.unlocked && r.level + 1 < LEVELS.length) this.progress.unlocked = r.level + 1;
@@ -4363,19 +4526,25 @@ const UI = {
       const rb = { S: 150, A: 100, B: 60, C: 30, D: 0 }[r.rank] || 0, cb = (r.challenges || []).filter(c => c.ok).length * 40, first = best ? 0 : 100;
       bloodGain = Math.round(r.score / 12) + rb + cb + first + (r.objectives || []).filter(o => o.done).length * 40; this.progress.blood = (this.progress.blood || 0) + bloodGain;
     }
+    if (r.endless) { bloodGain = Math.round(r.score / 20) + (r.wave || 0) * 12; this.progress.blood = (this.progress.blood || 0) + bloodGain; }
     this.progress.shopV = (this.progress.shopV || 0) + (bloodGain ? 1 : 0);
+    if (bloodGain) this.stat('bloodEarned', bloodGain);
+    if (r.win && !r.endless) {
+      this.ach('win1'); if (r.witnesses === 0) this.ach('ghost'); if (r.rank === 'S') this.ach('srank'); if (r.time < LEVELS[r.level].par * 0.6) this.ach('speed'); if (r.diff === 'hard') this.ach('hard');
+      if (Object.keys(this.progress.best).length >= LEVELS.length) this.ach('allclear');
+    }
     store.set('progress', this.progress);
     const mm = Math.floor(r.time / 60), ss = String(Math.floor(r.time % 60)).padStart(2, '0');
     const styles = Object.entries(r.styles).map(([k, v]) => `<span>${k} ×${v}</span>`).join('');
     const next = r.win && r.level + 1 < LEVELS.length;
     $('#results').innerHTML = `
       <div class="resWrap">
-        <div class="resHead ${r.win ? 'win' : 'lose'}">${r.win ? 'LIVELLO COMPLETATO' : r.reason === 'boom' ? 'ESPLOSO' : r.reason === 'shot' ? 'ABBATTUTO' : 'PRESO'}</div>
+        <div class="resHead ${r.win ? 'win' : 'lose'}">${r.endless ? 'MATTATOIO' : r.win ? 'LIVELLO COMPLETATO' : r.reason === 'boom' ? 'ESPLOSO' : r.reason === 'shot' ? 'ABBATTUTO' : 'PRESO'}</div>
         <div class="resLvl">${r.levelName}</div>
         <div class="resBody">
           <div class="rank" style="color:${RANK_COL[r.rank]}">${r.rank}</div>
           <div class="resList">
-            <div><span>Vittime</span><b>${r.kills}/${r.total}</b></div>
+            <div><span>Vittime</span><b>${r.endless ? r.kills + ' · ondata ' + r.wave : r.kills + '/' + r.total}</b></div>
             <div><span>Tempo</span><b>${mm}:${ss}</b></div>
             <div><span>Testimoni</span><b>${r.witnesses}</b></div>
             <div><span>Combo massima</span><b>×${r.combo}</b></div>
@@ -4387,7 +4556,7 @@ const UI = {
             ${r.win ? (r.challenges || []).map(c => `<div class="ch ${c.ok ? 'ok' : 'no'}"><span>${c.ok ? '◆' : '◇'} ${c.text}</span><b>${c.ok ? '+300' : '—'}</b></div>`).join('') : ''}
             ${r.win || r.score ? ((r.objectives || []).length ? `<div class="obr"><span>★ Obiettivi ${(r.objectives || []).filter(o => o.done).length}/${r.objectives.length}</span><b>+${r.objPts}</b></div>` : '') : ''}
             <div class="tot"><span>TOTALE</span><b>${r.score}</b></div>
-            ${r.win ? `<div class="blood"><span>🩸 PUNTI SANGUE</span><b>+${bloodGain}</b></div><div class="net">Hai ${this.progress.blood} punti sangue da spendere nell'Armeria</div>` : ''}
+            ${r.win || r.endless ? `<div class="blood"><span>🩸 PUNTI SANGUE</span><b>+${bloodGain}</b></div><div class="net">Hai ${this.progress.blood} punti sangue da spendere nell'Armeria</div>` : ''}
             ${isRecord ? '<div class="rec">★ NUOVO RECORD ★</div>' : ''}
             <div class="styles">${styles}</div>
             <div class="net" id="resNet"></div>
@@ -4407,10 +4576,10 @@ const UI = {
     $('#rMenu').onclick = () => { Sound.click(); this.toMenu(); };
     if (r.win) $('#rShop').onclick = () => { Sound.click(); this.openShop('results'); };
     FB.saveProfile({ unlocked: this.progress.unlocked, kills: this.progress.kills, best: this.progress.best, blood: this.progress.blood, shop: this.progress.shop, shopV: this.progress.shopV });
-    if (r.win) {
-      FB.bumpStat('wins');
+    if (r.win || (r.endless && r.kills > 0)) {
+      if (r.win) FB.bumpStat('wins');
       const net = $('#resNet');
-      if (FB.ready) { net.textContent = 'Invio alla classifica…'; try { const ok = await FB.submitScore(r.levelId, r); await FB.submitWorld(this.worldStats()); net.textContent = ok ? 'Classifica mondiale aggiornata ✓' : 'Il tuo record online è già più alto'; } catch (e) { net.textContent = 'Classifica non raggiungibile'; } }
+      if (FB.ready) { net.textContent = 'Invio alla classifica…'; try { const ok = r.endless ? await FB.submitScore('endless', Object.assign({}, r, { kills: Math.min(r.kills, 60) })) : await FB.submitScore(r.levelId, r); if (!r.endless) await FB.submitWorld(this.worldStats()); net.textContent = ok ? 'Classifica mondiale aggiornata ✓' : 'Il tuo record online è già più alto'; } catch (e) { net.textContent = 'Classifica non raggiungibile'; } }
       else net.textContent = 'Offline: punteggio salvato solo su questo dispositivo';
     }
   }
@@ -4429,6 +4598,8 @@ async function goFull() {
   try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch (e) { /* unsupported */ }
 }
 
+/* ---------------- PWA ---------------- */
+if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 /* ---------------- boot ---------------- */
 (function main() {
   const cv = $('#cv');
