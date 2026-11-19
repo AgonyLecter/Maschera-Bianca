@@ -319,6 +319,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 .resList .blood{font-size:1.15em}.resList .blood b{color:#ff5a6a}
 .chip.lock{opacity:.55}.chip.shopchip{border-color:#c4101f;background:rgba(196,16,31,.2)}
 @media (max-height:560px){#shopList{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}.sitem{padding:6px 8px}.sitem p{display:none}.sitem .ic{font-size:20px}}
+#throwBtn{width:clamp(56px,13vh,72px);height:clamp(56px,13vh,72px);font-size:10px;font-weight:700;text-align:center;line-height:1.1;padding:4px;border-color:#ffd23a;background:radial-gradient(circle at 40% 35%,rgba(255,210,60,.55),rgba(60,40,0,.9))}
 #grabBtn{width:clamp(70px,16vh,92px);height:clamp(70px,16vh,92px);font-size:10px;font-weight:700;text-align:center;line-height:1.1;padding:6px;border-color:#ffb02a;background:radial-gradient(circle at 40% 35%,rgba(255,150,30,.9),rgba(90,30,0,.92));box-shadow:0 0 18px rgba(255,150,30,.6);animation:killp .6s infinite alternate}
 #struggle{position:fixed;left:50%;bottom:16%;transform:translateX(-50%);z-index:13;text-align:center;pointer-events:none;width:min(420px,80vw)}
 #struggle .sTxt{font-family:Nosifer;font-size:clamp(14px,3.6vh,24px);color:#ff2a3a;text-shadow:0 0 18px #f00,0 3px 0 #000;animation:cshake .1s steps(2) infinite}
@@ -469,10 +470,11 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
       </div>
     </div>
     <button class="cbtn" id="sprintBtn" data-btn="sprint">CORRI</button>
+    <button class="cbtn hidden" id="throwBtn" data-btn="throw"><span>🔪<br>LANCIA</span><span class="kb">T</span></button>
     <button class="cbtn hidden" id="grabBtn" data-btn="grab"><span id="grabLabel">PRESA</span><span class="kb">V</span></button>
     <button class="cbtn" id="actBtn" data-btn="action"><span id="actLabel">—</span><span class="kb">SPAZIO</span></button>
   </div>
-  <div id="hudKeys">WASD muovi · SHIFT corri · SPAZIO azione · V presa · Q/E/R poteri · X/C gadget · clic = blocca bersaglio · ESC pausa</div>
+  <div id="hudKeys">WASD muovi · SHIFT corri · SPAZIO azione · V presa · T lancia coltello · Q/E/R poteri · X/C gadget · clic = blocca bersaglio · ESC pausa</div>
 </div>
 <div id="struggle" class="hidden"><div class="sTxt">PREMI AZIONE RIPETUTAMENTE!</div><div class="sBar"><i id="struggleBar"></i></div></div>
 <div id="touch" class="hidden"><div id="joyHint">◀ TRASCINA PER MUOVERTI ▶</div></div>
@@ -956,8 +958,12 @@ const KT = {
   slash: ['GOLA TAGLIATA!', '#ff2a3a'], stab: ['ACCOLTELLATO!', '#ff4a4a'], push: ['TRAPASSATO!', '#ff1a2a'], chop: ['SPACCATO!', '#ff8a2a'], saw: ['SQUARTATO!', '#ff6a1a'],
   shoot: ['COLPO IN TESTA!', '#ffd23a'], blast: ['POLVERIZZATO!', '#ff9a2a'], slam: ['SBATTUTO!', '#ff3a4a'], burn: ['ARROSTITO!', '#ff7a1a'], drown: ['ANNEGATO!', '#5ac0ff'],
   bin: ['SEPOLTO!', '#c8c8d0'], electro: ['FULMINATO!', '#8ab8ff'], snare: ['TAGLIOLA!', '#ff6a6a'], poison: ['AVVELENATO!', '#7aff8a'], crush: ['SCHIACCIATO!', '#ffcf6a'], explode: ['ESPLOSO!', '#ff9a2a'],
+  backstab: ['PUGNALATO ALLE SPALLE!', '#ff2a3a'], neck: ['LAMA NEL COLLO!', '#ff1a2a'], gut: ['SVENTRATO!', '#ff3a3a'], eye: ['DRITTO NELL\'OCCHIO!', '#ff4a5a'],
+  frenzy: ['SCANNATO!', '#ff0a1a'], sleep: ['UCCISO NEL SONNO!', '#c88aff'], thrown: ['COLTELLO LANCIATO!', '#ffd23a'],
   shred: ['TRITATO!', '#ff3a1a'], impale: ['IMPALATO!', '#ff2a4a'], decap: ['DECAPITATO!', '#ff1020'], melt: ['SCIOLTO!', '#9aff3a']
 };
+const KNIFE_BACK = ['slash', 'slash', 'backstab', 'neck'], KNIFE_FRONT = ['stab', 'gut', 'eye', 'frenzy'], KNIFE_RAND = new Set(['slash', 'stab', 'backstab', 'neck', 'gut', 'eye', 'frenzy']);
+const KNIFE_TAG = { backstab: ['ALLE SPALLE', 1.1], neck: ['NEL COLLO', 1.2], gut: ['SVENTRATO', 1.2], eye: ['NELL\'OCCHIO', 1.2], frenzy: ['SCANNATO', 1.2], sleep: ['NEL SONNO', 1.35], thrown: ['A DISTANZA', 1.4] };
 const KT_ALT = { slash: ['SGOZZATO!', 'GOLA APERTA!'], stab: ['SVENTRATO!', 'INFILZATO!', 'TRAFITTO!'], chop: ['MACELLATO!', 'FATTO A PEZZI!'], slam: ['SFRACELLATO!', 'SPAPPOLATO!'], blast: ['DISINTEGRATO!'], push: ['PASSATO DA PARTE A PARTE!'] };
 const OBJ = {
   wall: { t: 'Uccidi qualcuno sbattendolo al muro', pts: 300, ev: 'kill', f: (G, d) => d.fin === 'wall' },
@@ -966,7 +972,10 @@ const OBJ = {
   bin: { t: 'Chiudi una vittima in un contenitore', pts: 300, ev: 'kill', f: (G, d) => d.style === 'bin', ok: G => G.hides.length > 0 },
   slamobj: { t: 'Sbatti qualcuno contro un oggetto', pts: 300, ev: 'kill', f: (G, d) => d.finisher && d.style === 'slam' && d.fin !== 'wall' && d.fin !== 'water' },
   push: { t: 'Vinci una lotta col coltello', pts: 300, ev: 'kill', f: (G, d) => d.style === 'push' },
-  throat: { t: 'Taglia la gola a qualcuno alle spalle', pts: 250, ev: 'kill', f: (G, d) => d.style === 'slash' },
+  throat: { t: 'Uccidi qualcuno alle spalle col coltello', pts: 250, ev: 'kill', f: (G, d) => ['slash', 'backstab', 'neck'].includes(d.style) },
+  thrown: { t: 'Uccidi lanciando il coltello', pts: 300, ev: 'kill', f: (G, d) => d.style === 'thrown' },
+  sleeper: { t: 'Uccidi qualcuno nel sonno', pts: 300, ev: 'kill', f: (G, d) => d.style === 'sleep', ok: G => G.pois.some(p => p.anim === 'sleep') },
+  window: { t: 'Entra sfondando una finestra', pts: 200, ev: 'window', ok: G => G.tiles.includes('W') },
   fuse: { t: 'Spegni la corrente dal quadro elettrico', pts: 250, ev: 'fuse', ok: G => G.lures.some(l => l.effect === 'fuse') },
   camoff: { t: 'Disattiva le telecamere', pts: 300, ev: 'camoff', ok: G => G.cams.length > 0 && G.lures.some(l => l.effect === 'camoff') },
   cut2: { t: 'Taglia 2 fili del telefono', pts: 250, need: 2, ev: 'cut', ok: G => G.phones.length >= 2 },
@@ -1812,14 +1821,14 @@ const DIFF = [
   { sus: 1.1, view: 1.05, police: 46 }, { sus: 1.15, view: 1.07, police: 44 }, { sus: 1.22, view: 1.1, police: 40 }
 ];
 const KEYN = IS_TOUCH
-  ? { move: 'il joystick (trascina a sinistra)', sprint: 'CORRI', act: 'il pulsante rosso', grab: 'il pulsante AFFERRA', blink: 'OMBRA', lure: 'RICHIAMO', blackout: 'BUIO' }
-  : { move: 'WASD / frecce', sprint: 'SHIFT', act: 'SPAZIO', grab: 'V', blink: 'Q', lure: 'E', blackout: 'R' };
+  ? { move: 'il joystick (trascina a sinistra)', sprint: 'CORRI', act: 'il pulsante rosso', grab: 'il pulsante AFFERRA', blink: 'OMBRA', lure: 'RICHIAMO', blackout: 'BUIO', thr: 'il pulsante LANCIA' }
+  : { move: 'WASD / frecce', sprint: 'SHIFT', act: 'SPAZIO', grab: 'V', blink: 'Q', lure: 'E', blackout: 'R', thr: 'T' };
 const nearestOf = (arr, x, y, f) => { let b = null, bd = 1e9; for (const o of arr) { if (f && !f(o)) continue; const d = dist(x, y, o.x, o.y); if (d < bd) { bd = d; b = o; } } return b; };
 const tc = (x, y) => ({ x: (x + 0.5) * TILE, y: (y + 0.5) * TILE });
 /* Level 1 is a guided training ground. Each step completes when done, or skips itself after a while: never a wall. */
 const TUTORIAL = [
   { h: 'BENVENUTO', text: () => 'Sei la MASCHERA BIANCA. Questa villa è il tuo addestramento. Impara le basi: nei livelli successivi ti aspettano guardie, telecamere, armi pesanti e trappole sempre più crudeli.', min: 7, max: 7 },
-  { h: 'MOVIMENTO', text: () => `Muoviti con ${KEYN.move}. Tieni ${KEYN.sprint} per correre: sei veloce, ma fai rumore.`, done: (G, T) => dist(G.player.x, G.player.y, T.sx, T.sy) > TILE * 3, max: 30 },
+  { h: 'MOVIMENTO', text: () => `Muoviti con ${KEYN.move}. Tieni ${KEYN.sprint} per correre: sei veloce, ma fai rumore. Le finestre si possono SFONDARE per entrare: chi è vicino sentirà il vetro e verrà a controllare.`, done: (G, T) => dist(G.player.x, G.player.y, T.sx, T.sy) > TILE * 3, max: 30 },
   { h: 'IL BUIO', text: () => 'Il buio è il tuo migliore amico. Fermati in una zona buia: quando l\'occhio in basso si CHIUDE nessuno può vederti.', done: (G, T) => (T.inv || 0) > 0.6, max: 30 },
   { h: 'PRIMA VITTIMA', text: (G, T) => `Bersaglio: ${T.vic ? T.vic.name : 'la vittima più vicina'} (▼). Avvicinati alle sue SPALLE e premi ${KEYN.act}: gola tagliata, in silenzio.`, late: () => `Troppo lontana? ${KEYN.blink} (OMBRA) ti fa apparire alle sue spalle.`,
     pick: G => nearestOf(G.npcs, G.player.x, G.player.y, n => n.alive && CALM[n.state] && !n.guard), mark: (G, T) => T.vic && T.vic.alive ? T.vic : null, done: G => G.kills >= 1 },
@@ -1831,6 +1840,7 @@ const TUTORIAL = [
     mark: G => nearestOf(G.npcs, G.player.x, G.player.y, n => n.alive && CALM[n.state] && !!G.finisherFor(n)), done: G => (G.st.finisher || 0) >= 1, max: 75 },
   { h: 'TRAPPOLE MORTALI ☠', text: () => 'I teschi rossi sono TRAPPOLE MORTALI: il gas del fornello, il lampadario, il tosaerba… Attivane una, allontanati e lascia che la vittima faccia il resto. Ogni livello ne avrà di più.',
     mark: G => nearestOf(G.lures.map(l => ({ l, ...tc(l.x, l.y) })), G.player.x, G.player.y, o => (o.l.deadly || o.l.zone) && !o.l.used), done: G => G.st.trap >= 1, max: 80 },
+  { h: 'LANCIO DEL COLTELLO', text: () => `Bersaglio lontano davanti a te? ${KEYN.thr}: LANCIA il coltello. Uccide in silenzio, ma poi devi andare a riprenderlo dal corpo. Il coltello non uccide mai due volte nello stesso modo.`, done: G => !!(G.styleSet && G.styleSet.thrown), max: 40 },
   { h: 'POTERI DELL\'OMBRA', text: () => `${KEYN.blink}: OMBRA, appari alle spalle del bersaglio. ${KEYN.lure}: RICHIAMO, sussurri il suo nome e viene da te. ${KEYN.blackout}: BUIO totale. Ogni uccisione ricarica l'energia.`, done: G => G.powerUses >= 1, max: 35 },
   { h: 'TELEFONI ☎', text: () => `Chi ti vede scappa al telefono e chiama la polizia. Taglia i fili con ${KEYN.act} prima che succeda.`,
     mark: G => { const ph = nearestOf(G.phones.map(p => ({ p, ...tc(p.x, p.y) })), G.player.x, G.player.y, o => !o.p.cut); return ph; }, done: G => G.phones.some(p => p.cut) || !G.phones.some(p => !p.cut), max: 40 },
@@ -1885,7 +1895,7 @@ const Game = {
     this.player = {
       x: L.start.x * TILE, y: L.start.y * TILE, ang: Math.PI, r: 13, moving: false, sprint: false, stillT: 0, still: false,
       inDark: false, invisible: false, hidden: null, carrying: null, attackT: 0, blinkT: 0, shadowT: 0, vx: 0, vy: 0, dripT: 0,
-      blood: 0, bloodMask: 0, weapon: null, stepD: 0, foot: 0, attackKind: 'stab', dead: false, disguise: null, disguiseLook: null, hp: 3, hpT: 0, stunT: 0
+      blood: 0, bloodMask: 0, weapon: null, stepD: 0, foot: 0, attackKind: 'stab', knifeOut: false, dead: false, disguise: null, disguiseLook: null, hp: 3, hpT: 0, stunT: 0
     };
     this.npcs = L.npcs.map((d, i) => this.makeNPC(d, i));
     this.randomizeRun();
@@ -1899,7 +1909,7 @@ const Game = {
     this.cine = null; this.cineK = 0; this.fin = null; this.struggle = null; this.punchT = 0; this.killCamT = 0; this.whisperCd = 0;
     this.frenzyT = 0; this.frenzyMax = 9; this.st = { silent: 0, weapon: 0, trap: 0, multi: 0, hidden: 0 }; this.lastKillT = -9;
     this.tracers = []; this.sched = []; this.screenBlood = []; this.boomFx = []; this.flames = []; this.trapSet = {}; this.styleSet = {};
-    this.diff = DIFF[Math.min(idx, DIFF.length - 1)]; this.lureUses = 0; this.powerUses = 0; this.tut = def.tutorial ? { i: -1, t: 0, total: 0 } : null; this.tutMark = null;
+    this.diff = DIFF[Math.min(idx, DIFF.length - 1)]; this.lureUses = 0; this.powerUses = 0; this.knifeBody = null; this.tut = def.tutorial ? { i: -1, t: 0, total: 0 } : null; this.tutMark = null;
     this.cams = (L.cams || []).map(c => ({ ...c, sus: 0, cd: 0, off: 0, a: c.ang }));
     const sh = (UI.progress && UI.progress.shop) || newShop();
     this.gadgets = (UI.loadout || []).filter(id => sh.own.includes(id)).slice(0, 2).map(id => ({ id, n: GADGETS[id].n + ((sh.ch || {})[id] || 0) }));
@@ -2620,6 +2630,7 @@ const Game = {
       P.stepA = (P.stepA || 0) + moved;
       if (P.stepA > (P.sprint ? 34 : 26)) {
         P.stepA = 0; const tx = Math.floor(P.x / TILE), ty = Math.floor(P.y / TILE); let tt = this.tiles[ty * this.W + tx]; if (tt === 'D') tt = this.L.doorFloor[ty * this.W + tx] || '.';
+        if (tt === 'w') { tt = this.L.doorFloor[ty * this.W + tx] || '.'; Sound.noise(0.06, { filter: 'highpass', ff: 4500, vol: 0.12 }); if (P.sprint) this.noise(P.x, P.y, TILE * 4, 0.2); }
         Sound.stepSurf(tt, P.carrying ? 0.07 : P.sprint ? 0.1 : 0.045);
       }
       P.walkPh = (P.walkPh || 0) + sp * dt * 0.13;
@@ -2630,6 +2641,7 @@ const Game = {
       }
     }
     P.stillT = P.moving ? 0 : P.stillT + dt; P.still = P.stillT > 0.3;
+    if (P.knifeOut) { const kb = this.knifeBody; if (!kb || kb.hidden || kb.style === 'explode') this.retrieveKnife(); else if (dist(P.x, P.y, kb.x, kb.y) < TILE * 0.8) this.retrieveKnife(); }
     P.inDark = this.lightAt(P.x, P.y) < DARK_T;
     P.invisible = P.inDark && P.still && !P.carrying;
     if (P.invisible) P.shadowT = 1.4;
@@ -2686,6 +2698,10 @@ const Game = {
     let best = null, bd = kr;
     for (const n of this.npcs) { if (!n.alive || !this.canKnife(n, mw)) continue; const d = dist(P.x, P.y, n.x, n.y); if (d < bd && this.wallClear(P.x, P.y, n.x, n.y)) { bd = d; best = n; } }
     if (P.weapon && WEAPONS[P.weapon.id].ranged) { const t = this.shootTarget(); if (t && t !== best) return { label: 'SPARA', kind: 'shoot', n: t }; }
+    if (best && P.knifeOut && this.meleeId() === 'knife') {
+      const fin = this.finisherFor(best), ctx = { label: 'RECUPERA IL COLTELLO', kind: 'noknife', n: best };
+      if (fin) ctx.alt = { n: best, fin }; return ctx;
+    }
     if (best) {
       const ctx = { label: mw.verb, kind: 'kill', n: best };
       if (this.meleeId() === 'knife' && !P.carrying) {
@@ -2700,8 +2716,59 @@ const Game = {
     for (const ph of this.phones) if (!ph.cut && this.nearRect({ x: ph.x, y: ph.y, w: 1, h: 1 }, P.x, P.y) < TILE * 0.75) return { label: 'TAGLIA FILO', kind: 'cut', ph };
     for (const l of this.lures) if (dist(P.x, P.y, (l.x + 0.5) * TILE, (l.y + 0.5) * TILE) < TILE * 1.3) return { label: l.used ? 'ESAURITO' : l.active ? 'IN CORSO…' : l.cd > 0 ? `ATTENDI ${Math.ceil(l.cd)}s` : l.label.toUpperCase(), kind: 'lure', l };
     for (const h of this.hides) if (this.nearRect(h, P.x, P.y) < TILE * 0.8) return { label: 'NASCONDITI', kind: 'hide', h };
+    const w = this.windowNear(P.x, P.y); if (w) return { label: 'SFONDA FINESTRA', kind: 'window', w };
     return null;
   },
+  /* ---------- windows: smash through them (loud!) ---------- */
+  windowNear(x, y) {
+    const tx0 = Math.floor(x / TILE), ty0 = Math.floor(y / TILE); let best = null, bd = TILE * 0.95;
+    for (let ty = ty0 - 1; ty <= ty0 + 1; ty++) for (let tx = tx0 - 1; tx <= tx0 + 1; tx++) {
+      if (tx < 1 || ty < 1 || tx >= this.W - 1 || ty >= this.H - 1 || this.tiles[ty * this.W + tx] !== 'W') continue;
+      const free = (a, b) => !this.solid[(ty + b) * this.W + tx + a];
+      if (!((free(-1, 0) && free(1, 0)) || (free(0, -1) && free(0, 1)))) continue;
+      const d = dist(x, y, clamp(x, tx * TILE, (tx + 1) * TILE), clamp(y, ty * TILE, (ty + 1) * TILE)); if (d < bd) { bd = d; best = { tx, ty }; }
+    }
+    return best;
+  },
+  breakWindow(w) {
+    const i = w.ty * this.W + w.tx, x = (w.tx + 0.5) * TILE, y = (w.ty + 0.5) * TILE, P = this.player;
+    this.tiles[i] = 'w'; this.solid[i] = 0;
+    const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([a, b]) => (w.ty + b) * this.W + w.tx + a).filter(j => !this.solid[j] && this.tiles[j] !== 'w');
+    const inside = nb.find(j => !this.outside[j]); this.L.doorFloor[i] = this.tiles[inside != null ? inside : nb[0]] || '.';
+    Render.brokenWindow(this, w.tx, w.ty);
+    Sound.glass(); Sound.crack(); Sound.glass(); this.shake = 10; this.flash = 0.15; this.flashColor = '200,220,255';
+    for (let k = 0; k < 26; k++) { const a = rand(0, TAU), sp = rand(60, 260); this.particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.3, 0.8), max: 0.8, size: rand(1.5, 3.5), type: 'debris' }); }
+    // everyone close by heard it: the nearest come to check, the others get nervous, guards come running
+    this.attract(x, y, 2, TILE * 11, pick(['Un vetro rotto?! Vado a vedere!', 'Cos\'era?! Una finestra?', 'Qualcuno ha rotto un vetro!']));
+    this.noise(x, y, TILE * 11, 0.35, null, true);
+    if (P.disguise) this.breakDisguise();
+    this.objEvent('window'); UI.toast('Finestra sfondata! Qualcuno ha sentito…');
+  },
+  /* ---------- knife throw ---------- */
+  throwTarget() {
+    const P = this.player; if (P.knifeOut || P.carrying || P.hidden || this.meleeId() !== 'knife' || (P.weapon && WEAPONS[P.weapon.id].ranged)) return null;
+    let best = null, bs = 1e9;
+    for (const n of this.npcs) {
+      if (!n.alive) continue;
+      const d = dist(P.x, P.y, n.x, n.y); if (d < TILE * 1.6 || d > TILE * 7) continue;
+      const a = Math.atan2(n.y - P.y, n.x - P.x); if (n !== this.lock && Math.abs(angDiff(P.ang, a)) > 0.7) continue;
+      if (!this.wallClear(P.x, P.y, n.x, n.y)) continue;
+      const sc = d - (n === this.lock ? 1e5 : 0) - (n.state === 'panic' || n.state === 'calling' ? 300 : 0); if (sc < bs) { bs = sc; best = n; }
+    }
+    return best;
+  },
+  throwKnife() {
+    const P = this.player, n = this.throwTarget(); if (!n) { Sound.denied(); return; }
+    if (n.brute) { Sound.denied(); UI.toast('Troppo grosso: il coltello rimbalza'); return; }
+    const a = Math.atan2(n.y - P.y, n.x - P.x); P.ang = a;
+    Sound.noise(0.18, { filter: 'bandpass', ff: 1800, slide: 600, q: 2, vol: 0.25 });
+    this.tracers.push({ x0: P.x + Math.cos(a) * 16, y0: P.y + Math.sin(a) * 16, x1: n.x, y1: n.y, life: 0.14, knife: true });
+    P.knifeOut = true;
+    this.kill(n, { style: 'thrown', aware: this.victimAware(n) });
+    const b = this.bodies[this.bodies.length - 1]; if (b && b.n === n) { b.knife = true; this.knifeBody = b; }
+    UI.toast('Recupera il coltello dal corpo!');
+  },
+  retrieveKnife() { const P = this.player; P.knifeOut = false; if (this.knifeBody) this.knifeBody.knife = false; this.knifeBody = null; Sound.pickup(); UI.toast('🔪 Coltello recuperato'); },
   doAction() {
     const c = this.context, P = this.player; if (!c || this.ended) return;
     switch (c.kind) {
@@ -2716,6 +2783,8 @@ const Game = {
       case 'stash': { const b = P.carrying; b.hidden = true; b.carried = false; P.carrying = null; c.h.bodies++; c.h.shake = 0.4; this.st.hidden++; this.objEvent('hide'); Sound.thud(); this.addScore(50, 'CORPO NASCOSTO', b.x, b.y); break; }
       case 'cut': c.ph.cut = true; this.objEvent('cut'); Sound.cut(); this.addScore(25, 'LINEA TAGLIATA', (c.ph.x + 0.5) * TILE, c.ph.y * TILE); break;
       case 'lure': this.activateLure(c.l); break;
+      case 'window': this.breakWindow(c.w); break;
+      case 'noknife': Sound.denied(); UI.toast('Il coltello è nel corpo che hai colpito: vai a riprenderlo'); break;
     }
   },
   unhide() {
@@ -2756,9 +2825,11 @@ const Game = {
     const aware = o.aware != null ? o.aware : !trap && (!CALM[n.state] || n.sus > 0.45 || (n.watchT > 0 && this.sees(n, P.x, P.y) && !P.invisible));
     const panicking = n.state === 'panic' || n.state === 'calling' || n.state === 'flee';
     const back = !trap && wid !== 'pistol' && wid !== 'shotgun' && Math.abs(angDiff(n.ang, dirA)) < 1.15;
-    const style = o.style && !trap ? o.style : trap ? (o.style || 'explode') : wid === 'pistol' ? 'shoot' : wid === 'shotgun' ? 'blast' : wid === 'axe' ? 'chop' : wid === 'saw' ? 'saw' : (back && !aware ? 'slash' : 'stab');
+    let style = o.style && !trap ? o.style : trap ? (o.style || 'explode') : wid === 'pistol' ? 'shoot' : wid === 'shotgun' ? 'blast' : wid === 'axe' ? 'chop' : wid === 'saw' ? 'saw' : (back && !aware ? 'slash' : 'stab');
+    // the knife is never the same twice
+    if (wid === 'knife' && !trap && !o.style) style = n.anim === 'sleep' && !aware ? 'sleep' : style === 'slash' ? pick(KNIFE_BACK) : pick(KNIFE_FRONT);
     const bl = (o.blood || wd.blood) * (this.frenzyT > 0 && !trap ? 1.25 : 1);
-    if (!trap) { P.attackT = style === 'saw' ? 1 : style === 'shoot' ? 0.2 : 0.3; P.attackKind = style; P.ang = dirA; }
+    if (!trap) { P.attackT = style === 'saw' ? 1 : style === 'shoot' ? 0.2 : style === 'frenzy' ? 0.6 : 0.3; P.attackKind = style; P.ang = dirA; }
     if (n.phone && n.phone.busy === n) n.phone.busy = null;
     const wasLured = n.lured;
     if (n.lure) { this.fixLure(n.lure, null); n.lure.cd = Math.max(n.lure.cd, 6); n.lure = null; }
@@ -2801,6 +2872,26 @@ const Game = {
       case 'poison': for (let i = 0; i < 8; i++) this.particles.push({ x: n.x + rand(-8, 8), y: n.y + rand(-8, 8), vx: rand(-14, 14), vy: rand(-26, -8), life: rand(1, 1.8), max: 1.8, size: rand(4, 7), type: 'smoke' }); Sound.thud(); break;
       case 'crush': this.splatter(n.x, n.y, rand(0, TAU), 40, Math.PI, [40, 260]); this.gibs(n.x, n.y, dirA, 5, Math.PI); Sound.thud(); Sound.squelch(); this.shake = 14; break;
       case 'explode': this.splatter(n.x, n.y, dirA, 44, Math.PI, [120, 380]); this.gibs(n.x, n.y, dirA, 8, Math.PI); this.mist(n.x, n.y, 5); break;
+      case 'backstab':
+        this.splatter(n.x, n.y, dirA, 20 * bl, 0.8); Sound.stab(); this.shake = 8; this.hitstop = 0.06; b.spurt = { t: 1.6, max: 1.6, k: 0.2, a: dirA };
+        [0.16, 0.32].forEach(dl => this.sched.push({ t: dl, fn: () => { this.splatter(n.x, n.y, dirA + rand(-0.4, 0.4), 20 * bl, 0.8); Sound.stab(); Sound.squelch(); this.shake = 9; Render.splat(n.x + rand(-10, 10), n.y + rand(-10, 10), rand(6, 10), 0.85); } })); break;
+      case 'neck':
+        Sound.stabThrough(); Sound.gurgle(1.1); this.splatter(n.x, n.y, dirA - 0.6, 34 * bl, 0.5, [140, 360]); this.shake = 11; this.hitstop = 0.09;
+        b.spurt = { t: 3, max: 3, k: 0, a: dirA - 0.6 }; break;
+      case 'gut':
+        Sound.stab(); Sound.squelch(); this.splatter(n.x, n.y, dirA, 30 * bl, 1); this.gibs(n.x, n.y, dirA, 5, 0.9); this.mist(n.x, n.y, 3); this.shake = 12; this.hitstop = 0.1;
+        this.sched.push({ t: 0.2, fn: () => { Sound.squelch(); this.gibs(n.x, n.y, dirA + 0.4, 3, 0.6); Render.smear(n.x, n.y, n.x + Math.cos(dirA) * 34, n.y + Math.sin(dirA) * 34, 8, 0.8); } });
+        b.spurt = { t: 1.4, max: 1.4, k: 0.2, a: dirA }; break;
+      case 'eye':
+        Sound.stab(); Sound.crack(); this.splatter(n.x, n.y, dirA, 12, 0.5, [60, 200]); this.shake = 10; this.hitstop = 0.16; this.slowmo(0.6, 0.3); b.spurt = { t: 0.8, max: 0.8, k: 0.2, a: dirA }; break;
+      case 'frenzy':
+        Sound.stab(); this.shake = 8;
+        for (let i = 1; i <= 6; i++) this.sched.push({ t: i * 0.09, fn: () => { Sound.stab(); if (i % 2) Sound.squelch(); this.splatter(n.x, n.y, dirA + rand(-0.9, 0.9), 14 * bl, 0.9); this.shake = 7 + i; P.attackT = Math.max(P.attackT, 0.15); Render.splat(n.x + rand(-16, 16), n.y + rand(-16, 16), rand(5, 9), 0.85); if (i === 6) { this.bloodScreen(2, true); this.hitstop = 0.08; } } });
+        b.spurt = { t: 2, max: 2, k: 0.5, a: dirA }; break;
+      case 'sleep':
+        Sound.squelch(); this.splatter(n.x, n.y, dirA, 10 * bl, 0.6, [40, 140]); this.shake = 4; b.spurt = { t: 1, max: 1, k: 0.4, a: dirA }; break;
+      case 'thrown':
+        Sound.stab(); Sound.squelch(); this.splatter(n.x, n.y, dirA, 22 * bl, 0.6); this.shake = 7; this.hitstop = 0.08; b.knife = true; b.spurt = { t: 1.4, max: 1.4, k: 0.2, a: dirA }; break;
       case 'shred':
         Sound.sawBurst(); Sound.scream(n.pitch * 1.25); this.shake = 14; b.split = true; this.gibs(n.x, n.y, dirA, 7, Math.PI); this.mist(n.x, n.y, 6); this.slowmo(0.9, 0.4);
         for (let i = 0; i < 12; i++) this.sched.push({ t: 0.04 + i * 0.07, fn: () => { this.splatter(n.x, n.y, rand(0, TAU), 18, 0.8, [90, 360]); this.gibs(n.x, n.y, rand(0, TAU), 1, 0.6); Render.splat(n.x + rand(-34, 34), n.y + rand(-34, 34), rand(5, 13), 0.85); this.shake = 10; } });
@@ -2832,13 +2923,15 @@ const Game = {
     const silent = !trap && !aware && !wd.noise && !o.finisher;
     if (silent) { mult *= 1.5; tags.push('SILENZIOSO'); this.st.silent++; }
     if (style === 'slash') { mult *= 1.2; tags.push('GOLA TAGLIATA'); }
+    if (KNIFE_TAG[style]) { mult *= KNIFE_TAG[style][1]; tags.push(KNIFE_TAG[style][0]); }
     if (style === 'stab' && aware) tags.push('ACCOLTELLATO');
     if (style === 'chop') tags.push('ACCETTATA'); if (style === 'saw') tags.push('SQUARTATO'); if (style === 'shoot') tags.push('COLPO IN TESTA');
     if (style === 'push') { mult *= 1.4; tags.push('TRAPASSATO'); }
     if (o.finisher) { mult *= 1.8; tags.push(({ slam: 'SBATTUTO', burn: 'ARROSTITO', drown: 'ANNEGATO', bin: 'CHIUSO DENTRO', electro: 'ELETTROCUTATO', shred: 'TRITATO', crush: 'SCHIACCIATO', impale: 'IMPALATO', decap: 'DECAPITATO', melt: 'SCIOLTO' })[style] || 'FINISHER'); this.st.finisher = (this.st.finisher || 0) + 1; }
     let newTrap = false;
     if (trap) { mult *= 2; tags.push(TRAP_TAG[style] && style !== 'explode' && style !== 'electro' ? TRAP_TAG[style] : 'INCIDENTE'); this.st.trap++; this.trapSet = this.trapSet || {}; newTrap = !this.trapSet[style]; this.trapSet[style] = 1; }
-    this.styleSet = this.styleSet || {}; if (!this.styleSet[style]) { this.styleSet[style] = 1; if (this.kills > 1 && style !== 'stab') { mult *= 1.3; tags.push('NUOVO STILE'); } }
+    const vkey = KNIFE_RAND.has(style) ? 'knife' : style;
+    this.styleSet = this.styleSet || {}; if (!this.styleSet[vkey]) { this.styleSet[vkey] = 1; if (this.kills > 1 && style !== 'stab') { mult *= 1.3; tags.push('NUOVO STILE'); } }
     if (!trap && wid !== 'knife') this.st.weapon++;
     if (!trap && P.blinkT > 0) { mult *= 1.5; tags.push('DIETRO DI TE'); }
     if (!trap && P.shadowT > 0) { mult *= 1.25; tags.push('DALL\'OMBRA'); }
@@ -2858,7 +2951,7 @@ const Game = {
     // shadow energy
     let gain = aware ? 0.5 : 1; if (this.combo.n % 3 === 0) gain += 1;
     this.charges = Math.min(3, this.charges + gain);
-    this.punchT = 0.4; if (['slash', 'push', 'slam', 'chop', 'saw', 'burn', 'drown', 'bin', 'shred', 'crush', 'impale', 'decap', 'melt'].includes(style)) this.killCamT = 1.1; else if (style === 'stab') this.killCamT = 0.55;
+    this.punchT = 0.4; if (['slash', 'push', 'slam', 'chop', 'saw', 'burn', 'drown', 'bin', 'shred', 'crush', 'impale', 'decap', 'melt', 'neck', 'gut', 'eye', 'frenzy', 'thrown'].includes(style)) this.killCamT = 1.1; else if (style === 'stab') this.killCamT = 0.55;
     if (o.noise) this.noise(P.x, P.y, TILE * o.noise, 0.4, n);
     // weapon wear + noise
     if (!trap && !chain && P.weapon && P.weapon.id === wid && wid !== 'knife') { if (--P.weapon.uses <= 0) { P.weapon = null; UI.toast('Arma esaurita: torni al coltello'); } }
@@ -3228,6 +3321,7 @@ const Game = {
       else {
         if (Input.hit('Space') || Input.hit('KeyF') || Input.hit('Enter') || UI.btnPressed('action')) this.doAction();
         if ((Input.hit('KeyV') || UI.btnPressed('grab')) && this.context && this.context.alt) this.startFinisher(this.context.alt);
+        if (Input.hit('KeyT') || UI.btnPressed('throw')) this.throwKnife();
         if (Input.hit('KeyQ') || Input.hit('Digit1') || UI.btnPressed('blink')) this.usePower('blink');
         if (Input.hit('KeyE') || Input.hit('Digit2') || UI.btnPressed('lure')) this.usePower('lure');
         if (Input.hit('KeyR') || Input.hit('Digit3') || UI.btnPressed('blackout')) this.usePower('blackout');
@@ -3355,6 +3449,7 @@ const Game = {
     for (const o of this.objs) if (o.t === 'campfire' && Math.random() < dt * 14 && this.particles.length < 700) this.particles.push({ x: (o.x + 0.5) * TILE + rand(-8, 8), y: (o.y + 0.5) * TILE + rand(-4, 6), vx: rand(-10, 10), vy: rand(-50, -20), life: rand(0.5, 1), max: 1, size: rand(4, 8), type: 'fire' });
     // context + target
     this.context = this.ended || this.fin || this.struggle ? null : this.computeContext();
+    this.throwT = this.ended || this.fin || this.struggle ? null : this.throwTarget();
     this.target = this.currentTarget();
     this.shake = Math.max(0, this.shake - rdt * 30); this.flash = Math.max(0, this.flash - rdt * 1.5);
     // tutorial (level 1) or hints
@@ -3586,6 +3681,16 @@ const Render = {
       if (horiz) c.fillRect(x + 6, y + 18, T - 12, 2); else c.fillRect(x + 18, y + 6, 2, T - 12);
       c.fillStyle = '#4a4452'; if (horiz) c.fillRect(x + T / 2 - 1, y + 16, 2, 16); else c.fillRect(x + 16, y + T / 2 - 1, 16, 2);
     }
+  },
+  brokenWindow(G, tx, ty) {
+    const c = this.stat.getContext('2d'), i = ty * G.W + tx, x = tx * TILE, y = ty * TILE, T = TILE;
+    this.floor(c, G.L.doorFloor[i] || '.', x, y, i);
+    const t = (a, b) => G.tiles[(ty + b) * G.W + tx + a], horiz = t(-1, 0) === '#' || t(1, 0) === '#' || t(-1, 0) === 'W' || t(1, 0) === 'W';
+    c.fillStyle = '#2c2833'; if (horiz) { c.fillRect(x, y + 14, 5, 20); c.fillRect(x + T - 5, y + 14, 5, 20); } else { c.fillRect(x + 14, y, 20, 5); c.fillRect(x + 14, y + T - 5, 20, 5); }
+    c.fillStyle = 'rgba(160,210,255,0.55)';
+    for (let k = 0; k < 4; k++) { c.beginPath(); if (horiz) { c.moveTo(x + 5, y + 16 + k * 4); c.lineTo(x + 12 + k * 3, y + 20 + k * 3); c.lineTo(x + 5, y + 22 + k * 4); } else { c.moveTo(x + 16 + k * 4, y + 5); c.lineTo(x + 20 + k * 3, y + 12 + k * 3); c.lineTo(x + 22 + k * 4, y + 5); } c.fill(); }
+    const d = this.dctx; if (d) for (let k = 0; k < 40; k++) { const px = x + T / 2 + rand(-T, T) * (horiz ? 0.5 : 1.1), py = y + T / 2 + rand(-T, T) * (horiz ? 1.1 : 0.5); d.save(); d.translate(px, py); d.rotate(rand(0, TAU)); d.fillStyle = Math.random() < 0.5 ? 'rgba(200,230,255,0.7)' : 'rgba(150,190,230,0.5)'; d.fillRect(-2.5, -1, 5, 2); d.restore(); }
+    if (this.mmBase) { const m = this.mmBase.getContext('2d'); m.fillStyle = '#26232c'; m.fillRect(tx * 3, ty * 3, 3, 3); }
   },
   doorFrame(c, G, tx, ty) {
     const W = G.W, x = tx * TILE, y = ty * TILE, t = (a, b) => G.tiles[(ty + b) * W + tx + a];
@@ -3858,7 +3963,7 @@ const Render = {
     for (const sn of G.snares) { c.save(); c.translate(sn.x, sn.y); c.strokeStyle = '#9aa0a8'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 9, 0, TAU); c.stroke(); c.fillStyle = '#6a6e74'; for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; c.beginPath(); c.moveTo(Math.cos(a) * 9, Math.sin(a) * 9); c.lineTo(Math.cos(a + 0.2) * 5, Math.sin(a + 0.2) * 5); c.lineTo(Math.cos(a - 0.2) * 5, Math.sin(a - 0.2) * 5); c.fill(); } c.restore(); }
     for (const d of G.devices) { const pu = 0.5 + 0.5 * Math.sin(t * 9); c.fillStyle = '#222'; rr(c, d.x - 8, d.y - 5, 16, 10, 2); c.fill(); c.fillStyle = '#888'; circ(c, d.x - 3, d.y, 3); c.strokeStyle = `rgba(255,220,100,${0.2 + 0.5 * pu})`; c.lineWidth = 2; c.beginPath(); c.arc(d.x, d.y, 12 + pu * 14, 0, TAU); c.stroke(); }
     // bodies
-    for (const b of G.bodies) if (!b.hidden && inView(b.x, b.y, 40)) drawPerson(c, b.x, b.y, b.ang, b.n.look, 'dead', t, 0, { burnt: b.burnt, split: b.split, wound: b.wound, style: b.style, tw: (b.age || 9) < 1.5 ? 1.5 - b.age : 0 });
+    for (const b of G.bodies) if (!b.hidden && inView(b.x, b.y, 40)) drawPerson(c, b.x, b.y, b.ang, b.n.look, 'dead', t, 0, { burnt: b.burnt, split: b.split, wound: b.wound, style: b.style, knife: b.knife, tw: (b.age || 9) < 1.5 ? 1.5 - b.age : 0 });
     // characters (y-sorted)
     const list = G.npcs.filter(n => n.alive && inView(n.x, n.y, 40));
     list.push(G.player); list.sort((a, b) => a.y - b.y);
@@ -3894,7 +3999,8 @@ const Render = {
       const k = sl.life / 0.24; c.lineCap = 'round';
       for (const q of sl.cross ? [0, 0.9] : [0]) for (const [lw, col] of [[12, `rgba(255,30,45,${k * 0.55})`], [4, `rgba(255,255,255,${k})`]]) { c.strokeStyle = col; c.lineWidth = lw; c.beginPath(); c.arc(sl.x - Math.cos(sl.a + q) * 6, sl.y - Math.sin(sl.a + q) * 6, 30 + (1 - k) * 18, sl.a + q - 1.15, sl.a + q + 1.15); c.stroke(); }
     }
-    for (const tr of G.tracers) { c.strokeStyle = `rgba(255,240,180,${tr.life / 0.14})`; c.lineWidth = 2; c.beginPath(); c.moveTo(tr.x0, tr.y0); c.lineTo(tr.x1, tr.y1); c.stroke(); }
+    for (const tr of G.tracers) if (tr.knife) { const k = 1 - tr.life / 0.14, kx = lerp(tr.x0, tr.x1, k), ky = lerp(tr.y0, tr.y1, k); c.save(); c.translate(kx, ky); c.rotate(Math.atan2(tr.y1 - tr.y0, tr.x1 - tr.x0)); c.fillStyle = '#e8ecf0'; c.fillRect(-4, -1.5, 16, 3); c.restore(); }
+    for (const tr of G.tracers) if (!tr.knife) { c.strokeStyle = `rgba(255,240,180,${tr.life / 0.14})`; c.lineWidth = 2; c.beginPath(); c.moveTo(tr.x0, tr.y0); c.lineTo(tr.x1, tr.y1); c.stroke(); }
     for (const f of G.boomFx) { const r = TILE * (3 + (1.2 - f.life) * 5), g = c.createRadialGradient(f.x, f.y, 0, f.x, f.y, r); g.addColorStop(0, `rgba(255,220,140,${f.life * 0.9})`); g.addColorStop(0.5, `rgba(255,110,30,${f.life * 0.4})`); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(f.x - r, f.y - r, r * 2, r * 2); }
     for (const p of G.particles) {
       const a = clamp(p.life / p.max, 0, 1);
@@ -3990,6 +4096,7 @@ const Render = {
       }
       c.restore();
     }
+    if (G.throwT && !(G.context && G.context.kind === 'kill')) { const n = G.throwT, s2 = this.toScreen(n.x, n.y), P2 = this.toScreen(P.x, P.y); c.save(); c.setLineDash([5, 7]); c.strokeStyle = 'rgba(255,210,60,0.45)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(P2.x, P2.y); c.lineTo(s2.x, s2.y); c.stroke(); c.setLineDash([]); c.fillStyle = 'rgba(255,210,60,0.95)'; c.font = '600 11px Oswald, sans-serif'; c.fillText(IS_TOUCH ? '🔪 LANCIA' : '🔪 T', s2.x, s2.y + 30 * z); c.restore(); }
     // kill highlight
     if (G.context && G.context.kind === 'kill') { const n = G.context.n, s = this.toScreen(n.x, n.y); c.strokeStyle = `rgba(255,30,50,${0.6 + Math.sin(t * 10) * 0.3})`; c.lineWidth = 2.5; c.beginPath(); c.arc(s.x, s.y, 22 * z, 0, TAU); c.stroke(); }
     // target reticle
@@ -4162,6 +4269,11 @@ function drawPerson(c, x, y, ang, L, anim, t, ph, o = {}) {
     if (bn) { c.fillStyle = 'rgba(0,0,0,0.5)'; ell(c, -2, 0, 11, 9.5); }
     if (o.style === 'decap') { c.fillStyle = '#5a0008'; ell(c, 12, 0, 6, 6); c.fillStyle = '#b01a2a'; ell(c, 12, 0, 4, 4.4); c.fillStyle = '#e8dcc8'; circ(c, 12, 0, 1.6); c.fillStyle = 'rgba(120,0,10,0.7)'; ell(c, 26, 0, 14, 9); }
     else headDraw(c, Object.assign({}, L, { skin: sk }), 16, 0);
+    if (o.style === 'neck') { c.fillStyle = 'rgba(140,0,14,0.9)'; ell(c, 11, -4, 5, 4); }
+    if (o.style === 'eye') { c.fillStyle = '#200004'; circ(c, 19, -3, 2.6); c.fillStyle = 'rgba(140,0,14,0.8)'; ell(c, 22, -3, 4, 2); }
+    if (o.style === 'gut' || o.style === 'frenzy') { c.fillStyle = '#7a1018'; ell(c, -4, 4, 9, 6); c.strokeStyle = '#c04050'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-8, 4); c.quadraticCurveTo(-2, 14, 4, 6); c.quadraticCurveTo(10, 0, 2, -2); c.stroke(); }
+    if (o.style === 'backstab') { c.fillStyle = '#300006'; circ(c, -6, -3, 2.2); circ(c, -2, 4, 2.2); circ(c, -9, 5, 2); }
+    if (o.knife) { c.fillStyle = '#2a1a10'; c.fillRect(-4, -9, 3, 7); c.fillStyle = '#d6dbe0'; c.fillRect(-4, -2, 3, 4); }
     if (o.style === 'melt') { c.fillStyle = 'rgba(120,210,40,0.42)'; ell(c, -4, 0, 30, 16); c.fillStyle = 'rgba(200,255,120,0.25)'; ell(c, 4, -3, 12, 6); }
     if (o.style === 'impale') { c.fillStyle = '#250004'; circ(c, -2, 0, 4.5); c.strokeStyle = '#8a8a92'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(-2, -16); c.lineTo(-2, 16); c.stroke(); }
     if (o.style === 'slash') { c.strokeStyle = 'rgba(150,0,16,0.95)'; c.lineWidth = 2.4; c.beginPath(); c.moveTo(11, -6); c.quadraticCurveTo(13, 0, 11, 6); c.stroke(); c.fillStyle = 'rgba(130,0,14,0.7)'; ell(c, 10, 0, 4, 7); }
@@ -4226,7 +4338,7 @@ function drawKiller(c, P, t) {
   if (P.blood > 0.15) { c.fillStyle = `rgba(110,0,10,${Math.min(0.75, P.blood)})`; ell(c, 4, 3, 5, 7); circ(c, 6, -6, 2.5); circ(c, 2, 9, 2); }
   // weapon
   c.save(); c.translate(hr[0], hr[1]);
-  if (wid === 'knife') {
+  if (wid === 'knife' && !P.knifeOut) {
     c.rotate(P.attackT > 0 ? -0.2 : 0.15);
     c.fillStyle = '#2a1a10'; c.fillRect(-4, -2, 8, 4);
     c.fillStyle = '#d6dbe0'; c.beginPath(); c.moveTo(4, -2.5); c.lineTo(24, -0.5); c.lineTo(4, 2.5); c.fill();
@@ -4709,6 +4821,7 @@ const UI = {
     this.set('hudObj', (G.objectives || []).map(o => { const d = OBJ[o.id]; return `<div class="ob${o.done ? ' done' : ''}">${o.done ? '✔' : '◇'} ${d.t}${d.need ? ` (${o.n}/${d.need})` : ''} <b>+${d.pts}</b></div>`; }).join(''), 'innerHTML');
     { const arm = G.npcs.some(n => n.alive && n.armed); $('#hudHp').style.display = arm || G.player.hp < 3 ? '' : 'none'; this.set('hudHp', [0, 1, 2].map(i => `<i class="${G.player.hp > i ? 'f' : ''}">♥</i>`).join(''), 'innerHTML'); }
     { const alt = G.context && G.context.alt; $('#grabBtn').classList.toggle('hidden', !alt); if (alt) this.set('grabLabel', alt.fin.def.label);
+      $('#throwBtn').classList.toggle('hidden', !G.throwT);
       $('#struggle').classList.toggle('hidden', !G.struggle); if (G.struggle) $('#struggleBar').style.width = Math.min(100, G.struggle.prog * 100) + '%'; }
     for (let i = 0; i < 2; i++) { const g = G.gadgets[i], el = $('#gad' + i); el.style.display = g ? '' : 'none'; if (!g) continue; const d = GADGETS[g.id]; this.set('gad' + i, `<span class="ic">${d.icon}</span>${d.short}<small>×${g.n}</small><span class="kb">${i ? 'C' : 'X'}</span>`, 'innerHTML'); el.classList.toggle('na', g.n <= 0); }
     this.set('hudCombo', G.combo.t > 0 && G.combo.n > 1 ? `COMBO ×${G.combo.n}` : '');
