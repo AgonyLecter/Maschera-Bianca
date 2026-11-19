@@ -1,0 +1,51 @@
+{
+  "rules": {
+    "horrorGame": {
+      "presence": {
+        ".read": true,
+        "$pid": {
+          ".write": true,
+          ".validate": "!newData.exists() || (newData.child('name').isString() && newData.child('name').val().length <= 16)"
+        }
+      },
+      "players": {
+        "$pid": {
+          ".read": true,
+          ".write": true,
+          ".validate": "newData.child('name').isString() && newData.child('name').val().length <= 16 && (!newData.child('kills').exists() || (newData.child('kills').isNumber() && newData.child('kills').val() >= 0 && newData.child('kills').val() < 1000000)) && (!newData.child('blood').exists() || (newData.child('blood').isNumber() && newData.child('blood').val() >= 0 && newData.child('blood').val() < 10000000))"
+        }
+      },
+      "stats": {
+        "global": {
+          ".read": true,
+          "$k": {
+            ".write": true,
+            ".validate": "newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+          }
+        },
+        "leaderboard": {
+          ".read": true,
+          "$lvl": {
+            ".indexOn": ["score"],
+            "$pid": {
+              ".write": true,
+              ".validate": "newData.hasChildren(['name', 'score', 'kills', 't']) && newData.child('name').isString() && newData.child('name').val().length <= 16 && newData.child('score').isNumber() && newData.child('score').val() >= 0 && newData.child('score').val() < 2000000 && newData.child('kills').isNumber() && newData.child('kills').val() >= 0 && newData.child('kills').val() <= 40 && (!data.exists() || newData.child('score').val() >= data.child('score').val())"
+            }
+          }
+        },
+        "world": {
+          ".read": true,
+          ".indexOn": ["score"],
+          "$pid": {
+            ".write": true,
+            ".validate": "newData.hasChildren(['name', 'score', 'levels']) && newData.child('name').isString() && newData.child('name').val().length <= 16 && newData.child('score').isNumber() && newData.child('score').val() >= 0 && newData.child('score').val() < 20000000 && newData.child('levels').isNumber() && newData.child('levels').val() <= 20"
+          }
+        }
+      },
+      "content": {
+        ".read": true,
+        ".write": false
+      }
+    }
+  }
+}
