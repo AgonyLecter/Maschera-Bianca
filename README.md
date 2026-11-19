@@ -28,3 +28,7 @@ La vera protezione dei dati sono le **regole del database**. Per applicarle:
 Firebase Console → Realtime Database → Regole → incolla il blocco `horrorGame` di `firebase/database.rules.json` dentro le regole esistenti (se nel progetto ci sono altre app, non sostituire le loro regole) → Pubblica.
 
 Le regole limitano lunghezza dei nomi, valori dei punteggi, statistiche (solo +1) e impediscono di scrivere i contenuti (`content/motd`).
+
+## App installabile
+
+Il gioco è una PWA: `manifest.webmanifest`, `sw.js` e le icone in `icons/` stanno nella radice accanto a `index.html`. Da Chrome/Android compare "Installa app" (anche dal pulsante INSTALLA nel menu); su iPhone: Condividi → Aggiungi alla schermata Home. Funziona anche offline dopo la prima apertura; la classifica richiede la rete.
