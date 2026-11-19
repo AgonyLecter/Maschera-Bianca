@@ -1,0 +1,80 @@
+{
+  "rules": {
+    "horrorGame": {
+      "content": {
+        ".read": true,
+        ".write": false
+      },
+      "stats": {
+        ".read": true,
+        "global": {
+          "$key": {
+            ".write": true,
+            ".validate": "newData.isNumber() && newData.val() === (data.exists() ? data.val() : 0) + 1"
+          }
+        },
+        "leaderboard": {
+          "$level": {
+            ".indexOn": ["score"],
+            "$pid": {
+              ".write": "!data.exists() || (newData.exists() && newData.child('score').val() >= data.child('score').val())",
+              ".validate": "newData.hasChildren(['name', 'score', 'rank'])",
+              "name":  { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 16" },
+              "score": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2000000" },
+              "rank":  { ".validate": "newData.isString() && newData.val().matches(/^[SABCD]$/)" },
+              "time":  { ".validate": "newData.isNumber() && newData.val() >= 0" },
+              "kills": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 60" },
+              "t":     { ".validate": "newData.isNumber()" },
+              "$other": { ".validate": false }
+            }
+          }
+        },
+        "world": {
+          ".indexOn": ["score"],
+          "$pid": {
+            ".write": "!data.exists() || (newData.exists() && newData.child('score').val() >= data.child('score').val())",
+            ".validate": "newData.hasChildren(['name', 'score', 'levels'])",
+            "name":   { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 16" },
+            "score":  { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20000000" },
+            "levels": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20" },
+            "kills":  { ".validate": "newData.isNumber() && newData.val() >= 0" },
+            "t":      { ".validate": "newData.isNumber()" },
+            "$other": { ".validate": false }
+          }
+        }
+      },
+      "presence": {
+        ".read": true,
+        "$pid": {
+          ".write": true,
+          ".validate": "newData.hasChildren(['name'])",
+          "name":  { ".validate": "newData.isString() && newData.val().length <= 16" },
+          "state": { ".validate": "newData.isString() && newData.val().length <= 16" },
+          "level": { ".validate": "newData.isString() && newData.val().length <= 16" },
+          "t":     { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
+        }
+      },
+      "players": {
+        "$pid": {
+          ".read": true,
+          ".write": true,
+          "name":     { ".validate": "newData.isString() && newData.val().length <= 16" },
+          "unlocked": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20" },
+          "kills":    { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "blood":    { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "shopV":    { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "lastSeen": { ".validate": "newData.isNumber()" }
+        }
+      }
+    },
+    "hollowmere": {
+      ".read": true,
+      "players":  { "$pid": { ".write": true } },
+      "registro": { "$id": { ".write": "!data.exists()" } },
+      "lapidi":   { "$id": { ".write": "!data.exists()" } },
+      "stats":    { ".write": true },
+      "presence": { "$pid": { ".write": true } }
+    }
+  }
+}
