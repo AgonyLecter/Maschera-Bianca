@@ -2,7 +2,13 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Maschera Bianca">
+<meta name="application-name" content="Maschera Bianca">
+<meta name="description" content="Sei la Maschera Bianca. Nove notti, nessun sopravvissuto. Horror stealth splatter.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -187,6 +193,7 @@ body:not(.touch) .ctrls{bottom:26px}
 .resHead{font-family:Nosifer;font-size:clamp(24px,7vh,54px)}
 .resHead.win{color:var(--bone);text-shadow:0 0 30px rgba(211,18,42,.9)}
 .resHead.lose{color:#4aa3ff;text-shadow:0 0 30px rgba(74,163,255,.8)}
+.resAch{font-family:'Special Elite';color:#ffd23a;font-size:clamp(11px,2.3vh,14px);text-align:center}.resAch b{color:#fff}
 .resLvl{letter-spacing:.4em;color:var(--mut);font-size:13px;text-transform:uppercase}
 .resBody{display:flex;gap:clamp(16px,5vw,50px);align-items:center}
 .rank{font-family:Nosifer;font-size:clamp(70px,26vh,190px);line-height:1;text-shadow:0 0 50px currentColor;animation:slam 1s cubic-bezier(.2,1.6,.4,1)}
@@ -238,6 +245,15 @@ input{user-select:text;-webkit-user-select:text}
 #liLoad>b{color:#7ab8ff;letter-spacing:.25em;font-size:clamp(10px,2vh,13px);font-family:'Special Elite'}
 .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .chip{background:rgba(0,0,0,.45);border:1px solid rgba(235,229,216,.25);color:var(--bone);padding:6px 10px;font-size:clamp(11px,2.2vh,14px);letter-spacing:.06em;max-width:190px;text-align:left}
+/* screens never cut: they scroll when the phone is short, the ENTER hint sticks to the bottom */
+#lvlintro,#nick,#pause,#boot,#menu{overflow-y:auto;overflow-x:hidden;justify-content:flex-start;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+#lvlintro>:first-child,#nick>:first-child,#pause>:first-child,#boot>:first-child{margin-top:auto}
+#lvlintro>:last-child,#nick>:last-child,#pause>:last-child,#boot>:last-child{margin-bottom:auto}
+#menu{justify-content:center}#menu>.menuL,#menu>.menuR{margin-top:auto;margin-bottom:auto}
+#lvlintro>.tap{position:sticky;bottom:0;padding:8px 24px;background:linear-gradient(transparent,rgba(0,0,0,.9) 40%);width:100%;flex-shrink:0}
+#lvlintro>*{flex-shrink:0}
+@media (max-height:520px){#lvlintro{gap:.8vh}#liName{font-size:clamp(22px,8vh,40px)}#liBlurb{font-size:12px}.obj{padding:5px 12px;font-size:11px}#liChal{font-size:10.5px;line-height:1.35}.chip{padding:4px 8px;font-size:11px}.chip small{display:none}#liLoad{gap:3px}}
+@media (max-height:400px){#liBlurb,#liSub{display:none}}
 .chip small{display:block;font-family:'Special Elite';color:var(--mut);font-size:.82em;letter-spacing:0;line-height:1.25}
 .chip.on{border-color:#4aa3ff;background:rgba(74,163,255,.2)}
 .gad{font-size:8px!important;line-height:1.05;padding:0}
@@ -302,6 +318,11 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 #hudScore{text-shadow:0 2px 0 #000,0 0 18px rgba(211,18,42,.9),0 6px 14px rgba(140,0,16,.8)}
 #boardList .row.me{box-shadow:inset 3px 0 0 #c4101f}
 /* shop */
+#trophies .panel{width:min(900px,96vw);max-height:94vh;display:flex;flex-direction:column}#trophyHead{font-family:'Special Elite';color:var(--mut);margin:4px 0 10px}#trophyHead b{color:#ffd23a}
+#trophyList{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;overflow-y:auto;touch-action:pan-y}
+.troph{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.35);opacity:.6}.troph.ok{opacity:1;border-color:rgba(255,210,60,.5);background:rgba(60,40,0,.3)}
+.troph .ic{font-size:26px;width:34px;text-align:center}.troph h3{margin:0;font-size:15px;letter-spacing:.05em}.troph p{margin:2px 0 0;font-family:'Special Elite';font-size:12px;color:#cfc6b8}.troph .rw{margin-left:auto;color:#ffd23a;font-size:13px;white-space:nowrap}
+.mswatch{display:inline-block;width:30px;height:38px;border-radius:50% 50% 46% 46%}
 #shop .panel{width:min(980px,96vw);max-height:94vh;display:flex;flex-direction:column}
 #shopBal{font-family:Nosifer;font-size:clamp(16px,4vh,26px);color:var(--red2);text-shadow:0 0 14px rgba(211,18,42,.8);margin-left:auto}
 #shopBal b{color:var(--bone)}
@@ -402,6 +423,8 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
     <button class="btn primary" data-go="levels">GIOCA</button>
     <button class="btn" id="btnShop">ARMERIA 🩸</button>
     <button class="btn" data-go="board">CLASSIFICA</button>
+    <button class="btn" data-go="trophies">TROFEI 🏆</button>
+    <button class="btn hidden" id="btnInstall">INSTALLA IL GIOCO ⬇</button>
     <button class="btn" data-go="howto">COME SI GIOCA</button>
     <button class="btn" data-go="options">OPZIONI</button>
     <button class="btn" id="btnIntro">INTRO</button>
@@ -412,6 +435,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 
 <div id="levels" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Scegli la notte</h2><button class="btn back" data-go="menu">‹ INDIETRO</button></div><div id="levelCards"></div></div></div>
 <div id="shop" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Armeria</h2><div id="shopBal"></div><button class="btn back" id="shopBack">‹ INDIETRO</button></div><div id="shopMsg"></div><div id="shopList"></div></div></div>
+<div id="trophies" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Trofei</h2><button class="btn back" data-go="menu">‹ INDIETRO</button></div><div id="trophyHead"></div><div id="trophyList"></div></div></div>
 <div id="board" class="screen hidden"><div class="panel"><div class="panelHead"><h2>Classifica</h2><button class="btn back" data-go="menu">‹ INDIETRO</button></div><div id="boardTabs"></div><div id="boardList"></div></div></div>
 <div id="howto" class="screen hidden"><div class="panel"><h2>Come si gioca</h2>
   <div class="how">
@@ -474,7 +498,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
     <button class="cbtn hidden" id="grabBtn" data-btn="grab"><span id="grabLabel">PRESA</span><span class="kb">V</span></button>
     <button class="cbtn" id="actBtn" data-btn="action"><span id="actLabel">—</span><span class="kb">SPAZIO</span></button>
   </div>
-  <div id="hudKeys">WASD muovi · SHIFT corri · SPAZIO azione · V presa · T lancia coltello · Q/E/R poteri · X/C gadget · clic = blocca bersaglio · ESC pausa</div>
+  <div id="hudKeys">WASD muovi · SHIFT corri · SPAZIO azione · V presa / mutila · T lancia coltello · Q/E/R poteri · X/C gadget · clic = blocca bersaglio · ESC pausa</div>
 </div>
 <div id="struggle" class="hidden"><div class="sTxt">PREMI AZIONE RIPETUTAMENTE!</div><div class="sBar"><i id="struggleBar"></i></div></div>
 <div id="touch" class="hidden"><div id="joyHint">◀ TRASCINA PER MUOVERTI ▶</div></div>
@@ -929,7 +953,39 @@ const SHOP = {
   shadow: [200, 350],      // +1 starting shadow energy, up to +2
   axe: 400                 // start every level with an axe (2 uses)
 };
-const newShop = () => ({ own: ['bait'], ch: {}, shadow: 0, axe: false });
+const newShop = () => ({ own: ['bait'], ch: {}, shadow: 0, axe: false, masks: ['porcelain'], mask: 'porcelain' });
+/* cosmetic masks: bought with blood points, shown in game and in the entrance cinematic */
+const MASKS = {
+  porcelain: { name: 'Porcellana', cost: 0, rgb: [235, 229, 216], eye: '#050505', desc: 'L\'originale. Crepata, con la lacrima di sangue.' },
+  sack: { name: 'Sacco di juta', cost: 500, rgb: [150, 112, 66], eye: '#0a0604', desc: 'Juta cucita a mano. Puzza di cantina.', stitch: true },
+  skull: { name: 'Teschio', cost: 700, rgb: [214, 206, 186], eye: '#000', desc: 'Osso levigato, denti scoperti.', teeth: true },
+  clown: { name: 'Clown sfregiato', cost: 900, rgb: [244, 244, 240], eye: '#000', desc: 'Un sorriso tagliato da orecchio a orecchio.', smile: true },
+  obsidian: { name: 'Ossidiana', cost: 1200, rgb: [34, 32, 40], eye: '#ff1a2a', desc: 'Nera come la notte. Gli occhi bruciano.', glow: true },
+  gold: { name: 'Oro insanguinato', cost: 2000, rgb: [222, 178, 70], eye: '#100800', desc: 'Per chi ha finito ogni notte. Grondante.', drip: true }
+};
+const curMask = () => { const sh = (typeof UI !== 'undefined' && UI.progress && UI.progress.shop) || {}; return MASKS[sh.mask] || MASKS.porcelain; };
+const BEG = ['No… ti prego, no!', 'Ho dei figli!', 'Prendi quello che vuoi!', 'AIUTO! AIUTOOO!', 'Perché io?!', 'Non voglio morire…', 'Lasciami andare, non dico niente!', 'Mamma…'];
+/* trophies: permanent, each one pays blood points */
+const ACH = [
+  { id: 'first', icon: '🩸', name: 'Primo sangue', desc: 'La prima uccisione.', r: 50, f: p => (p.kills || 0) >= 1 || Object.keys(p.life.styles).length > 0 },
+  { id: 'k100', icon: '🔪', name: 'Macellaio', desc: '100 vittime in totale.', r: 300, f: p => (p.kills || 0) >= 100 },
+  { id: 'k500', icon: '💀', name: 'Leggenda urbana', desc: '500 vittime in totale.', r: 1000, f: p => (p.kills || 0) >= 500 },
+  { id: 'styles12', icon: '🎭', name: 'Collezionista', desc: 'Uccidi in 12 modi diversi.', r: 400, f: p => Object.keys(p.life.styles).length >= 12 },
+  { id: 'styles20', icon: '📕', name: 'Enciclopedia della morte', desc: 'Uccidi in 20 modi diversi.', r: 900, f: p => Object.keys(p.life.styles).length >= 20 },
+  { id: 'knife', icon: '🗡️', name: 'Maestro di lama', desc: 'Tutte le uccisioni col coltello, lancio compreso.', r: 500, f: p => ['slash', 'stab', 'backstab', 'neck', 'gut', 'eye', 'frenzy', 'sleep', 'thrown'].every(k => p.life.styles[k]) },
+  { id: 'traps10', icon: '☠️', name: 'Incidente domestico', desc: '10 vittime con le trappole.', r: 300, f: p => (p.life.traps || 0) >= 10 },
+  { id: 'mut10', icon: '🥩', name: 'Scempio', desc: 'Fai scempio di 10 cadaveri.', r: 300, f: p => (p.life.mutfull || 0) >= 10 },
+  { id: 'win10', icon: '🪟', name: 'Dall\'altra parte del vetro', desc: 'Sfonda 10 finestre.', r: 200, f: p => (p.life.windows || 0) >= 10 },
+  { id: 'cut10', icon: '✂️', name: 'Nessuno risponde', desc: 'Taglia 10 fili del telefono.', r: 200, f: p => (p.life.cuts || 0) >= 10 },
+  { id: 'guards20', icon: '🛡️', name: 'Chi controlla i controllori', desc: 'Elimina 20 guardie.', r: 400, f: p => (p.life.guards || 0) >= 20 },
+  { id: 'triple', icon: '⚡', name: 'Massacro', desc: '3 uccisioni in meno di 2 secondi.', r: 300, f: p => p.life.flags.triple },
+  { id: 'combo8', icon: '🔥', name: 'Furia', desc: 'Combo ×8.', r: 400, f: p => p.life.flags.combo8 },
+  { id: 'ghost', icon: '👻', name: 'Fantasma', desc: 'Finisci un livello senza testimoni.', r: 300, f: p => p.life.flags.ghost },
+  { id: 'rankS', icon: '🏅', name: 'Notte perfetta', desc: 'Ottieni il rango S.', r: 300, f: p => Object.values(p.best || {}).some(b => b.rank === 'S') },
+  { id: 'allS', icon: '👑', name: 'La Maschera Bianca', desc: 'Rango S in tutti i livelli.', r: 3000, f: p => LEVELS.every(L => p.best[L.id] && p.best[L.id].rank === 'S') },
+  { id: 'all', icon: '🌑', name: 'Ogni notte', desc: 'Completa tutti i livelli.', r: 1500, f: p => LEVELS.every(L => p.best[L.id]) },
+  { id: 'masks', icon: '🎃', name: 'Mille volti', desc: 'Possiedi tutte le maschere.', r: 500, f: p => p.shop && Object.keys(MASKS).every(k => (p.shop.masks || []).includes(k)) }
+];
 const FIN = {
   stove: { k: 'burn', label: 'FRIGGI SUL FORNELLO' }, grill: { k: 'burn', label: 'FRIGGI SULLA GRIGLIA' },
   sink: { k: 'drown', label: 'SPACCA NEL LAVANDINO' }, tub: { k: 'drown', label: 'ANNEGA NELLA VASCA' }, toilet: { k: 'drown', label: 'TESTA NEL WC' }, water: { k: 'drown', label: 'ANNEGA NELL\'ACQUA' },
@@ -976,6 +1032,7 @@ const OBJ = {
   thrown: { t: 'Uccidi lanciando il coltello', pts: 300, ev: 'kill', f: (G, d) => d.style === 'thrown' },
   sleeper: { t: 'Uccidi qualcuno nel sonno', pts: 300, ev: 'kill', f: (G, d) => d.style === 'sleep', ok: G => G.pois.some(p => p.anim === 'sleep') },
   window: { t: 'Entra sfondando una finestra', pts: 200, ev: 'window', ok: G => G.tiles.includes('W') },
+  mutilate: { t: 'Fai scempio di un cadavere (3 colpi con V)', pts: 300, ev: 'mutilate' },
   fuse: { t: 'Spegni la corrente dal quadro elettrico', pts: 250, ev: 'fuse', ok: G => G.lures.some(l => l.effect === 'fuse') },
   camoff: { t: 'Disattiva le telecamere', pts: 300, ev: 'camoff', ok: G => G.cams.length > 0 && G.lures.some(l => l.effect === 'camoff') },
   cut2: { t: 'Taglia 2 fili del telefono', pts: 250, need: 2, ev: 'cut', ok: G => G.phones.length >= 2 },
@@ -2712,7 +2769,7 @@ const Game = {
     }
     for (const p of this.pickups) if (!p.taken && dist(P.x, P.y, p.x * TILE, p.y * TILE) < TILE * 0.9) return { label: 'PRENDI ' + WEAPONS[p.w].name.toUpperCase(), kind: 'pickup', p };
     for (const b of this.bodies) if (!b.hidden && b.uniform && !b.looted && b.style !== 'explode' && dist(P.x, P.y, b.x, b.y) < TILE * 0.9) return { label: 'PRENDI DIVISA', kind: 'dress', b };
-    for (const b of this.bodies) if (!b.hidden && dist(P.x, P.y, b.x, b.y) < TILE * 0.9) return { label: 'TRASCINA', kind: 'carry', b };
+    for (const b of this.bodies) if (!b.hidden && dist(P.x, P.y, b.x, b.y) < TILE * 0.9) return { label: 'TRASCINA', kind: 'carry', b, mut: (b.mut || 0) < 3 && b.style !== 'explode' ? b : null };
     for (const ph of this.phones) if (!ph.cut && this.nearRect({ x: ph.x, y: ph.y, w: 1, h: 1 }, P.x, P.y) < TILE * 0.75) return { label: 'TAGLIA FILO', kind: 'cut', ph };
     for (const l of this.lures) if (dist(P.x, P.y, (l.x + 0.5) * TILE, (l.y + 0.5) * TILE) < TILE * 1.3) return { label: l.used ? 'ESAURITO' : l.active ? 'IN CORSO…' : l.cd > 0 ? `ATTENDI ${Math.ceil(l.cd)}s` : l.label.toUpperCase(), kind: 'lure', l };
     for (const h of this.hides) if (this.nearRect(h, P.x, P.y) < TILE * 0.8) return { label: 'NASCONDITI', kind: 'hide', h };
@@ -2742,7 +2799,22 @@ const Game = {
     this.attract(x, y, 2, TILE * 11, pick(['Un vetro rotto?! Vado a vedere!', 'Cos\'era?! Una finestra?', 'Qualcuno ha rotto un vetro!']));
     this.noise(x, y, TILE * 11, 0.35, null, true);
     if (P.disguise) this.breakDisguise();
-    this.objEvent('window'); UI.toast('Finestra sfondata! Qualcuno ha sentito…');
+    this.objEvent('window'); UI.lifeBump('windows'); UI.toast('Finestra sfondata! Qualcuno ha sentito…');
+  },
+  /* ---------- desecration: hack the corpse apart ---------- */
+  mutilate(b) {
+    const P = this.player, k = b.mut = (b.mut || 0) + 1, a = Math.atan2(b.y - P.y, b.x - P.x);
+    P.ang = a; P.attackT = 0.3; P.attackKind = 'stab';
+    Sound.chop(); Sound.squelch(); if (k > 1) Sound.crack(); this.shake = 8 + k * 3; this.hitstop = 0.05 + k * 0.02;
+    this.splatter(b.x, b.y, rand(0, TAU), 18 + k * 10, Math.PI, [60, 260]); this.gibs(b.x, b.y, a, 2 + k * 2, Math.PI); this.mist(b.x, b.y, 2 + k);
+    for (let i = 0; i < 2 + k; i++) Render.splat(b.x + rand(-30, 30), b.y + rand(-30, 30), rand(6, 12), 0.85);
+    this.pools.push({ x: b.x + rand(-8, 8), y: b.y + rand(-8, 8), r: 2, max: rand(18, 28), seed: Math.random() * 100, age: 0 });
+    b.wound = (b.wound || 1) + 0.7; b.spurt = { t: 1, max: 1, k: 0, a: rand(0, TAU) };
+    P.blood = Math.min(1, P.blood + 0.25); P.bloodMask = Math.min(1, (P.bloodMask || 0) + 0.15); this.bloodScreen(1 + k, k === 3);
+    if (k === 3) { b.split = true; this.gibs(b.x, b.y, a, 8, Math.PI); UI.killText('SCEMPIO!', '#ff0a1a'); this.addScore(150, 'SCEMPIO', b.x, b.y); this.slowmo(0.5, 0.4); this.objEvent('mutilate'); UI.lifeBump('mutfull'); }
+    else this.addScore(40 * k, 'MUTILATO', b.x, b.y);
+    this.noise(b.x, b.y, TILE * 3.5, 0.3);
+    for (const m of this.npcs) if (m.alive && CALM[m.state] && this.sees(m, b.x, b.y)) this.scare(m, 'witness', b.x, b.y);
   },
   /* ---------- knife throw ---------- */
   throwTarget() {
@@ -2781,7 +2853,7 @@ const Game = {
       case 'carry': P.carrying = c.b; c.b.carried = true; Sound.thud(); break;
       case 'drop': P.carrying.carried = false; P.carrying = null; Sound.thud(); break;
       case 'stash': { const b = P.carrying; b.hidden = true; b.carried = false; P.carrying = null; c.h.bodies++; c.h.shake = 0.4; this.st.hidden++; this.objEvent('hide'); Sound.thud(); this.addScore(50, 'CORPO NASCOSTO', b.x, b.y); break; }
-      case 'cut': c.ph.cut = true; this.objEvent('cut'); Sound.cut(); this.addScore(25, 'LINEA TAGLIATA', (c.ph.x + 0.5) * TILE, c.ph.y * TILE); break;
+      case 'cut': c.ph.cut = true; this.objEvent('cut'); UI.lifeBump('cuts'); Sound.cut(); this.addScore(25, 'LINEA TAGLIATA', (c.ph.x + 0.5) * TILE, c.ph.y * TILE); break;
       case 'lure': this.activateLure(c.l); break;
       case 'window': this.breakWindow(c.w); break;
       case 'noknife': Sound.denied(); UI.toast('Il coltello è nel corpo che hai colpito: vai a riprenderlo'); break;
@@ -2917,7 +2989,7 @@ const Game = {
       this.flash = 0.25 + bl * 0.05; this.flashColor = '160,0,0';
     }
     if ((aware && style !== 'shoot') || style === 'electro') Sound.scream(n.pitch * 1.15);
-    this.kills++; FB.bumpStat('kills');
+    this.kills++; FB.bumpStat('kills'); UI.lifeStyle(style); if (trap) UI.lifeBump('traps'); if (n.guard && !n.brute) UI.lifeBump('guards');
     // style & score
     const tags = []; let mult = wd.mult;
     const silent = !trap && !aware && !wd.noise && !o.finisher;
@@ -2968,6 +3040,7 @@ const Game = {
     {
       const kt = KT[style], mt = ['', '', 'DOPPIA!', 'TRIPLA!', 'MASSACRO!'][Math.min(4, this.multiN)];
       const ktx = kt ? (KT_ALT[style] && Math.random() < 0.5 ? pick(KT_ALT[style]) : kt[0]) : 'UCCISO!';
+      if (this.multiN >= 3) UI.lifeFlag('triple'); if (this.combo.n >= 8) UI.lifeFlag('combo8');
       UI.killText(this.multiN >= 2 ? mt : ktx, this.multiN >= 2 ? '#ffb02a' : (kt ? kt[1] : '#ff3a4a'));
       this.impactT = 0.24; this.focus = { x: n.x, y: n.y, t: 0.9 };
       if (!['shoot', 'blast', 'electro', 'snare', 'poison', 'bin', 'burn', 'drown', 'melt'].includes(style)) this.slashes.push({ x: n.x, y: n.y, a: dirA, life: 0.24, cross: !!o.finisher || style === 'push' || style === 'chop' || style === 'saw' });
@@ -3000,7 +3073,7 @@ const Game = {
   startStruggle(n) {
     const P = this.player; this.release(n); n.talk = null; n.state = 'held'; n.anim = 'panic'; n.path = []; n.fixer = false;
     if (n.phone && n.phone.busy === n) n.phone.busy = null;
-    P.ang = Math.atan2(n.y - P.y, n.x - P.x); this.struggle = { n, prog: 0.2, t: 0, max: n.brute ? 4.6 : 3.6 };
+    P.ang = Math.atan2(n.y - P.y, n.x - P.x); this.struggle = { n, prog: 0.2, t: 0, max: n.brute ? 4.6 : 3.6 }; if (!n.brute) this.say(n, pick(BEG), 2);
     Sound.scream(n.pitch); Sound.strain(); this.noise(n.x, n.y, TILE * 5, 0.4, n); this.shake = 5;
   },
   updateStruggle(dt) {
@@ -3025,7 +3098,7 @@ const Game = {
     const vx = cx + dx / dl * 16, vy = cy + dy / dl * 16; if (!this.solidPx(vx, vy)) { n.x = vx; n.y = vy; }
     n.ang = Math.atan2(cy - n.y, cx - n.x); P.ang = Math.atan2(n.y - P.y, n.x - P.x);
     const px = n.x - Math.cos(P.ang) * 26, py = n.y - Math.sin(P.ang) * 26; if (!this.solidPx(px, py)) { P.x = px; P.y = py; }
-    this.fin = { n, o, def, t: 0, i: 0, cx, cy }; Sound.strain(); this.killCamT = 1.9;
+    this.fin = { n, o, def, t: 0, i: 0, cx, cy }; Sound.strain(); this.killCamT = 1.9; this.say(n, pick(BEG), 1.8);
   },
   updateFinisher(dt) {
     const F = this.fin; F.t += dt; const T = FIN_T[F.def.k]; this.focus = { x: (F.n.x + this.player.x) / 2, y: (F.n.y + this.player.y) / 2, t: 0.3 };
@@ -3321,6 +3394,7 @@ const Game = {
       else {
         if (Input.hit('Space') || Input.hit('KeyF') || Input.hit('Enter') || UI.btnPressed('action')) this.doAction();
         if ((Input.hit('KeyV') || UI.btnPressed('grab')) && this.context && this.context.alt) this.startFinisher(this.context.alt);
+        else if ((Input.hit('KeyV') || UI.btnPressed('grab')) && this.context && this.context.mut && !this.player.attackT) this.mutilate(this.context.mut);
         if (Input.hit('KeyT') || UI.btnPressed('throw')) this.throwKnife();
         if (Input.hit('KeyQ') || Input.hit('Digit1') || UI.btnPressed('blink')) this.usePower('blink');
         if (Input.hit('KeyE') || Input.hit('Digit2') || UI.btnPressed('lure')) this.usePower('lure');
@@ -4366,10 +4440,15 @@ function drawKiller(c, P, t) {
   if (P.blood > 0.2) { c.fillStyle = `rgba(130,0,12,${Math.min(0.85, P.blood)})`; circ(c, hr[0], hr[1], 3.4); }
   // hood + porcelain mask
   c.fillStyle = '#0e0d11'; circ(c, -1, 0, 9.5);
-  c.fillStyle = '#ebe5d8'; ell(c, 3.5, 0, 6.2, 7.6);
+  const MK = curMask();
+  c.fillStyle = `rgb(${MK.rgb.join(',')})`; ell(c, 3.5, 0, 6.2, 7.6);
   c.fillStyle = 'rgba(0,0,0,0.12)'; ell(c, 2, 0, 3.5, 6.8);
-  c.fillStyle = '#050505'; c.fillRect(7, -4.2, 2.4, 2.6); c.fillRect(7, 1.6, 2.4, 2.6);
-  c.strokeStyle = '#9a0010'; c.lineWidth = 0.9; c.beginPath(); c.moveTo(1, -6); c.lineTo(4, -3); c.lineTo(3, 0); c.lineTo(6, 3); c.stroke();
+  if (MK.glow) { c.shadowColor = '#ff1a2a'; c.shadowBlur = 8; }
+  c.fillStyle = MK.eye; c.fillRect(7, -4.2, 2.4, 2.6); c.fillRect(7, 1.6, 2.4, 2.6); c.shadowBlur = 0;
+  if (MK.stitch) { c.strokeStyle = '#3a2410'; c.lineWidth = 0.8; c.beginPath(); for (let k = -5; k <= 5; k += 2.5) { c.moveTo(4, k); c.lineTo(6, k + 0.8); } c.stroke(); }
+  if (MK.teeth) { c.fillStyle = '#1a1612'; c.fillRect(8.6, -1.6, 1.4, 3.2); c.fillStyle = '#e8e2d0'; c.fillRect(8.8, -1.2, 0.8, 0.8); c.fillRect(8.8, 0.4, 0.8, 0.8); }
+  if (MK.smile) { c.strokeStyle = '#c0101a'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(7.5, -5); c.quadraticCurveTo(10.5, 0, 7.5, 5); c.stroke(); }
+  if (MK === MASKS.porcelain || MK.drip) { c.strokeStyle = '#9a0010'; c.lineWidth = 0.9; c.beginPath(); c.moveTo(1, -6); c.lineTo(4, -3); c.lineTo(3, 0); c.lineTo(6, 3); c.stroke(); }
   const bm = P.bloodMask || 0;
   if (bm > 0.1) { c.fillStyle = `rgba(150,0,14,${Math.min(0.9, bm + 0.25)})`; for (let k = 0; k < 4 + bm * 8; k++) circ(c, 2 + srand(k + 3) * 7, -6 + srand(k * 7 + 1) * 12, 0.7 + srand(k * 3) * 1.4); c.fillRect(3.4, 3.5, 1.6, 2 + bm * 4); ell(c, 5, 2.6, 2.6, 2.1); }
   if (P.attackT > 0 && (wid === 'knife' || wid === 'axe')) { c.strokeStyle = `rgba(255,240,240,${P.attackT * 2})`; c.lineWidth = 2; c.beginPath(); c.arc(4, 4, wid === 'axe' ? 36 : 30, -0.9, 0.9); c.stroke(); }
@@ -4412,14 +4491,18 @@ const CineScene = {
   sm(a, b, t) { const k = clamp((t - a) / (b - a), 0, 1); return k * k * (3 - 2 * k); },
   mask(c, x, y, s, sy, lit, eyes, rot) {
     const P = this.P; c.save(); c.translate(x, y); if (rot) c.rotate(rot); c.scale(s, s * sy); c.translate(-100, -130);
-    const L = v => Math.round(clamp(v * lit, 0, 255));
-    const g = c.createRadialGradient(84, 83, 4, 100, 130, 200); g.addColorStop(0, `rgb(${L(255)},${L(250)},${L(240)})`); g.addColorStop(0.65, `rgb(${L(217)},${L(210)},${L(194)})`); g.addColorStop(1, `rgb(${L(122)},${L(114)},${L(102)})`);
+    const MK = curMask(), base = MK.rgb, L = (v, k) => Math.round(clamp(base[k] * v * lit, 0, 255)), col = v => `rgb(${L(v, 0)},${L(v, 1)},${L(v, 2)})`;
+    const g = c.createRadialGradient(84, 83, 4, 100, 130, 200); g.addColorStop(0, col(1.08)); g.addColorStop(0.65, col(0.92)); g.addColorStop(1, col(0.52));
     c.fillStyle = g; c.fill(P.face); c.fillStyle = 'rgba(0,0,0,.1)'; c.fill(P.nose);
-    c.fillStyle = '#050407'; c.fill(P.eyeL); c.fill(P.eyeR);
+    if (MK.stitch) { c.strokeStyle = 'rgba(40,24,10,.9)'; c.lineWidth = 4; c.beginPath(); for (let y = 30; y < 240; y += 18) { c.moveTo(92, y); c.lineTo(108, y + 6); } c.moveTo(100, 20); c.lineTo(100, 245); c.stroke(); }
+    if (MK.smile) { c.strokeStyle = '#b0101a'; c.lineWidth = 7; c.lineCap = 'round'; c.beginPath(); c.moveTo(34, 170); c.quadraticCurveTo(100, 240, 166, 170); c.stroke(); }
+    if (MK.teeth) { c.fillStyle = '#0a0806'; c.fillRect(70, 190, 60, 26); c.fillStyle = col(1); for (let k = 0; k < 6; k++) c.fillRect(72 + k * 10, 192, 7, 22); c.fillStyle = '#0a0806'; c.beginPath(); c.moveTo(100, 140); c.lineTo(88, 168); c.lineTo(112, 168); c.fill(); }
+    c.fillStyle = MK.glow ? '#300006' : '#050407'; c.fill(P.eyeL); c.fill(P.eyeR);
     if (eyes > 0) { c.save(); c.shadowColor = '#ff1a2a'; c.shadowBlur = 30 * eyes; c.fillStyle = `rgba(255,30,45,${0.85 * eyes})`; c.translate(67, 112); c.scale(0.45, 0.4); c.beginPath(); c.arc(0, 0, 22, 0, TAU); c.fill(); c.restore();
       c.save(); c.shadowColor = '#ff1a2a'; c.shadowBlur = 30 * eyes; c.fillStyle = `rgba(255,30,45,${0.85 * eyes})`; c.translate(133, 112); c.scale(0.45, 0.4); c.beginPath(); c.arc(0, 0, 22, 0, TAU); c.fill(); c.restore(); }
     c.strokeStyle = `rgb(${L(58)},${L(53)},${L(48)})`; c.lineWidth = 3; c.lineCap = 'round'; c.stroke(P.mouth);
-    c.strokeStyle = '#2a0008'; c.lineWidth = 2.6; c.stroke(P.crack); c.fillStyle = '#a0000f'; c.fill(P.tear);
+    if (MK === MASKS.porcelain || MK.drip) { c.strokeStyle = '#2a0008'; c.lineWidth = 2.6; c.stroke(P.crack); c.fillStyle = '#a0000f'; c.fill(P.tear); }
+    if (MK.drip) { c.fillStyle = '#8a0010'; for (let k = 0; k < 6; k++) { const x = 50 + k * 20; c.fillRect(x, 4, 6, 30 + (k * 37) % 50); } }
     c.restore();
   },
   figure(c, x, headY, stand, walk, hand, knife, lit, eyes, maskOn) {
@@ -4445,7 +4528,7 @@ const CineScene = {
     c.fillStyle = body; c.beginPath(); c.ellipse(x, headY + 6, 66, 82, 0, 0, TAU); c.fill();
     c.strokeStyle = rim; c.lineWidth = 2; c.beginPath(); c.ellipse(x, headY + 6, 66, 82, 0, Math.PI * 0.62, Math.PI * 1.25); c.stroke();
     c.fillStyle = '#000'; c.beginPath(); c.ellipse(x, headY + 12, 48, 62, 0, 0, TAU); c.fill();
-    if (maskOn) this.mask(c, x, headY + 12, 0.46, 1, lit * 0.85 + 0.25, eyes, 0);
+    if (maskOn) this.mask(c, x, headY + 12, 0.46, 1, lit * 0.85 + 0.25, curMask().glow ? Math.max(eyes, 0.7) : eyes, 0);
     c.fillStyle = body; c.beginPath(); c.ellipse(x, headY - 40, 58, 30, 0, Math.PI, TAU); c.fill();
     c.restore();
   },
@@ -4592,17 +4675,39 @@ const UI = {
     document.body.classList.toggle('touch', IS_TOUCH);
     this.refreshMenu();
   },
-  ensureShop() { const p = this.progress; if (!p.shop) p.shop = newShop(); if (p.blood == null) p.blood = 100; p.shopV = p.shopV || 0; this.loadout = (this.loadout || []).filter(id => p.shop.own.includes(id)); },
-  persist() { const p = this.progress; p.shopV = (p.shopV || 0) + 1; store.set('progress', p); FB.saveProfile({ unlocked: p.unlocked, kills: p.kills || 0, best: p.best, blood: p.blood, shop: p.shop, shopV: p.shopV }); },
+  ensureShop() { const p = this.progress; if (!p.shop) p.shop = newShop(); if (!p.shop.masks) { p.shop.masks = ['porcelain']; p.shop.mask = 'porcelain'; }
+    p.life = p.life || {}; p.life.styles = p.life.styles || {}; p.life.flags = p.life.flags || {}; p.ach = p.ach || {}; if (p.blood == null) p.blood = 100; p.shopV = p.shopV || 0; this.loadout = (this.loadout || []).filter(id => p.shop.own.includes(id)); },
+  persist(noBump) { const p = this.progress; if (!noBump) p.shopV = (p.shopV || 0) + 1; store.set('progress', p); FB.saveProfile({ unlocked: p.unlocked, kills: p.kills || 0, best: p.best, blood: p.blood, shop: p.shop, shopV: p.shopV }); },
+  lifeBump(k, n = 1) { const L = this.progress.life; L[k] = (L[k] || 0) + n; this.checkAch(); },
+  lifeStyle(st) { const L = this.progress.life; if (!L.styles[st]) { L.styles[st] = 1; this.checkAch(); } else L.styles[st]++; },
+  lifeFlag(f) { const L = this.progress.life; if (!L.flags[f]) { L.flags[f] = 1; this.checkAch(); } },
+  checkAch() {
+    const p = this.progress; let got = false;
+    for (const a of ACH) {
+      if (p.ach[a.id]) continue; let ok = false; try { ok = a.f(p); } catch (e) { ok = false; }
+      if (!ok) continue; p.ach[a.id] = Date.now(); p.blood = (p.blood || 0) + a.r; got = true; (this.newAch = this.newAch || []).push(a);
+      this.trophyPop(a);
+    }
+    if (got) { p.shopV = (p.shopV || 0) + 1; this.persist(true); } else store.set('progress', p);
+  },
+  trophyPop(a) {
+    const el = $('#objPop'); el.innerHTML = `<small>🏆 TROFEO SBLOCCATO</small>${a.icon} ${a.name} <b>+🩸${a.r}</b>`; el.className = ''; void el.offsetWidth; el.className = 'show';
+    if (this.scene !== 'game') this.toast(`🏆 ${a.name} · +🩸${a.r}`); try { Sound.objective(); } catch (e) { /* audio off */ }
+  },
+  buildTrophies() {
+    this.ensureShop(); const p = this.progress, n = ACH.filter(a => p.ach[a.id]).length;
+    $('#trophyHead').innerHTML = `<b>${n}</b> / ${ACH.length} · stili di uccisione scoperti: <b>${Object.keys(p.life.styles).length}</b>`;
+    $('#trophyList').innerHTML = ACH.map(a => { const ok = !!p.ach[a.id]; return `<div class="troph${ok ? ' ok' : ''}"><div class="ic">${ok ? a.icon : '🔒'}</div><div><h3>${a.name}</h3><p>${a.desc}</p></div><div class="rw">${ok ? '✔' : '🩸' + a.r}</div></div>`; }).join('');
+  },
   openShop(back) { this.shopBack = back; this.scene = 'shop'; this.show('shop'); this.buildShop(); },
   buildShop(msg) {
     const p = this.progress, sh = p.shop; $('#shopBal').innerHTML = `🩸 <b>${p.blood}</b>`; $('#shopMsg').textContent = msg || 'Spendi i punti sangue guadagnati vincendo i livelli. Porti sempre 2 gadget a partita.';
     const box = $('#shopList'); box.innerHTML = '';
-    const item = (icon, name, desc, info, label, cost, fn, own) => {
+    const item = (icon, name, desc, info, label, cost, fn, own, maxTxt) => {
       const d = document.createElement('div'); d.className = 'sitem' + (own ? ' own' : '');
       d.innerHTML = `<div class="ic">${icon}</div><h3>${name}</h3><p>${desc}</p><div class="si">${info}</div>`;
-      if (label) { const b = document.createElement('button'); b.className = 'btn buy' + (p.blood < cost ? ' broke' : ''); b.textContent = `${label} · 🩸${cost}`; b.onclick = () => { if (p.blood < cost) { Sound.denied(); this.buildShop('Non hai abbastanza punti sangue.'); return; } p.blood -= cost; fn(); this.persist(); Sound.pickup(); this.buildShop('Acquistato!'); }; d.appendChild(b); }
-      else { const t = document.createElement('div'); t.className = 'maxed'; t.textContent = 'AL MASSIMO'; d.appendChild(t); }
+      if (label) { const b = document.createElement('button'); b.className = 'btn buy' + (p.blood < cost ? ' broke' : ''); b.textContent = cost ? `${label} · 🩸${cost}` : label; b.onclick = () => { if (p.blood < cost) { Sound.denied(); this.buildShop('Non hai abbastanza punti sangue.'); return; } p.blood -= cost; fn(); this.persist(); Sound.pickup(); this.buildShop('Acquistato!'); }; d.appendChild(b); }
+      else { const t = document.createElement('div'); t.className = 'maxed'; t.textContent = maxTxt || 'AL MASSIMO'; d.appendChild(t); }
       box.appendChild(d);
     };
     for (const [id, g] of Object.entries(GADGETS)) {
@@ -4612,6 +4717,10 @@ const UI = {
     }
     item('◐', 'Energia Ombra', 'Inizi ogni livello con più energia per Ombra, Richiamo e Blackout.', `Livello ${sh.shadow}/2`, sh.shadow < 2 ? '+1 ENERGIA' : null, SHOP.shadow[sh.shadow] || 0, () => { sh.shadow++; }, sh.shadow > 0);
     item('🪓', 'Accetta in tasca', 'Inizi ogni livello con un\'accetta (2 colpi).', sh.axe ? '✔ Acquistata' : 'Non posseduta', sh.axe ? null : 'ACQUISTA', SHOP.axe, () => { sh.axe = true; }, sh.axe);
+    for (const [id, m] of Object.entries(MASKS)) {
+      const own = sh.masks.includes(id), on = sh.mask === id, sw = `<span class="mswatch" style="background:rgb(${m.rgb.join(',')});box-shadow:inset 0 0 0 3px ${m.eye}"></span>`;
+      item(sw, 'Maschera · ' + m.name, m.desc, on ? '✔ Indossata' : own ? 'Posseduta' : 'Cosmetica', on ? null : own ? 'INDOSSA' : 'ACQUISTA', own ? 0 : m.cost, () => { if (!own) sh.masks.push(id); sh.mask = id; this.checkAch(); }, own, on ? 'INDOSSATA' : null);
+    }
   },
   enter() {
     Sound.init(); goFull();
@@ -4636,6 +4745,7 @@ const UI = {
     const el = $('#' + id); if (el) el.classList.remove('hidden');
     if (id === 'levels') this.buildLevels();
     if (id === 'board') this.buildBoard('world');
+    if (id === 'trophies') this.buildTrophies();
     if (id === 'menu') { this.scene = 'menu'; this.refreshMenu(); }
   },
   toMenu() {
@@ -4770,7 +4880,7 @@ const UI = {
   },
   beginPlay() {
     if (this.scene !== 'lvlintro') return;
-    this.loadout = this.loadout.filter(id => this.progress.shop.own.includes(id));
+    this.loadout = this.loadout.filter(id => this.progress.shop.own.includes(id)); this.newAch = [];
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     Game.start(this.pendingLevel); this.scene = 'game';
     const seen = this.cineSeen = this.cineSeen || {}; Game.cine = { t: seen[Game.def.id] ? 2.7 : 0, dur: 9.45, stage: -1 }; seen[Game.def.id] = 1; Game.cineK = 1; Game.cam.zoom = 3.2; document.body.classList.add('cine');
@@ -4820,7 +4930,7 @@ const UI = {
     $('#hudChase').classList.toggle('hidden', !G.chased);
     this.set('hudObj', (G.objectives || []).map(o => { const d = OBJ[o.id]; return `<div class="ob${o.done ? ' done' : ''}">${o.done ? '✔' : '◇'} ${d.t}${d.need ? ` (${o.n}/${d.need})` : ''} <b>+${d.pts}</b></div>`; }).join(''), 'innerHTML');
     { const arm = G.npcs.some(n => n.alive && n.armed); $('#hudHp').style.display = arm || G.player.hp < 3 ? '' : 'none'; this.set('hudHp', [0, 1, 2].map(i => `<i class="${G.player.hp > i ? 'f' : ''}">♥</i>`).join(''), 'innerHTML'); }
-    { const alt = G.context && G.context.alt; $('#grabBtn').classList.toggle('hidden', !alt); if (alt) this.set('grabLabel', alt.fin.def.label);
+    { const alt = G.context && G.context.alt, mut = G.context && G.context.mut; $('#grabBtn').classList.toggle('hidden', !alt && !mut); if (alt) this.set('grabLabel', alt.fin.def.label); else if (mut) this.set('grabLabel', ['MUTILA', 'SQUARTA', 'FAI SCEMPIO'][mut.mut || 0]);
       $('#throwBtn').classList.toggle('hidden', !G.throwT);
       $('#struggle').classList.toggle('hidden', !G.struggle); if (G.struggle) $('#struggleBar').style.width = Math.min(100, G.struggle.prog * 100) + '%'; }
     for (let i = 0; i < 2; i++) { const g = G.gadgets[i], el = $('#gad' + i); el.style.display = g ? '' : 'none'; if (!g) continue; const d = GADGETS[g.id]; this.set('gad' + i, `<span class="ic">${d.icon}</span>${d.short}<small>×${g.n}</small><span class="kb">${i ? 'C' : 'X'}</span>`, 'innerHTML'); el.classList.toggle('na', g.n <= 0); }
@@ -4874,13 +4984,15 @@ const UI = {
       if (r.level + 1 > this.progress.unlocked && r.level + 1 < LEVELS.length) this.progress.unlocked = r.level + 1;
     }
     this.progress.kills = (this.progress.kills || 0) + r.kills;
+    if (r.win && r.witnesses === 0) this.ensureShop(), this.progress.life.flags.ghost = 1;
     let bloodGain = 0;
     if (r.win) {
       const rb = { S: 150, A: 100, B: 60, C: 30, D: 0 }[r.rank] || 0, cb = (r.challenges || []).filter(c => c.ok).length * 40, first = best ? 0 : 100;
       bloodGain = Math.round(r.score / 12) + rb + cb + first + (r.objectives || []).filter(o => o.done).length * 40; this.progress.blood = (this.progress.blood || 0) + bloodGain;
     }
     this.progress.shopV = (this.progress.shopV || 0) + (bloodGain ? 1 : 0);
-    store.set('progress', this.progress);
+    store.set('progress', this.progress); this.checkAch();
+    const newAch = (this.newAch || []).splice(0);
     const mm = Math.floor(r.time / 60), ss = String(Math.floor(r.time % 60)).padStart(2, '0');
     const styles = Object.entries(r.styles).map(([k, v]) => `<span>${k} ×${v}</span>`).join('');
     const next = r.win && r.level + 1 < LEVELS.length;
@@ -4888,6 +5000,7 @@ const UI = {
       <div class="resWrap">
         <div class="resHead ${r.win ? 'win' : 'lose'}">${r.win ? 'LIVELLO COMPLETATO' : r.reason === 'boom' ? 'ESPLOSO' : r.reason === 'shot' ? 'ABBATTUTO' : 'PRESO'}</div>
         <div class="resLvl">${r.levelName}</div>
+        ${newAch.length ? `<div class="resAch">🏆 ${newAch.map(x => `${x.icon} ${x.name} <b>+🩸${x.r}</b>`).join(' · ')}</div>` : ''}
         <div class="resBody">
           <div class="rank" style="color:${RANK_COL[r.rank]}">${r.rank}</div>
           <div class="resList">
@@ -4945,6 +5058,20 @@ async function goFull() {
   try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch (e) { /* unsupported */ }
 }
 
+/* ---------------- installable app (PWA) ---------------- */
+(function () {
+  const btn = $('#btnInstall'), ios = /iphone|ipad|ipod/i.test(navigator.userAgent), standalone = matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone;
+  let evt = null;
+  if (ios && !standalone && btn) btn.classList.remove('hidden');
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); evt = e; if (btn) btn.classList.remove('hidden'); });
+  window.addEventListener('appinstalled', () => { if (btn) btn.classList.add('hidden'); UI.toast('Installato! Trovi la Maschera Bianca tra le tue app.'); });
+  if (btn) btn.addEventListener('click', async e => {
+    e.stopPropagation(); Sound.click();
+    if (evt) { evt.prompt(); try { await evt.userChoice; } catch (_) { /* dismissed */ } evt = null; btn.classList.add('hidden'); }
+    else UI.toast(ios ? 'Tocca Condividi ⬆ poi "Aggiungi alla schermata Home"' : 'Dal menu del browser scegli "Installa app"');
+  });
+  if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+})();
 /* ---------------- boot ---------------- */
 (function main() {
   const cv = $('#cv');
