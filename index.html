@@ -314,6 +314,8 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 #struggle .sTxt{font-family:Nosifer;font-size:clamp(14px,3.6vh,24px);color:#ff2a3a;text-shadow:0 0 18px #f00,0 3px 0 #000;animation:cshake .1s steps(2) infinite}
 #struggle .sBar{height:14px;border:2px solid #ff2a3a;background:rgba(0,0,0,.7);margin-top:8px}
 #struggle .sBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8a0010,#ff3a4a);box-shadow:0 0 12px #f00}
+#hudHp{display:flex;gap:3px;margin-top:4px;font-size:16px}
+#hudHp i{font-style:normal;color:#3a2a2e}#hudHp i.f{color:#ff2a3a;text-shadow:0 0 8px #f00}
 </style>
 </head>
 <body>
@@ -408,7 +410,7 @@ body.cine #hud,body.cine #touch,body.cine #joy{opacity:0;pointer-events:none}
 </div>
 
 <div id="hud" class="hidden">
-  <div class="hudTL"><div id="hudLevel"></div><div id="hudVictims"></div><div id="hudLeft"></div></div>
+  <div class="hudTL"><div id="hudLevel"></div><div id="hudVictims"></div><div id="hudLeft"></div><div id="hudHp"></div></div>
   <div class="hudTC"><div id="hudScore">0</div><div id="hudCombo"></div><div id="hudComboWrap"><div id="hudComboBar"></div></div><div id="hudPolice" class="hidden"></div><div id="hudChase" class="hidden">⚠ INSEGUITO!</div><div id="hudFrenzy" class="hidden">FRENESIA<div id="hudFrenzyBar"><i></i></div></div></div>
   <div class="hudTR"><canvas id="minimap"></canvas><button id="btnPause">❚❚</button></div>
   <div class="hudStatus"><div id="hudEye" class="eye open"></div><div><div id="hudStealth"></div><div id="hudTarget"></div></div></div>
@@ -623,6 +625,8 @@ const Sound = {
       f.type = 'bandpass'; f.frequency.value = 2300; f.Q.value = 3; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
       o.connect(f); f.connect(g); g.connect(this.sfx); g.connect(this.verb); o.start(t); l.start(t); o.stop(t + 1.2); l.stop(t + 1.2); });
   },
+  gun() { this.noise(0.1, { ff: 2400, q: 1, vol: 0.55 }); this.tone(190, 0.18, { slide: 50, vol: 0.5, type: 'square', filter: 'lowpass', ff: 1400 }); this.noise(0.5, { filter: 'lowpass', ff: 900, slide: 150, vol: 0.35, verb: true }); },
+  shotgun() { const t = this.t; this.noise(0.25, { ff: 1400, q: 0.8, vol: 0.7 }); this.tone(110, 0.4, { slide: 30, vol: 0.8 }); this.noise(0.7, { filter: 'lowpass', ff: 700, slide: 120, vol: 0.5, verb: true }); this.noise(0.04, { ff: 3000, vol: 0.3, at: t + 0.5 }); this.tone(300, 0.05, { type: 'square', vol: 0.1, at: t + 0.5 }); },
   tinnitus() { this.tone(4300, 3, { vol: 0.05, attack: 0.05 }); this.tone(5200, 2.2, { vol: 0.02, attack: 0.1 }); },
   stalkWhisper() { const t = this.t; for (let i = 0; i < 3; i++) this.noise(0.09, { filter: 'bandpass', ff: 3400, q: 7, vol: 0.22, at: t + i * 0.17, verb: true }); for (let i = 0; i < 3; i++) this.noise(0.14, { filter: 'bandpass', ff: 700, slide: 520, q: 5, vol: 0.22, at: t + 0.62 + i * 0.2, verb: true }); },
   /* footsteps by surface */
@@ -632,6 +636,7 @@ const Sound = {
       case '.': this.noise(0.05, { filter: 'lowpass', ff: 520 * R, vol: v }); this.tone(130 * R, 0.07, { slide: 80, vol: v * 0.7, type: 'triangle' }); break;
       case ',': case 'h': case 'm': this.noise(0.03, { filter: 'bandpass', ff: 2400 * R, q: 3, vol: v * 1.1 }); this.tone(320 * R, 0.03, { vol: v * 0.3, type: 'square', filter: 'lowpass', ff: 1500 }); break;
       case ':': this.noise(0.08, { filter: 'lowpass', ff: 260, vol: v * 0.7 }); break;
+      case 'c': this.noise(0.15, { filter: 'bandpass', ff: 2600, q: 0.6, vol: v * 1.4 }); this.noise(0.05, { filter: 'lowpass', ff: 300, vol: v * 0.4 }); break;
       case 'g': case 'f': this.noise(0.13, { filter: 'bandpass', ff: 3200 * R, q: 0.7, vol: v * 0.8 }); this.noise(0.04, { filter: 'lowpass', ff: 300, vol: v * 0.5 }); break;
       case 'd': this.tone(190 * R, 0.1, { slide: 120, vol: v, type: 'triangle' }); this.noise(0.04, { filter: 'lowpass', ff: 600, vol: v * 0.5 }); break;
       default: this.noise(0.04, { filter: 'lowpass', ff: 900 * R, vol: v }); this.tone(150 * R, 0.04, { slide: 100, vol: v * 0.5 }); break;
@@ -838,11 +843,11 @@ const Input = {
    Tile codes:
    '#' wall  'W' window  'D' door  'H' hedge  'B' brick border  '~' water
    floors: '.' wood  ',' tiles  ':' carpet  '_' concrete  '=' dance floor
-           'k' club floor  'g' grass  'p' asphalt/stone  'h' hospital  'm' morgue  'f' forest  'd' dock
+           'k' club floor  'g' grass  'p' asphalt/stone  'h' hospital  'm' morgue  'f' forest  'd' dock  'c' corn (walkable, blocks sight)
    ============================================================ */
 const TILE_SOLID = { '#': 1, 'W': 1, 'H': 1, 'B': 1, '~': 1 };
-const TILE_OPAQUE = { '#': 1, 'H': 1, 'B': 1 };
-const OUTSIDE_TILES = { 'g': 1, 'p': 1, 'H': 1, 'B': 1, '~': 1, 'f': 1, 'd': 1 };
+const TILE_OPAQUE = { '#': 1, 'H': 1, 'B': 1, 'c': 1 };
+const OUTSIDE_TILES = { 'g': 1, 'p': 1, 'H': 1, 'B': 1, '~': 1, 'f': 1, 'd': 1, 'c': 1 };
 
 const OBJ_DEF = {
   sofa: {}, bed: {}, rug: { under: 1 }, armchair: {}, toilet: {}, stool: {}, lamp: {}, rock: {}, bell: {},
@@ -898,6 +903,7 @@ const WEAPONS = {
   knife:  { name: 'Coltello', icon: '🔪', uses: Infinity, noise: 0, blood: 1, reach: 1, mult: 1, verb: 'UCCIDI' },
   axe:    { name: 'Accetta', icon: '🪓', uses: 4, noise: 5, blood: 2, reach: 1.15, mult: 1.4, brutal: true, verb: 'SPACCA' },
   saw:    { name: 'Motosega', icon: '⚙️', uses: 3, noise: 13, blood: 4, reach: 1.5, mult: 2, brutal: true, multi: true, verb: 'SQUARTA' },
+  shotgun: { name: 'Fucile a pompa', icon: '🔫', uses: 2, noise: 11, blood: 3, reach: 1, mult: 1.8, ranged: true, verb: 'SPARA' },
   pistol: { name: 'Pistola silenziata', icon: '🔫', uses: 4, noise: 4, blood: 1.4, reach: 1, mult: 1.2, ranged: true, verb: 'SPARA' }
 };
 
@@ -936,10 +942,12 @@ const DUR = {
   surgery: [15, 28], ward: [8, 16], desk: [10, 20], break: [10, 20], vend: [3, 6], recep: [20, 35], wait: [12, 22], morgue: [14, 26],
   pharm: [12, 22], patrol: [2, 5], fire: [16, 30], tentchat: [8, 14], dock: [10, 20], bbq: [10, 18],
   serve: [6, 12], monitor: [15, 30], laundry: [12, 20], pool: [10, 20], room: [10, 20], piano: [20, 40],
-  haunt: [10, 18], scare: [8, 14], perform: [15, 25], ride: [8, 16], operate: [25, 40], stall: [20, 35]
+  haunt: [10, 18], scare: [8, 14], perform: [15, 25], ride: [8, 16], operate: [25, 40], stall: [20, 35],
+  class: [12, 25], teach: [15, 30], lock: [4, 8], gym: [8, 16], bleach: [10, 18], lab: [14, 24], mop: [14, 24], principal: [20, 35],
+  yard: [8, 16], feed: [12, 20], barn: [8, 16], corn: [8, 14], work: [12, 22], server: [12, 22], cell: [10, 18]
 };
 
-const LOOK = (shirt, hair, style, skin = '#e0b48f', pants = '#26262e') => ({ shirt, hair, style, skin, pants });
+const LOOK = (shirt, hair, style, skin = '#e0b48f', pants = '#26262e', x = {}) => Object.assign({ shirt, hair, style, skin, pants }, x);
 
 const LEVELS = [
   /* ===================== LEVEL 1 : VILLA DEI PINI ===================== */
@@ -1455,6 +1463,208 @@ const LEVELS = [
         ]
       });
     }
+  },
+  /* ===================== LEVEL 7 : LICEO SANTA RITA ===================== */
+  {
+    id: 'school', name: 'Liceo Santa Rita', sub: 'Quartiere Est · 22:30 · veglia di maturità',
+    blurb: 'Aule, palestra, mensa e corridoi di armadietti. Un bullo grosso come un armadio, una streamer che trasmette in diretta e un vigilante armato.',
+    music: 'lounge', weather: null, par: 500, challenges: ['finisher2', 'trap1', 'silent3'],
+    ambIn: [0.08, 0.09, 0.11], ambOut: [0.10, 0.11, 0.17],
+    hints: [
+      'Gli ENERGUMENI non si lasciano pugnalare: ti afferrano e devi vincere la lotta premendo AZIONE.',
+      'Le STREAMER (📱) chiamano subito la polizia in diretta se vedono qualcosa. Zittiscile per prime.',
+      'Il vigilante è ARMATO: se ti vede spara. Hai 3 cuori (♥) e ne recuperi uno ogni 22 secondi.',
+      'Gli armadietti del corridoio sono ottimi nascondigli per i corpi.'
+    ],
+    build() {
+      const b = new LevelBuilder(52, 32, 'p');
+      b.room(3, 3, 15, 12, '.'); b.room(15, 3, 27, 12, '.'); b.room(27, 3, 37, 12, 'h'); b.room(37, 3, 49, 12, ':'); b.room(3, 12, 49, 16, '_');
+      b.room(3, 16, 23, 28, '.'); b.room(23, 16, 36, 28, ','); b.room(36, 16, 43, 22, ':'); b.room(43, 16, 49, 22, '_'); b.room(36, 22, 49, 28, ',');
+      b.border('B');
+      [[9, 12, '_'], [21, 12, '_'], [32, 12, '_'], [43, 12, '_'], [15, 8, '.'], [37, 8, 'h'], [8, 16, '.'], [9, 16, '.'], [29, 16, ','], [39, 16, ':'], [46, 16, '_'], [23, 22, ','], [36, 25, ','], [29, 28, ','], [30, 28, ','], [3, 22, '.'], [49, 14, '_']].forEach(([x, y, f]) => b.door(x, y, f));
+      [[3, 6], [3, 9], [9, 3], [21, 3], [32, 3], [43, 3], [49, 6], [49, 9], [13, 28], [8, 28], [40, 28], [45, 28], [3, 26]].forEach(([x, y]) => b.win(x, y));
+      // classrooms
+      [0, 12].forEach((dx, ci) => { [[5, 6], [8, 6], [11, 6], [5, 9], [8, 9], [11, 9]].forEach(([x, y]) => { b.o('desk', x + dx, y, 2, 1); b.poi('class', x + dx + 0.9, y + 1.45, -Math.PI / 2, 'sit'); }); b.poi('teach', 9.5 + dx, 4.6, Math.PI / 2, 'idle'); b.light('cl' + ci, 9.5 + dx, 8, 7, [1, 0.95, 0.8], 0.75, { flicker: ci ? 'bad' : undefined }); });
+      // lab
+      [[29, 5], [33, 5], [29, 8], [33, 8]].forEach(([x, y]) => { b.o('table', x, y, 3, 1, { c: '#aab' }); b.poi('lab', x + 1.5, y + 1.45, -Math.PI / 2, 'cook'); });
+      b.o('cabinet', 28, 4); b.o('stove', 36, 6);
+      b.lure('chem', 36, 6, 35.5, 6.5, 'Manomette il gas del laboratorio', 'stove', 'Che odore strano in laboratorio!', { deadly: 'explode' }); b.light('lab', 32.5, 7, 6, [0.8, 1, 0.95], 0.8);
+      // library
+      b.o('shelf', 38, 4, 6, 1); b.o('shelf', 45, 4, 4, 1); b.o('table', 40, 7, 3, 2, { c: '#6a4a30' }); b.o('table', 45, 8, 3, 2, { c: '#6a4a30' });
+      [[39.4, 8, 0], [43.6, 8, Math.PI], [44.4, 9.2, 0], [48.5, 9, Math.PI]].forEach(([x, y, f]) => b.poi('read', x, y, f, 'idle')); b.light('lib', 43, 8, 7, [1, 0.8, 0.5], 0.65);
+      // corridor
+      [5, 6, 7, 12, 13, 14, 24, 25, 26, 34, 35, 36, 45, 46, 47].forEach(x => b.o('locker', x, 13));
+      [5.5, 13.5, 25.5, 35.5, 46.5].forEach(x => b.poi('lock', x, 14.4, -Math.PI / 2, 'idle')); b.phone(48, 13, 47.5, 14.4);
+      b.light('c1', 10, 14, 6, [0.85, 1, 0.9], 0.5, { flicker: 'bad' }); b.light('c2', 26, 14, 6, [0.85, 1, 0.9], 0.55); b.light('c3', 42, 14, 6, [0.85, 1, 0.9], 0.5, { flicker: 'bad' });
+      b.cam(4.5, 14.5, 0, 0.25, 12); b.cam(48.5, 14.5, Math.PI, 0.25, 12);
+      // gym
+      b.o('pillar', 7, 20); b.o('pillar', 19, 20); b.o('bench', 5, 26, 6, 1); b.o('bench', 16, 26, 6, 1);
+      [6.5, 8.5, 10.5, 17.5, 19.5, 21.5].forEach(x => b.poi('bleach', x, 25.45, Math.PI / 2, 'sit'));
+      [[10, 22, 0], [13, 19.5, 1], [16, 23.5, 2], [8.5, 24, 3], [12.5, 24.5, 4], [15.5, 20.5, 5]].forEach(([x, y, f]) => b.poi('gym', x, y, f, 'idle'));
+      b.light('gym', 12, 22, 9, [1, 0.95, 0.8], 0.7, { flicker: 'bad' }); b.light('gym2', 18, 24, 5, [1, 0.95, 0.8], 0.5);
+      // cafeteria
+      [[26, 19], [31, 19], [26, 23], [31, 23]].forEach(([x, y]) => { b.o('table', x, y, 3, 2, { c: '#caa' }); b.poi('eat', x - 0.55, y + 1, 0, 'sit'); b.poi('eat', x + 3.55, y + 1, Math.PI, 'sit'); });
+      b.o('counter', 24, 25, 4, 1); b.poi('cook', 25.5, 26.4, -Math.PI / 2, 'cook'); b.poi('cook', 26.5, 26.4, -Math.PI / 2, 'cook'); b.o('fridge', 35, 18); b.poi('fridge', 34.4, 18.6, 0, 'idle'); b.light('caf', 29.5, 22, 9, [1, 0.95, 0.85], 1);
+      // office
+      b.o('desk', 38, 18, 3, 1); b.poi('principal', 39.5, 19.45, -Math.PI / 2, 'sit'); b.phone(42, 18, 41.5, 19.4); b.o('locker', 42, 20);
+      b.lure('cams', 37, 19, 38.2, 19.6, 'Hackera le telecamere', 'camoff', 'Le telecamere! Si sono spente!'); b.light('off', 39.5, 19, 4, [1, 0.8, 0.5], 0.6);
+      // janitor
+      b.o('fuse', 48, 17); b.o('locker', 44, 17, 1, 2); b.o('crate', 45, 20, 2, 1); b.poi('mop', 46.5, 19, 0, 'cook');
+      b.lure('fuse', 48, 17, 47.5, 18.5, 'Stacca la corrente', 'fuse', 'È saltata la luce! Vado al quadro!'); b.light('jan', 46, 19, 4, [1, 0.9, 0.6], 0.5, { flicker: 'bad' });
+      // bathrooms
+      [38, 40, 42, 44, 46].forEach(x => { b.o('toilet', x, 27); b.poi('wc', x + 0.5, 27.3, -Math.PI / 2, 'sit'); }); b.o('sink', 38, 23, 6, 1);
+      [39.5, 41.5, 43.5].forEach(x => b.poi('mirror', x, 24.45, -Math.PI / 2, 'idle')); b.poi('smoke', 47.5, 24.5, Math.PI, 'smoke'); b.light('wc', 42, 25, 7, [0.85, 0.95, 1], 0.7, { flicker: 'bad' });
+      // outside
+      b.poi('smoke', 26.5, 30.2, Math.PI / 2, 'smoke'); b.poi('smoke', 33, 30.2, Math.PI / 2, 'smoke'); b.o('dumpster', 40, 29, 2, 1);
+      b.light('door', 30, 29.5, 6, [1, 0.8, 0.5], 0.8, { group: 'out' }); b.light('west', 1.5, 22.5, 4, [1, 0.8, 0.5], 0.6, { group: 'out' });
+      [[10.5, 14.5], [24.5, 14.5], [40.5, 14.5], [10, 22], [29, 22], [30, 30.2], [1.5, 22.5], [50.5, 14.5]].forEach(([x, y], i) => b.poi('patrol', x, y, i, 'idle'));
+      b.weapon('axe', 47.5, 20.5); b.weapon('pistol', 41.5, 20.5); b.weapon('saw', 11.5, 27.0);
+      b.ev(90, { name: 'Ispettore Ferri', uniform: 'staff', look: LOOK('#3a3a4a', '#555', 'short', '#e0b48f', '#26262e', { glasses: true }), routine: { principal: 3, teach: 2, lock: 2, eat: 1 } }, 'Un ispettore ministeriale è appena arrivato', 0);
+      const ST = (n, l, r, x = {}) => Object.assign({ name: n, uniform: 'staff', look: l, routine: r }, x);
+      return Object.assign(b, {
+        start: { x: 30, y: 30.2 },
+        exits: [{ x: 1.5, y: 22.5 }, { x: 50.5, y: 14.5 }],
+        npcs: [
+          ST('Prof. Rossi', LOOK('#5a6a8a', '#444', 'short', '#e0b48f', '#26262e', { glasses: true, beard: true }), { teach: 7, lab: 1, smoke: 1 }),
+          ST('Prof.ssa Bianchi', LOOK('#8a4a6a', '#6a4a30', 'bun', '#e8c4a8', '#26262e', { glasses: true }), { teach: 6, read: 2, lab: 2, wc: 1 }),
+          ST('Preside Conti', LOOK('#2a2a3a', '#aaa', 'bald'), { principal: 7, lock: 2, eat: 1 }),
+          ST('Bidello Gino', LOOK('#4a5a4a', '#444', 'cap', '#d4a07a'), { mop: 7, wc: 2, smoke: 1, lock: 1 }),
+          ST('Cuoca Pina', LOOK('#f0f0f0', '#444', 'chef', '#e8c4a8'), { cook: 8, eat: 1, fridge: 2 }),
+          { name: 'Luca il bullo', guard: true, hero: true, brute: true, look: LOOK('#2a5a9a', '#222', 'short', '#d4a07a', '#222', { beard: true }), routine: { gym: 4, lock: 3, eat: 3, wc: 1 } },
+          { name: 'Sofia', streamer: true, look: LOOK('#e04a9a', '#e8c040', 'long', '#f0c8a8', '#26262e', { glasses: true }), routine: { lock: 3, class: 2, eat: 3, gym: 2, wc: 2, mirror: 2 } },
+          { name: 'Marta', look: LOOK('#40a080', '#2a1a10', 'bun'), routine: { class: 4, read: 3, lock: 2, wc: 2 } },
+          { name: 'Elia', look: LOOK('#c07a2a', '#3a2a1a', 'beanie', '#e0b48f', '#26262e', { hat: '#c0392b' }), routine: { gym: 4, eat: 3, bleach: 2, smoke: 2 } },
+          { name: 'Dario', drunk: true, look: LOOK('#8a8a3a', '#222', 'mohawk'), routine: { bleach: 3, wc: 3, smoke: 2, eat: 2 } },
+          { name: 'Vigilante Sandro', guard: true, armed: true, uniform: 'guard', look: LOOK('#243a5e', '#222', 'cap', '#d4a07a', '#1a2438'), routine: { patrol: 1 } },
+          { name: 'Prof. Marco', guard: true, hero: true, look: LOOK('#2a8a4a', '#2a1a10', 'short', '#c79a74'), routine: { gym: 5, bleach: 2, eat: 2, teach: 1 } }
+        ]
+      });
+    }
+  },
+  /* ===================== LEVEL 8 : FATTORIA CORVI ===================== */
+  {
+    id: 'farm', name: 'Fattoria Corvi', sub: 'Pianura · 01:15 · luna piena',
+    blurb: 'Un campo di grano alto due metri dove nessuno ti vede, un fienile, un silo che scricchiola e un contadino con il fucile.',
+    music: 'forest', weather: null, par: 480, challenges: ['weapon2', 'hide3', 'nopolice'],
+    ambIn: [0.10, 0.09, 0.12], ambOut: [0.13, 0.16, 0.26],
+    hints: [
+      'Il grano alto BLOCCA la vista: nascondici dentro e aspetta le vittime ai bordi dei sentieri.',
+      'Il contadino Hank e lo sceriffo sono ARMATI. Il fucile a pompa è in casa.',
+      'Il silo nel cortile crolla su chi si ferma lì sotto… se lo sabotano al momento giusto.',
+      'Jed è un energumeno: contro di lui serve la lotta, o un\'arma pesante.'
+    ],
+    build() {
+      const b = new LevelBuilder(56, 34, 'g');
+      b.rect(2, 3, 24, 14, 'c'); b.rect(28, 3, 53, 14, 'c'); b.rect(2, 8, 53, 9, 'g'); b.rect(12, 3, 13, 14, 'g'); b.rect(40, 3, 41, 14, 'g'); b.rect(18, 30, 24, 32, '~');
+      b.room(34, 18, 50, 29, '.'); b.room(8, 18, 26, 29, '_'); b.border('H');
+      [[42, 18, '.'], [34, 24, '.'], [50, 24, '.'], [17, 18, '_'], [26, 24, '_'], [8, 24, '_']].forEach(([x, y, f]) => b.door(x, y, f));
+      [[34, 21], [50, 21], [50, 27], [14, 18], [21, 18], [38, 18], [46, 18], [34, 27]].forEach(([x, y]) => b.win(x, y));
+      // farmhouse
+      b.o('counter', 36, 19, 4, 1); b.o('stove', 40, 19); b.o('fridge', 41, 19); b.o('tv', 44, 19, 2, 1); b.o('sofa', 44, 22, 3, 1, { c: '#6b4a3a' });
+      b.o('table', 37, 23, 3, 2, { c: '#5c4030' }); b.o('bed', 47, 25, 2, 3, { c: '#8a7a5a' }); b.o('wardrobe', 35, 26, 2, 1); b.phone(35, 22, 36.2, 22.6);
+      [36.5, 38.5].forEach(x => b.poi('cook', x, 20.45, -Math.PI / 2, 'cook')); [44.6, 46, 45.3].forEach(x => b.poi('tv', x, 22.45, -Math.PI / 2, 'sit'));
+      b.poi('eat', 36.45, 24, 0, 'sit'); b.poi('eat', 40.55, 24, Math.PI, 'sit'); b.poi('eat', 38.5, 22.45, Math.PI / 2, 'sit'); b.poi('eat', 38.5, 25.55, -Math.PI / 2, 'sit'); b.poi('sleep', 47.95, 26.3, -Math.PI / 2, 'sleep');
+      b.light('farm', 42, 23, 8, [1, 0.8, 0.5], 0.75); b.light('tv', 44.9, 20.3, 5, [0.35, 0.55, 1], 0.9, { flicker: 'tv' });
+      b.lure('tv', 44.5, 19, 45, 21, 'Spegni la TV', 'tv', 'Eh?! Chi ha spento la TV?', { light: 'tv' });
+      // barn
+      [[10, 20], [21, 20], [10, 26], [21, 26]].forEach(([x, y]) => b.o('crate', x, y, 3, 1)); b.o('car', 14, 22, 3, 2, { c: '#2a6a2a' }); b.o('counter', 10, 23, 3, 1); b.o('shed', 22, 23, 2, 2);
+      [10.5, 12.5].forEach(x => b.poi('feed', x, 24.45, -Math.PI / 2, 'cook')); [[19.5, 22.5, 0], [19.5, 25.5, 2], [13.5, 20.5, 1], [24.4, 21.5, Math.PI]].forEach(([x, y, f]) => b.poi('barn', x, y, f, 'idle'));
+      b.lure('tractor', 14, 22, 15.5, 24.4, 'Fai partire il trattore', 'alarm', 'Il trattore! Chi lo ha acceso?!', { count: 2 }); b.light('barn', 18, 24, 7, [1, 0.8, 0.45], 0.6, { flicker: 'bad' });
+      // yard + silo
+      b.o('pillar', 29, 20, 2, 2); [[28, 23, 0], [30.4, 24.5, Math.PI], [27.6, 21.5, 0], [31.4, 22.5, Math.PI], [32.5, 26.5, 1], [30, 28.5, 2]].forEach(([x, y, f]) => b.poi('yard', x, y, f, 'idle'));
+      b.lure('silo', 29, 20, 32.5, 21.5, 'Sabota il silo', 'crash', 'Il silo scricchiola!', { zone: [27, 19, 31, 25], style: 'crush' }); b.o('shed', 30, 29, 2, 2);
+      b.light('yard', 30, 24, 6, [1, 0.75, 0.4], 0.6, { group: 'out' }); b.light('porch', 42, 17.5, 5, [1, 0.8, 0.5], 0.7, { group: 'out' }); b.light('lan', 17, 17.5, 5, [1, 0.8, 0.5], 0.6, { group: 'out' });
+      // campfire & corn
+      b.o('campfire', 5, 22); b.o('log', 3, 21, 1, 3); b.o('log', 7, 21, 1, 3); [22, 23].forEach(y => { b.poi('fire', 3.5, y, 0, 'sit'); b.poi('fire', 7.5, y, Math.PI, 'sit'); }); b.light('fire', 5.5, 22.5, 9, [1, 0.55, 0.2], 1.25, { flicker: 'fire', group: 'out' });
+      [[6.5, 5.5], [18.5, 11.5], [34, 6.5], [46.5, 12.5], [22.5, 5.5], [30.5, 11.5]].forEach(([x, y], i) => b.poi('corn', x, y, i * 1.2, 'idle'));
+      b.poi('kiss', 20.0, 16.3, 0, 'kiss', { pair: 'k1', role: 0 }); b.poi('kiss', 20.9, 16.3, Math.PI, 'kiss', { pair: 'k1', role: 1 });
+      [[14, 16.5], [30, 16], [44, 16.5], [28, 31], [6, 16], [52, 20], [19.5, 27.5], [40, 31]].forEach(([x, y], i) => b.poi('patrol', x, y, i, 'idle'));
+      b.weapon('axe', 12.5, 30.5); b.weapon('shotgun', 36.5, 27.5); b.weapon('saw', 45.5, 30.5);
+      b.ev(90, { name: 'Vlogger Zed', streamer: true, look: LOOK('#e0a030', '#222', 'beanie', '#e0b48f', '#26262e', { hat: '#2a7ac0' }), routine: { fire: 4, yard: 3, corn: 2, barn: 1 } }, 'Un vlogger è arrivato con il furgone', 0);
+      return Object.assign(b, {
+        start: { x: 28.5, y: 32.5 },
+        exits: [{ x: 1.5, y: 16.5 }, { x: 54.5, y: 16.5 }],
+        npcs: [
+          { name: 'Hank', guard: true, hero: true, armed: true, look: LOOK('#8a3a2a', '#444', 'cowboy', '#d4a07a', '#2a3a5a', { beard: true }), routine: { yard: 2, tv: 2, patrol: 3 } },
+          { name: 'Dolores', look: LOOK('#c07a8a', '#aaa', 'bun', '#e8c4a8'), routine: { cook: 6, tv: 2, eat: 2 } },
+          { name: 'Jed', guard: true, hero: true, brute: true, look: LOOK('#5a6a3a', '#3a2a1a', 'cap', '#d4a07a', '#3a3a2a', { beard: true }), routine: { feed: 4, barn: 3, yard: 2, fire: 2 } },
+          { name: 'Cletus', drunk: true, look: LOOK('#8a8a8a', '#c8c8c8', 'bald', '#e0b48f'), routine: { fire: 5, yard: 2, barn: 2 } },
+          { name: 'Nonno Eb', look: LOOK('#6a5a4a', '#ddd', 'bald', '#e8c4a8', '#4a4a3a', { glasses: true }), routine: { sleep: 5, tv: 3, eat: 1 }, slow: 0.75 },
+          { name: 'Cody', look: LOOK('#c0392b', '#3a2a1a', 'short'), routine: { kiss: 5, corn: 2, fire: 2 }, partner: 6 },
+          { name: 'Lacey', look: LOOK('#2a7ac0', '#e8c040', 'long', '#f0c8a8'), routine: { kiss: 3, corn: 2, fire: 3 }, follower: 5 },
+          { name: 'Bree', streamer: true, look: LOOK('#9a4ac0', '#2a1a10', 'long', '#f0c8a8', '#26262e', { glasses: true }), routine: { corn: 3, fire: 3, yard: 2, barn: 2 } },
+          { name: 'Hal', look: LOOK('#3a7a5a', '#aaa', 'cap', '#e0b48f'), routine: { fire: 3, yard: 3, eat: 2, barn: 2 } },
+          { name: 'Dott. Moss', uniform: 'medic', look: LOOK('#e8e8f0', '#5a3a22', 'short', '#e0b48f', '#26262e', { glasses: true }), routine: { barn: 4, feed: 2, yard: 2, eat: 1 } },
+          { name: 'Sceriffo Dan', guard: true, armed: true, uniform: 'guard', look: LOOK('#6a5a2a', '#222', 'cowboy', '#c79a74', '#3a3a2a', { beard: true }), routine: { patrol: 1 } }
+        ]
+      });
+    }
+  },
+  /* ===================== LEVEL 9 : LABORATORIO HELIX ===================== */
+  {
+    id: 'lab', name: 'Laboratorio Helix', sub: 'Zona industriale · 04:00 · livello di allerta 3',
+    blurb: 'Scienziati, telecamere ovunque, guardie armate e il Soggetto 17 chiuso in cella. Un reattore al centro che non perdona.',
+    music: 'hospital', weather: null, par: 560, challenges: ['finisher2', 'ghost', 'trap1'],
+    ambIn: [0.08, 0.10, 0.12], ambOut: [0.10, 0.11, 0.18],
+    hints: [
+      'Le divise da scienziato (camici) ti fanno passare inosservato tra i lavoratori, ma non davanti alle telecamere se sei sporco di sangue.',
+      'Il Soggetto 17 è un energumeno: lotta lunga e dura. Meglio fargli trovare il reattore.',
+      'Sovraccaricare i server o il reattore fulmina chi si trova dentro la zona.',
+      'Le guardie sono armate e si avvisano via radio: spegni le telecamere dal pannello di controllo.'
+    ],
+    build() {
+      const b = new LevelBuilder(52, 32, 'p');
+      b.room(3, 3, 15, 12, 'h'); b.room(15, 3, 27, 12, 'h'); b.room(27, 3, 36, 12, '_'); b.room(36, 3, 48, 12, '.'); b.room(3, 12, 48, 18, 'm');
+      b.room(3, 18, 17, 28, 'm'); b.room(17, 18, 29, 28, ','); b.room(29, 18, 39, 28, '_'); b.room(39, 18, 48, 28, 'h'); b.border('B');
+      [[9, 12, 'm'], [21, 12, 'm'], [31, 12, 'm'], [42, 12, 'm'], [15, 7, 'h'], [10, 18, 'm'], [23, 18, ','], [34, 18, '_'], [43, 18, 'h'], [29, 24, ','], [39, 24, '_'], [43, 28, 'h'], [44, 28, 'h'], [3, 15, 'm'], [48, 15, 'm']].forEach(([x, y, f]) => b.door(x, y, f));
+      [[3, 6], [3, 9], [9, 3], [21, 3], [32, 3], [42, 3], [48, 6], [48, 9], [3, 22], [3, 26], [48, 22], [48, 25]].forEach(([x, y]) => b.win(x, y));
+      // labs
+      [[5, 5], [9, 5], [5, 8], [9, 8], [17, 5], [21, 5], [17, 8], [21, 8]].forEach(([x, y]) => { b.o('table', x, y, 3, 1, { c: '#bcc' }); b.poi('lab', x + 1.5, y + 1.45, -Math.PI / 2, 'cook'); });
+      b.o('cabinet', 14, 4); b.o('monitor', 4, 4); b.o('gurney', 24, 10, 2, 1, { c: '#cfe0e8' }); b.light('lab1', 9, 7, 7, [0.8, 1, 1], 0.8, { flicker: 'bad' }); b.light('lab2', 21, 7, 7, [0.8, 1, 1], 0.8);
+      // servers
+      [28, 30, 32, 34].forEach(x => { b.o('cabinet', x, 4); b.poi('server', x + 0.5, 5.45, -Math.PI / 2, 'idle'); }); b.light('srv', 31.5, 7, 6, [0.4, 0.7, 1], 0.7, { flicker: 'pulse' });
+      b.o('fuse', 30, 13); b.lure('servers', 30, 13, 30.5, 14.4, 'Sovraccarica i server', 'zap', 'I server! Stanno andando in sovraccarico!', { zone: [28, 4, 35, 11], style: 'electro' });
+      // control
+      [[38, 5], [41, 5], [44, 5]].forEach(([x, y]) => { b.o('desk', x, y, 2, 1); b.poi('monitor', x + 0.5, y + 1.45, -Math.PI / 2, 'sit'); }); b.o('locker', 47, 4, 1, 2); b.phone(47, 8, 46.5, 8.6);
+      b.lure('cams', 46, 10, 45.5, 10.4, 'Hackera le telecamere', 'camoff', 'Le telecamere! Sono saltate!'); b.light('ctl', 42, 7, 6, [0.5, 0.8, 1], 0.6, { flicker: 'bad' });
+      // hall + reactor
+      b.o('boiler', 22, 14, 3, 3); b.o('fuse', 18, 14); b.o('fuse', 47, 13);
+      b.lure('core', 18, 14, 17.5, 14.5, 'Sovraccarica il reattore', 'zap', 'Il reattore! Allarme di sovraccarico!', { zone: [19, 13, 27, 17], style: 'electro' });
+      b.lure('fuse', 47, 13, 46.5, 14.4, 'Stacca la corrente', 'fuse', 'Blackout! Vado al quadro!');
+      [[20.5, 15.5, 0], [26.5, 15.5, Math.PI], [23.5, 13.5, Math.PI / 2], [23.5, 17.4, -Math.PI / 2]].forEach(([x, y, f]) => b.poi('work', x, y, f, 'idle')); b.light('core', 23.5, 15.5, 8, [0.4, 1, 0.8], 0.9, { flicker: 'pulse' });
+      b.light('h1', 8, 15, 6, [0.8, 1, 1], 0.5); b.light('h2', 38, 15, 6, [0.8, 1, 1], 0.5, { flicker: 'bad' });
+      b.cam(4.5, 13.5, 0.28, 0.3, 15); b.cam(47.5, 17.5, -2.9, 0.3, 15); b.cam(18.5, 19.5, 0.6, 0.4, 10); b.cam(40.5, 19.5, 0.9, 0.4, 10);
+      // cells
+      [4, 6, 8, 12].forEach(x => b.o('drawer', x, 19, 2, 1)); [[6.5, 23.5, 0], [10.5, 24.5, 2], [13.5, 22.5, Math.PI], [8.5, 21.5, 1]].forEach(([x, y, f]) => b.poi('cell', x, y, f, 'idle')); b.light('cell', 10, 23, 7, [1, 0.3, 0.3], 0.5, { flicker: 'bad' });
+      // canteen
+      [[19, 21], [24, 21], [19, 24], [24, 24]].forEach(([x, y]) => { b.o('table', x, y, 3, 2, { c: '#bbb' }); b.poi('eat', x - 0.55, y + 1, 0, 'sit'); b.poi('eat', x + 3.55, y + 1, Math.PI, 'sit'); }); b.o('fridge', 28, 19); b.poi('fridge', 27.4, 19.6, 0, 'idle'); b.light('can', 23, 22, 8, [1, 0.95, 0.85], 0.9);
+      // storage
+      [[31, 20], [35, 20], [31, 26], [35, 26]].forEach(([x, y]) => b.o('crate', x, y, 3, 1)); b.o('locker', 30, 21, 1, 2); b.light('sto', 34, 23, 6, [1, 0.8, 0.5], 0.5, { flicker: 'bad' });
+      // entrance
+      b.o('counter', 41, 20, 4, 1); b.poi('recep', 42.5, 21.45, -Math.PI / 2, 'idle'); b.phone(46, 20, 46.5, 21.3); b.light('ent', 43.5, 23, 7, [0.85, 0.95, 1], 0.8);
+      b.poi('smoke', 46.5, 30.2, Math.PI / 2, 'smoke'); b.poi('smoke', 38.5, 30.2, Math.PI / 2, 'smoke'); b.light('gate', 43.5, 29.5, 6, [0.8, 0.9, 1], 0.8, { group: 'out' });
+      [[6, 15], [12, 15], [30, 15], [38, 15], [45, 15], [10, 22], [23, 22], [34, 22], [43, 22], [20, 8], [8, 8], [41, 8]].forEach(([x, y], i) => b.poi('patrol', x + 0.5, y + 0.5, i, 'idle'));
+      b.weapon('axe', 25.5, 8.5); b.weapon('saw', 36.5, 23.5); b.weapon('shotgun', 32.5, 24); b.weapon('pistol', 44.5, 10.5);
+      b.ev(100, { name: 'Ispettrice Dana', guard: true, hero: true, look: LOOK('#2a3a4a', '#222', 'short', '#c79a74', '#1a2438', { glasses: true }), routine: { work: 3, eat: 2, monitor: 2 } }, 'Un\'ispettrice è arrivata per un controllo a sorpresa', 0);
+      const SC = (n, l, r, x = {}) => Object.assign({ name: n, uniform: 'medic', look: l, routine: r }, x);
+      return Object.assign(b, {
+        start: { x: 43.5, y: 30.2 },
+        exits: [{ x: 1.5, y: 15.5 }, { x: 49.5, y: 15.5 }],
+        npcs: [
+          SC('Dott. Voss', LOOK('#f0f0f0', '#555', 'short', '#e0b48f', '#26262e', { glasses: true }), { lab: 6, monitor: 2, eat: 2, work: 2 }),
+          SC('Dott.ssa Kim', LOOK('#f0f0f0', '#111', 'bun', '#e8c4a8', '#26262e', { glasses: true }), { lab: 6, eat: 2, work: 2 }),
+          { name: 'Tecnico Ray', uniform: 'staff', look: LOOK('#3a5a8a', '#2a1a10', 'beanie', '#d4a07a', '#26262e', { hat: '#555' }), routine: { server: 5, work: 2, eat: 2 } },
+          { name: 'Direttrice Hale', uniform: 'staff', look: LOOK('#2a2a3a', '#aaa', 'bun', '#e8c4a8', '#26262e', { glasses: true }), routine: { monitor: 6, eat: 1, work: 2 } },
+          { name: 'Joe', streamer: true, uniform: 'staff', look: LOOK('#3a8a5a', '#e0a030', 'afro', '#a87654'), routine: { eat: 4, work: 3, server: 1 } },
+          { name: 'Soggetto 17', guard: true, hero: true, brute: true, look: LOOK('#6a8a6a', '#222', 'bald', '#7a9a7a', '#3a4a3a'), routine: { cell: 9 } },
+          { name: 'Guardia Reyes', guard: true, armed: true, uniform: 'guard', look: LOOK('#1a2a3a', '#222', 'cap', '#c79a74', '#14182a'), routine: { patrol: 1 } },
+          { name: 'Guardia Park', guard: true, armed: true, uniform: 'guard', look: LOOK('#1a2a3a', '#111', 'cap', '#e0b48f', '#14182a'), routine: { patrol: 1 } },
+          { name: 'Lin', uniform: 'staff', look: LOOK('#8a3a6a', '#111', 'long', '#f0c8a8'), routine: { recep: 8, eat: 1 } },
+          SC('Dott. Moreau', LOOK('#f0f0f0', '#8a8a8a', 'bald', '#e0b48f'), { eat: 3, lab: 3 }, { drunk: true }),
+          { name: 'Cmdr. Stone', guard: true, hero: true, armed: true, look: LOOK('#3a4a3a', '#aaa', 'short', '#c79a74', '#2a3a2a', { beard: true }), routine: { work: 4, eat: 2, monitor: 1 } }
+        ]
+      });
+    }
   }
 ];
 
@@ -1470,7 +1680,8 @@ const CHALLENGES = {
   hide3: { t: 'Nascondi 3 corpi', f: G => G.st.hidden >= 3 },
   speed: { t: 'Finisci entro il tempo par', f: G => G.time <= G.def.par },
   nopolice: { t: 'La polizia non viene mai chiamata', f: G => !G.policeCalled },
-  combo4: { t: 'Combo ×4 o più', f: G => G.combo.best >= 4 }
+  combo4: { t: 'Combo ×4 o più', f: G => G.combo.best >= 4 },
+  finisher2: { t: '2 finali ambientali', f: G => (G.st.finisher || 0) >= 2 }
 };
 const DARK_T = 0.36;           // light level under which you are "in shadow"
 const FOV = 1.45;              // NPC field of view (radians)
@@ -1510,7 +1721,7 @@ const Game = {
     this.player = {
       x: L.start.x * TILE, y: L.start.y * TILE, ang: Math.PI, r: 13, moving: false, sprint: false, stillT: 0, still: false,
       inDark: false, invisible: false, hidden: null, carrying: null, attackT: 0, blinkT: 0, shadowT: 0, vx: 0, vy: 0, dripT: 0,
-      blood: 0, bloodMask: 0, weapon: null, stepD: 0, foot: 0, attackKind: 'stab', dead: false, disguise: null, disguiseLook: null
+      blood: 0, bloodMask: 0, weapon: null, stepD: 0, foot: 0, attackKind: 'stab', dead: false, disguise: null, disguiseLook: null, hp: 3, hpT: 0, stunT: 0
     };
     this.npcs = L.npcs.map((d, i) => this.makeNPC(d, i));
     this.randomizeRun();
@@ -1577,7 +1788,9 @@ const Game = {
       speed: 78, bubble: null, anim: 'idle', icon: null, phone: null, saidHuh: false, wasWitness: false, tremble: 0,
       guard: !!d.guard, vulnT: 0, loseT: 0, radioT: 0, trapDone: false,
       trait: null, talk: null, talkCd: rand(3, 10), nervous: 0, fixer: false, lookT: 0,
-      uniform: d.uniform || null, drunk: !!d.drunk, hero: !!d.hero, poison: 0
+      uniform: d.uniform || null, drunk: !!d.drunk, hero: !!d.hero, poison: 0,
+      streamer: !!d.streamer, brute: !!d.brute, armed: !!d.armed, shootT: 0,
+      role: d.streamer ? 'streamer' : d.brute ? 'energumeno' : d.armed ? 'armato' : d.drunk ? 'ubriaco' : d.hero ? 'veterano' : d.guard ? 'guardia' : null
     };
   },
 
@@ -1923,6 +2136,7 @@ const Game = {
       why === 'accident' ? pick(['Oddio! È caduto!', 'Che è successo?!', 'AIUTO! Si è fatto male!']) :
       why === 'witness' ? pick(['ASSASSINO!!', 'AIUTO!!', 'NO! NO! NO!']) : pick(['Chi sei?! AIUTO!', 'Ha un coltello!', 'Stai lontano!']), 2.4);
     Sound.scream(n.pitch);
+    if (n.streamer && !this.police) { this.say(n, 'SONO IN DIRETTA!! POLIZIA!!', 3); this.callPolice(n); }
     if (!this.police) { this.slowmo(0.9, 0.3); Sound.spotted(); UI.big(why === 'body' ? 'CADAVERE TROVATO!' : why === 'blast' ? 'CHE BOTTO!' : 'TI HANNO VISTO!', '#ff3344', 'Fermalo prima che raggiunga un telefono'); }
     this.flash = 0.5; this.flashColor = '255,30,40';
     this.noise(n.x, n.y, TILE * 6, 0.3, n);
@@ -1934,7 +2148,7 @@ const Game = {
     this.release(n); n.lured = false; n.sus = 1; n.path = []; n.watchT = 0; n.vulnT = 0;
     n.radioT = n.radioT > 0 ? n.radioT : (why === 'killer' || why === 'witness' ? 6 : 9);
     if (why === 'killer' || why === 'witness') {
-      n.state = 'chase'; n.loseT = 0; n.repath = 0; n.lastSeen = { x: this.player.x, y: this.player.y };
+      n.state = 'chase'; n.loseT = 0; n.repath = 0; n.shootT = 0.8; n.lastSeen = { x: this.player.x, y: this.player.y };
       this.say(n, pick(['FERMO LÌ!', 'Ti ho visto!', 'Fermati!!', 'Sei in arresto!']), 2.4);
       UI.big('UNA GUARDIA TI HA VISTO!', '#ff3344', 'Spezza la linea di vista, nasconditi o colpiscila alle spalle');
     } else {
@@ -1944,6 +2158,15 @@ const Game = {
     }
     if (why !== 'radio') { Sound.whistle(); Sound.scream(n.pitch * 0.7); this.flash = 0.5; this.flashColor = '255,30,40'; this.slowmo(0.6, 0.35); this.noise(n.x, n.y, TILE * 6, 0.35, n); }
     if (!noRelay && (why === 'killer' || why === 'witness')) for (const g of this.npcs) if (g !== n && g.alive && g.guard && CALM[g.state]) this.alertGuard(g, 'radio', n.x, n.y, true);
+  },
+  npcShoot(n) {
+    const P = this.player, d = dist(n.x, n.y, P.x, P.y), a = Math.atan2(P.y - n.y, P.x - n.x);
+    Sound.gun(); this.tracers.push({ x0: n.x + Math.cos(a) * 14, y0: n.y + Math.sin(a) * 14, x1: P.x + rand(-6, 6), y1: P.y + rand(-6, 6), life: 0.12 });
+    this.noise(n.x, n.y, TILE * 10, 0.4, n, true); n.ang = a;
+    if (Math.random() < clamp(0.62 - d / (TILE * 9) * 0.4, 0.2, 0.6) * (P.sprint ? 0.7 : 1) * (P.hidden ? 0 : 1)) {
+      P.hp--; P.hpT = 0; this.flash = 0.6; this.flashColor = '200,0,0'; this.shake = 14; this.bloodScreen(2, false); Sound.stab(); P.stunT = 0.2; UI.toast(`COLPITO! ${Math.max(0, P.hp)}/3`);
+      if (P.hp <= 0) this.finish(false, 'shot');
+    } else { this.shake = Math.max(this.shake, 5); for (let i = 0; i < 6; i++) this.particles.push({ x: P.x + rand(-14, 14), y: P.y + rand(-14, 14), vx: rand(-90, 90), vy: rand(-90, 90), life: rand(0.15, 0.3), max: 0.3, size: 2.5, type: 'spark' }); }
   },
   guardSees(n, omni) {
     const P = this.player; if (P.hidden || this.ended) return false;
@@ -1967,6 +2190,7 @@ const Game = {
     const d = dist(n.x, n.y, P.x, P.y), sees = this.guardSees(n, true);
     if (sees) { n.lastSeen = { x: P.x, y: P.y }; n.loseT = 0; } else n.loseT += dt;
     this.guardRadio(n, dt);
+    if (n.armed && sees && d < TILE * 9 && this.wallClear(n.x, n.y, P.x, P.y) && (n.shootT -= dt) <= 0) { n.shootT = rand(1.3, 1.9); this.npcShoot(n); }
     n.repath -= dt;
     if (n.repath <= 0) { this.goTo(n, n.lastSeen.x, n.lastSeen.y, true); n.speed = 158; n.repath = 0.3; }
     const done = this.moveAlong(n, dt);
@@ -2271,7 +2495,7 @@ const Game = {
   },
   meleeId() { const w = this.player.weapon; return w && !WEAPONS[w.id].ranged ? w.id : 'knife'; },
   killRadius() { return KILL_R * (this.frenzyT > 0 ? 1.2 : 1) * WEAPONS[this.meleeId()].reach; },
-  canKnife(n, wd) { if (!n.guard) return true; if (n.vulnT > 0) return true; if (wd.brutal) return true; return !!CALM[n.state] && n.sus < 0.5; },
+  canKnife(n, wd) { if (!n.guard || n.brute) return true; if (n.vulnT > 0) return true; if (wd.brutal) return true; return !!CALM[n.state] && n.sus < 0.5; },
   shootTarget() {
     const P = this.player; let best = null, bs = 1e9;
     for (const n of this.npcs) {
@@ -2313,7 +2537,7 @@ const Game = {
     const c = this.context, P = this.player; if (!c || this.ended) return;
     switch (c.kind) {
       case 'kill': this.tryKill(c.n); break;
-      case 'shoot': if (this.wallClear(P.x, P.y, c.n.x, c.n.y)) this.kill(c.n, { weapon: 'pistol' }); else Sound.denied(); break;
+      case 'shoot': if (this.wallClear(P.x, P.y, c.n.x, c.n.y)) this.kill(c.n, { weapon: P.weapon.id }); else Sound.denied(); break;
       case 'pickup': { const w = WEAPONS[c.p.w]; c.p.taken = true; P.weapon = { id: c.p.w, uses: w.uses }; Sound.pickup(); UI.toast(`${w.icon} ${w.name}: ${w.uses} ${w.ranged ? 'colpi' : 'usi'}`); break; }
       case 'dress': { const b = c.b; b.looted = true; P.disguise = b.uniform; P.disguiseLook = Object.assign({}, b.n.look); b.n.look = Object.assign({}, b.n.look, { shirt: '#d8d0c8', pants: '#555' }); Sound.pickup(); UI.toast('Travestito! Muoviti piano e non farti sporcare di sangue'); break; }
       case 'unhide': this.unhide(); break;
@@ -2362,8 +2586,8 @@ const Game = {
     const dirA = Math.atan2(n.y - sy, n.x - sx);
     const aware = o.aware != null ? o.aware : !trap && (!CALM[n.state] || n.sus > 0.45 || (n.watchT > 0 && this.sees(n, P.x, P.y) && !P.invisible));
     const panicking = n.state === 'panic' || n.state === 'calling' || n.state === 'flee';
-    const back = !trap && wid !== 'pistol' && Math.abs(angDiff(n.ang, dirA)) < 1.15;
-    const style = o.style && !trap ? o.style : trap ? (o.style || 'explode') : wid === 'pistol' ? 'shoot' : wid === 'axe' ? 'chop' : wid === 'saw' ? 'saw' : (back && !aware ? 'slash' : 'stab');
+    const back = !trap && wid !== 'pistol' && wid !== 'shotgun' && Math.abs(angDiff(n.ang, dirA)) < 1.15;
+    const style = o.style && !trap ? o.style : trap ? (o.style || 'explode') : wid === 'pistol' ? 'shoot' : wid === 'shotgun' ? 'blast' : wid === 'axe' ? 'chop' : wid === 'saw' ? 'saw' : (back && !aware ? 'slash' : 'stab');
     const bl = (o.blood || wd.blood) * (this.frenzyT > 0 && !trap ? 1.25 : 1);
     if (!trap) { P.attackT = style === 'saw' ? 1 : style === 'shoot' ? 0.2 : 0.3; P.attackKind = style; P.ang = dirA; }
     if (n.phone && n.phone.busy === n) n.phone.busy = null;
@@ -2392,6 +2616,12 @@ const Game = {
         Sound.shot(); this.tracers.push({ x0: mx, y0: my, x1: n.x, y1: n.y, life: 0.14 });
         this.splatter(n.x, n.y, dirA, 24 * bl, 0.6, [120, 340]); this.mist(n.x, n.y, 3); this.shake = 5; this.hitstop = 0.04; b.spurt = { t: 1.3, max: 1.3, k: 0.1, a: dirA };
         this.particles.push({ x: mx, y: my, vx: 0, vy: 0, life: 0.07, max: 0.07, size: 12, type: 'spark' }); break;
+      }
+      case 'blast': {
+        const mx = sx + Math.cos(dirA) * 18, my = sy + Math.sin(dirA) * 18;
+        Sound.shotgun(); for (let q = -2; q <= 2; q++) this.tracers.push({ x0: mx, y0: my, x1: n.x + Math.cos(dirA + 1.57) * q * 8, y1: n.y + Math.sin(dirA + 1.57) * q * 8, life: 0.14 });
+        this.splatter(n.x, n.y, dirA, 44 * bl / 2, 0.8, [120, 360]); this.gibs(n.x, n.y, dirA, 3, 1); this.mist(n.x, n.y, 4); this.shake = 14; this.hitstop = 0.09; b.spurt = { t: 1.6, max: 1.6, k: 0, a: dirA };
+        this.particles.push({ x: mx, y: my, vx: 0, vy: 0, life: 0.08, max: 0.08, size: 16, type: 'spark' }); break;
       }
       case 'push': this.splatter(n.x, n.y, dirA, 38 * bl, 0.8); this.splatter(n.x, n.y, dirA + Math.PI, 28 * bl, 0.9, [80, 300]); this.gibs(n.x, n.y, dirA, 3, 1.2); this.mist(n.x, n.y, 4); Sound.stabThrough(); this.shake = 16; this.hitstop = 0.14; b.spurt = { t: 2.2, max: 2.2, k: 0, a: dirA }; this.slowmo(0.9, 0.3); break;
       case 'slam': this.splatter(n.x, n.y, dirA, 34 * bl, 1.2, [60, 280]); this.gibs(n.x, n.y, dirA, 3, 1.4); this.mist(n.x, n.y, 3); this.shake = 14; this.hitstop = 0.1; b.spurt = { t: 1.6, max: 1.6, k: 0.2, a: dirA }; Sound.gurgle(0.9); break;
@@ -2451,6 +2681,7 @@ const Game = {
     if (!trap) for (const m of this.npcs) if (m.alive && CALM[m.state] && dist(m.x, m.y, n.x, n.y) < TILE * 1.5) this.scare(m, 'witness', n.x, n.y);
     if (aware && !trap) this.noise(n.x, n.y, TILE * 6, 0.4);
     if (this.lock === n) this.lock = null;
+    if (wid === 'shotgun' && !chain) for (const m of this.npcs.slice()) if (m !== n && m.alive && dist(P.x, P.y, m.x, m.y) < TILE * 9 && dist(n.x, n.y, m.x, m.y) < TILE * 2.2 && Math.abs(angDiff(dirA, Math.atan2(m.y - P.y, m.x - P.x))) < 0.5 && this.wallClear(P.x, P.y, m.x, m.y)) this.kill(m, { weapon: 'shotgun', chain: true });
     // chainsaw cuts through whoever is in front
     if (wd.multi && !chain) for (const m of this.npcs.slice()) if (m !== n && m.alive && dist(P.x, P.y, m.x, m.y) < TILE * 1.9 && this.wallClear(P.x, P.y, m.x, m.y) && Math.abs(angDiff(dirA, Math.atan2(m.y - P.y, m.x - P.x))) < 1.4) this.kill(m, { weapon: 'saw', chain: true });
     this.checkWin();
@@ -2471,20 +2702,20 @@ const Game = {
   },
   tryKill(n) {
     const P = this.player, dirA = Math.atan2(n.y - P.y, n.x - P.x), back = Math.abs(angDiff(n.ang, dirA)) < 1.15;
-    if (this.meleeId() === 'knife' && !n.guard && this.victimAware(n) && !back && Math.random() < (n.drunk ? 0.2 : 0.65)) { this.startStruggle(n); return; }
+    if (this.meleeId() === 'knife' && (n.brute || (!n.guard && this.victimAware(n) && !back && Math.random() < (n.drunk ? 0.2 : 0.65)))) { this.startStruggle(n); return; }
     this.kill(n);
   },
   startStruggle(n) {
     const P = this.player; this.release(n); n.talk = null; n.state = 'held'; n.anim = 'panic'; n.path = []; n.fixer = false;
     if (n.phone && n.phone.busy === n) n.phone.busy = null;
-    P.ang = Math.atan2(n.y - P.y, n.x - P.x); this.struggle = { n, prog: 0.2, t: 0, max: 3.6 };
+    P.ang = Math.atan2(n.y - P.y, n.x - P.x); this.struggle = { n, prog: 0.2, t: 0, max: n.brute ? 4.6 : 3.6 };
     Sound.scream(n.pitch); Sound.strain(); this.noise(n.x, n.y, TILE * 5, 0.4, n); this.shake = 5;
   },
   updateStruggle(dt) {
     const S = this.struggle, P = this.player, n = S.n; S.t += dt; S.prog = Math.max(0, S.prog - 0.2 * dt);
     const presses = ((Input.hit('Space') || Input.hit('KeyF') || Input.hit('Enter')) ? 1 : 0) + (UI.btnPressed('action') ? 1 : 0) + Input.taps.length;
     if (presses) {
-      S.prog += presses * (n.drunk ? 0.2 : 0.11); Sound.scrapeHit(); this.shake = Math.max(this.shake, 3.5); if (Math.random() < 0.35) Sound.strain();
+      S.prog += presses * (n.drunk ? 0.2 : n.brute ? 0.07 : 0.11); Sound.scrapeHit(); this.shake = Math.max(this.shake, 3.5); if (Math.random() < 0.35) Sound.strain();
       for (let i = 0; i < 4; i++) this.particles.push({ x: (P.x + n.x) / 2, y: (P.y + n.y) / 2, vx: rand(-120, 120), vy: rand(-120, 120), life: rand(0.15, 0.35), max: 0.35, size: rand(2, 4), type: 'spark' });
     }
     if (S.prog >= 1) { this.struggle = null; this.kill(n, { style: 'push', aware: true, blood: 1.7 }); return; }
@@ -2692,6 +2923,7 @@ const Game = {
     this.ended = true; this.endT = 0; this.win = win; this.reason = reason; Sound.setLevels(0, 0);
     if (win) { this.slowmo(1.6, 0.25); Sound.win(); UI.big(this.escaped ? 'LAVORO SPORCO' : 'NESSUN SOPRAVVISSUTO', '#ff2a2a', ''); }
     else if (reason === 'guard') { Sound.whistle(); Sound.stopSiren(); this.flash = 0.6; this.flashColor = '60,120,255'; UI.big('PRESO!', '#4aa3ff', 'Una guardia ti ha bloccato'); }
+    else if (reason === 'shot') { Sound.stopSiren(); UI.big('ABBATTUTO', '#ff3344', 'Il fuoco nemico ti ha steso'); }
     else if (reason === 'boom') { Sound.stopSiren(); UI.big('SALTATO IN ARIA', '#ff9a2a', 'Eri troppo vicino alla trappola'); }
     else { Sound.sirenLevel(0.25); UI.big('LA POLIZIA È QUI', '#4aa3ff', 'Ti hanno circondato'); }
     setTimeout(() => { Sound.stopSiren(); UI.results(this.buildResults()); }, 2600);
@@ -2793,6 +3025,7 @@ const Game = {
       const tens = Math.max(maxSus * 0.9, this.chased ? 1 : 0, this.police ? 0.6 + 0.4 * (1 - this.police.t / this.police.max) : 0, this.frenzyT > 0 ? 0.5 : 0, this.struggle ? 1 : 0);
       Sound.setLevels(this.ended ? 0 : stalk, this.ended ? 0 : tens);
       if (stalk > 0.65 && this.time > this.whisperCd) { Sound.stalkWhisper(); this.whisperCd = this.time + 30; } }
+    { const Pl = this.player; Pl.hpT += dt; if (Pl.hp < 3 && Pl.hpT > 22) { Pl.hp++; Pl.hpT = 0; UI.toast('Ti riprendi un po\'…'); } }
     if (this.punchT > 0) this.punchT -= dt; if (this.killCamT > 0) this.killCamT -= rdt;
     for (const b of this.bodies) b.age = (b.age || 0) + dt;
     // pools grow & age
@@ -2884,8 +3117,12 @@ const Game = {
   }
 };
 
+const tagsOf = n => [n.role, n.trait ? TRAIT_IT[n.trait] : null].filter(Boolean).join(' · ');
 const TRAIT_IT = { curious: 'curioso', coward: 'codardo', chatty: 'chiacchierone', paranoid: 'paranoico', loner: 'solitario' };
 const TALK = {
+  school: ['Hai visto il compito di mate?', 'Il preside è di pessimo umore.', 'Stasera la scuola è inquietante.', 'Quel bidello mi fa paura.'],
+  farm: ['Il raccolto quest\'anno è maledetto.', 'Hai sentito le galline?', 'Dicono che nel granturco ci sia qualcosa.', 'Hank ha il fucile carico, sai.'],
+  lab: ['I risultati sono preoccupanti.', 'Il Soggetto 17 è agitato.', 'Non dovremmo essere qui a quest\'ora.', 'Hai controllato il reattore?'],
   hotel: ['Che serata di gala!', 'Il champagne è scadente.', 'Hai visto quella suite?', 'Il direttore sembra nervoso.'],
   park: ['Sul carosello ci vado io!', 'Non mi piace la casa degli orrori.', 'Hai provato il zucchero filato?', 'Quella ruota scricchiola.'],
   any: ['Hai visto che ore sono?', 'Non ti sembra strano stasera?', 'Ti ricordi di sabato scorso?', 'Che nottata…', 'Ma tu ci credi ai fantasmi?', 'Ho sentito un rumore prima.'],
@@ -2909,6 +3146,10 @@ const CHATTER = {
   laundry: ['Lenzuola, lenzuola…', 'Che turno!'], pool: ['L\'acqua è calda!', 'Un tuffo?'], room: ['Che bella suite.', 'Mi riposo un attimo.'],
   haunt: ['Buuu!', 'Che spavento li faccio…'], scare: ['Aaah! Cos\'era?!', 'Ho paura!'], perform: ['Signore e signori!', 'Un applauso!'],
   ride: ['Che giro!', 'Ancora una volta!'], operate: ['Tenetevi forte!', 'Si parte!'], stall: ['Zucchero filato!', 'Popcorn caldi!'],
+  class: ['Che noia questa lezione.', 'Hai fatto i compiti?'], teach: ['Aprite il libro a pagina 40.', 'Silenzio, per favore.'], lock: ['Dov\'è il mio libro?', 'Il lucchetto si è incastrato.'],
+  gym: ['Passa la palla!', 'Ancora un giro!'], bleach: ['Che partita!', 'Sono distrutto.'], lab: ['Non toccare i reagenti.', 'Annoto il risultato.'], mop: ['Quanta sporcizia…', 'Tutta colpa dei ragazzi.'],
+  principal: ['Devo firmare questi moduli.'], yard: ['Che bella notte.', 'Il raccolto va male.'], feed: ['Mangiate, bestie.'], barn: ['Il fienile scricchiola.'], corn: ['Questo granturco è altissimo.'],
+  work: ['Controllo i parametri.', 'Livelli nella norma.'], server: ['Backup completato.', 'I server sono caldi.'], cell: ['…', 'Grrr…'],
   fire: ['Che storia di paura!', 'Passami un marshmallow.'], tentchat: ['Hai sentito un rumore?'], dock: ['L\'acqua è nera…'], bbq: ['Quasi pronte!']
 };
 
@@ -2996,7 +3237,7 @@ const Render = {
     for (let ty = 0; ty < H; ty++) for (let tx = 0; tx < W; tx++) {
       const t = G.tiles[ty * W + tx];
       m.fillStyle = (t === '#' || t === 'W') ? '#8a8494' : G.opaque[ty * W + tx] ? '#2a2a32' : G.outside[ty * W + tx] ? '#101014' : t === '=' ? '#3a1a4a' : '#26232c';
-      if (t === 'B' || t === 'H') m.fillStyle = '#060608';
+      if (t === 'B' || t === 'H') m.fillStyle = '#060608'; if (t === 'c') m.fillStyle = '#243a18';
       m.fillRect(tx * 3, ty * 3, 3, 3);
     }
     this.frameN = 0;
@@ -3016,6 +3257,7 @@ const Render = {
       case 'h': { c.fillStyle = shade('#b4c4c0', (r - 0.5) * 0.08); c.fillRect(x, y, T, T); c.strokeStyle = 'rgba(40,70,70,0.22)'; c.lineWidth = 1; c.strokeRect(x + 0.5, y + 0.5, T - 1, T - 1); c.fillStyle = 'rgba(255,255,255,0.1)'; c.fillRect(x + 3, y + 3, T - 6, 2); for (let k = 0; k < 3; k++) { c.fillStyle = 'rgba(0,0,0,0.06)'; ell(c, x + srand(i + k) * T, y + srand(i * 3 + k) * T, 5 + srand(i * 7 + k) * 7, 2 + srand(i * 5 + k) * 3); } break; }
       case 'm': { for (let a = 0; a < 4; a++) for (let b2 = 0; b2 < 4; b2++) { c.fillStyle = (a + b2) % 2 ? '#7d909c' : '#8ea1ad'; c.fillRect(x + a * 12, y + b2 * 12, 12, 12); } c.strokeStyle = 'rgba(0,0,0,0.2)'; c.strokeRect(x + 0.5, y + 0.5, T - 1, T - 1); break; }
       case 'f': { c.fillStyle = shade('#16241a', (r - 0.5) * 0.07); c.fillRect(x, y, T, T); for (let k = 0; k < 22; k++) { const bx = x + srand(i * 11 + k) * T, by = y + srand(i * 19 + k) * T, q = srand(i + k * 5); c.strokeStyle = q > 0.66 ? '#2d3f22' : q > 0.33 ? '#3a2e1c' : '#0f1a12'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(bx, by); c.lineTo(bx + (q - 0.5) * 7, by + 3 + q * 3); c.stroke(); } for (let k = 0; k < 2; k++) { c.fillStyle = 'rgba(70,70,70,0.4)'; circ(c, x + srand(i * 13 + k) * T, y + srand(i * 17 + k) * T, 1.5 + srand(k + i) * 1.5); } break; }
+      case 'c': { c.fillStyle = shade('#1c2a12', (r - 0.5) * 0.12); c.fillRect(x, y, T, T); for (let k = 0; k < 16; k++) { const bx = x + srand(i * 11 + k) * T, q = srand(i + k * 3); c.strokeStyle = q > 0.5 ? '#6a8a2a' : '#3e5a1c'; c.lineWidth = 2.2; c.beginPath(); c.moveTo(bx, y + T); c.lineTo(bx + (q - 0.5) * 8, y + 4 + q * 12); c.stroke(); c.fillStyle = '#c8b040'; c.fillRect(bx + (q - 0.5) * 8 - 1.5, y + 3 + q * 12, 3, 6); } break; }
       case 'd': { for (let k = 0; k < 4; k++) { const v = srand(i * 5 + k); c.fillStyle = shade('#4a3520', (v - 0.5) * 0.3); c.fillRect(x, y + k * 12, T, 12); c.fillStyle = 'rgba(0,0,0,0.5)'; c.fillRect(x, y + k * 12 + 11, T, 1); c.fillStyle = 'rgba(200,200,200,0.25)'; c.fillRect(x + 4, y + k * 12 + 5, 2, 2); c.fillRect(x + T - 6, y + k * 12 + 5, 2, 2); } break; }
       case 'H': { c.fillStyle = '#0c170c'; c.fillRect(x, y, T, T); for (let k = 0; k < 7; k++) { c.fillStyle = k % 2 ? '#16301a' : '#1e3c1e'; circ(c, x + srand(i * 3 + k) * T, y + srand(i * 7 + k) * T, 8 + srand(i + k) * 8); } break; }
       case 'B': { c.fillStyle = '#2a1512'; c.fillRect(x, y, T, T); c.fillStyle = '#3d1f19'; for (let row = 0; row < 4; row++) for (let col = -1; col < 3; col++) { c.fillRect(x + col * 24 + (row % 2) * 12 + 1, y + row * 12 + 1, 22, 10); } break; }
@@ -3284,7 +3526,7 @@ const Render = {
     list.push(G.player); list.sort((a, b) => a.y - b.y);
     for (const e of list) {
       if (e === G.player) { if (!e.hidden && !e.dead) { if (e.disguise) drawPerson(c, e.x, e.y, e.ang, e.disguiseLook, e.moving ? 'walk' : 'idle', t, e.walkPh || 0, { moving: e.moving }); else drawKiller(c, e, t); } continue; }
-      drawPerson(c, e.x, e.y, e.ang, e.look, e.moving ? (e.anim === 'run' || e.anim === 'panic' ? 'panic' : 'walk') : e.anim, t, e.walkPh, { moving: e.moving, drunk: e.drunk });
+      drawPerson(c, e.x, e.y, e.ang, e.look, e.moving ? (e.anim === 'run' || e.anim === 'panic' ? 'panic' : 'walk') : e.anim, t, e.walkPh, { moving: e.moving, drunk: e.drunk, big: e.brute, armed: e.armed, streamer: e.streamer });
     }
     // particles (pre-light)
     for (const p of G.particles) {
@@ -3342,6 +3584,7 @@ const Render = {
     c.rotate(-0.6 + Math.sin(t * 2) * 0.1);
     if (p.w === 'axe') { c.fillStyle = '#6a4a2a'; c.fillRect(-13, -2, 26, 4); c.fillStyle = '#c0c8d0'; c.beginPath(); c.moveTo(3, -2); c.lineTo(10, -12); c.lineTo(16, -9); c.lineTo(15, 3); c.lineTo(3, 2); c.closePath(); c.fill(); c.fillStyle = 'rgba(130,0,10,0.7)'; c.fillRect(12, -9, 3, 10); }
     else if (p.w === 'saw') { c.fillStyle = '#d9772b'; rr(c, -12, -7, 18, 14, 3); c.fill(); c.fillStyle = '#333'; rr(c, -9, -10, 8, 4, 2); c.fill(); c.fillStyle = '#8a9096'; rr(c, 6, -3.5, 16, 7, 2); c.fill(); c.fillStyle = '#333'; for (let k = 0; k < 7; k++) c.fillRect(7 + k * 2.2, -5, 1.2, 2); c.fillStyle = 'rgba(130,0,10,0.7)'; c.fillRect(14, -3, 6, 6); }
+    else if (p.w === 'shotgun') { c.fillStyle = '#4a3220'; rr(c, -14, -3, 14, 6, 2); c.fill(); c.fillStyle = '#25272b'; rr(c, -2, -2, 26, 4, 1.5); c.fill(); }
     else { c.fillStyle = '#25272b'; rr(c, -10, -3, 16, 6, 2); c.fill(); c.fillRect(-9, 0, 6, 9); c.fillStyle = '#111'; rr(c, 6, -2.4, 12, 4.8, 2); c.fill(); }
     c.restore();
   },
@@ -3393,7 +3636,7 @@ const Render = {
       c.save(); c.translate(s.x, s.y); c.rotate(t * (locked ? 2 : 0.8)); c.strokeStyle = locked ? '#ff2a40' : 'rgba(255,60,80,0.7)'; c.lineWidth = 2;
       for (let k = 0; k < 4; k++) { c.rotate(Math.PI / 2); c.beginPath(); c.moveTo(r, -6); c.lineTo(r, 6); c.stroke(); }
       c.restore();
-      c.font = '600 11px Oswald, sans-serif'; c.fillStyle = 'rgba(255,90,100,0.95)'; c.fillText(n.name.toUpperCase() + (n.trait ? ' · ' + TRAIT_IT[n.trait].toUpperCase() : ''), s.x, s.y + r + 12);
+      c.font = '600 11px Oswald, sans-serif'; c.fillStyle = 'rgba(255,90,100,0.95)'; c.fillText(n.name.toUpperCase() + (tagsOf(n) ? ' · ' + tagsOf(n).toUpperCase() : ''), s.x, s.y + r + 12);
     }
     // npc icons & bubbles
     for (const n of G.npcs) {
@@ -3515,12 +3758,17 @@ const DYN_OBJ = { radio: 1, phone: 1 };
 /* ---------------- characters ---------------- */
 function headDraw(c, L, x, y) {
   c.fillStyle = L.skin; circ(c, x + 1, y, 7.2);
-  if (L.style === 'cap') { c.fillStyle = L.hair; ell(c, x - 3, y, 5, 6.6); c.fillStyle = '#16213a'; ell(c, x - 0.6, y, 7.2, 7.8); c.fillStyle = '#0d1426'; rr(c, x + 3.5, y - 5, 5.2, 10, 2); c.fill(); c.fillStyle = '#c9a94a'; circ(c, x - 1, y, 1.8); return; }
-  if (L.style === 'bald') { c.fillStyle = 'rgba(255,255,255,0.22)'; circ(c, x - 1, y - 2, 2.6); return; }
-  c.fillStyle = L.hair;
-  if (L.style === 'long') ell(c, x - 6, y, 6.5, 9);
-  ell(c, x - 1.8, y, 7.2, 7.6);
-  if (L.style === 'bun') circ(c, x - 8.5, y, 3.6);
+  const st = L.style;
+  if (st === 'bald') { c.fillStyle = 'rgba(255,255,255,0.22)'; circ(c, x - 1, y - 2, 2.6); }
+  else if (st === 'cap') { c.fillStyle = L.hair; ell(c, x - 3, y, 5, 6.6); c.fillStyle = '#16213a'; ell(c, x - 0.6, y, 7.2, 7.8); c.fillStyle = '#0d1426'; rr(c, x + 3.5, y - 5, 5.2, 10, 2); c.fill(); c.fillStyle = '#c9a94a'; circ(c, x - 1, y, 1.8); }
+  else if (st === 'cowboy') { c.fillStyle = L.hair; ell(c, x - 2, y, 5, 6.4); c.fillStyle = '#4a3016'; ell(c, x, y, 11, 11.4); c.fillStyle = '#7a5228'; ell(c, x - 0.5, y, 6, 6.4); c.fillStyle = '#2a1a0a'; ell(c, x + 0.5, y, 6.4, 1.6); }
+  else if (st === 'beanie') { c.fillStyle = L.hair; ell(c, x - 1.8, y, 7, 7.4); c.fillStyle = L.hat || '#c0392b'; ell(c, x - 0.8, y, 7.8, 8.2); c.fillStyle = 'rgba(255,255,255,0.55)'; circ(c, x - 0.8, y, 2.4); }
+  else if (st === 'chef') { c.fillStyle = L.hair; ell(c, x - 2, y, 5, 6); c.fillStyle = '#f4f4f0'; ell(c, x - 1, y, 8.2, 8.6); c.fillStyle = '#dcdcd4'; circ(c, x - 1, y, 5); }
+  else if (st === 'afro') { c.fillStyle = L.hair; circ(c, x - 2.5, y, 10.5); }
+  else if (st === 'mohawk') { c.fillStyle = L.hair; ell(c, x - 1, y, 8.6, 2.8); }
+  else { c.fillStyle = L.hair; if (st === 'long') ell(c, x - 6, y, 6.5, 9); ell(c, x - 1.8, y, 7.2, 7.6); if (st === 'bun') circ(c, x - 8.5, y, 3.6); }
+  if (L.glasses) { c.strokeStyle = '#111'; c.lineWidth = 1.1; c.beginPath(); c.arc(x + 4.8, y - 2.6, 2, 0, TAU); c.moveTo(x + 6.8 + 0, y + 2.6); c.arc(x + 4.8, y + 2.6, 2, 0, TAU); c.stroke(); c.beginPath(); c.moveTo(x + 4.8, y - 0.6); c.lineTo(x + 4.8, y + 0.6); c.stroke(); }
+  if (L.beard) { c.fillStyle = L.hair; ell(c, x + 4, y, 3.4, 5.2); }
 }
 function heart(c, x, y, s) { c.beginPath(); c.moveTo(x, y + s * 0.3); c.bezierCurveTo(x, y, x - s * 0.5, y, x - s * 0.5, y + s * 0.3); c.bezierCurveTo(x - s * 0.5, y + s * 0.6, x, y + s * 0.8, x, y + s); c.bezierCurveTo(x, y + s * 0.8, x + s * 0.5, y + s * 0.6, x + s * 0.5, y + s * 0.3); c.bezierCurveTo(x + s * 0.5, y, x, y, x, y + s * 0.3); c.fill(); }
 
@@ -3549,7 +3797,7 @@ function drawPerson(c, x, y, ang, L, anim, t, ph, o = {}) {
     if (o.style === 'chop') { c.fillStyle = 'rgba(120,0,10,0.9)'; ell(c, 12, 2, 7, 5); }
     c.restore(); return;
   }
-  let sc = 1;
+  let sc = o.big ? 1.2 : 1;
   if (anim === 'cower') { sc = 0.82; c.translate(Math.sin(t * 40) * 1.2, 0); }
   if (anim === 'dance') c.translate(0, Math.sin(t * 8.27 + ph) * 1.5);
   c.rotate(ang + (anim === 'dance' ? Math.sin(t * 4.13 + ph) * 0.5 : 0) + (o.drunk ? Math.sin(t * 2.6 + ph) * 0.3 : 0)); c.scale(sc, sc);
@@ -3578,6 +3826,8 @@ function drawPerson(c, x, y, ang, L, anim, t, ph, o = {}) {
   if (item === 'glass') { c.fillStyle = 'rgba(180,230,255,0.85)'; c.fillRect(hr[0] + 1, hr[1] - 3, 5, 6); }
   if (item === 'cig') { c.fillStyle = '#ff7a2a'; circ(c, hr[0] + 4, hr[1], 1.8); }
   if (item === 'phone') { c.fillStyle = '#c22'; c.fillRect(hr[0] - 2, hr[1] - 6, 4, 12); }
+  if (o.armed) { c.fillStyle = '#1c1c1e'; c.fillRect(hr[0], hr[1] - 1.5, 10, 3); c.fillStyle = '#333'; c.fillRect(hr[0] + 8, hr[1] - 1, 6, 2); }
+  if (o.streamer) { c.fillStyle = 'rgba(170,220,255,0.95)'; c.fillRect(hr[0] + 1, hr[1] - 3, 3, 6); }
   headDraw(c, L, 1.5, 0);
   c.restore();
 }
@@ -3587,7 +3837,7 @@ function drawKiller(c, P, t) {
   c.fillStyle = 'rgba(0,0,0,0.45)'; ell(c, 2, 4, 17, 14);
   if (P.attackT > 0 && P.attackKind === 'saw') c.translate(rand(-1.6, 1.6), rand(-1.6, 1.6));
   c.rotate(P.ang);
-  const wid = P.attackT > 0 ? (P.attackKind === 'shoot' ? 'pistol' : P.attackKind === 'chop' ? 'axe' : P.attackKind === 'saw' ? 'saw' : 'knife') : (P.weapon ? P.weapon.id : 'knife');
+  const wid = P.attackT > 0 ? (P.attackKind === 'shoot' ? 'pistol' : P.attackKind === 'blast' ? 'shotgun' : P.attackKind === 'chop' ? 'axe' : P.attackKind === 'saw' ? 'saw' : 'knife') : (P.weapon ? P.weapon.id : 'knife');
   const atkMax = wid === 'saw' ? 1 : 0.3;
   let lunge = 0; if (P.attackT > 0 && wid !== 'pistol') lunge = Math.sin((1 - P.attackT / atkMax) * Math.PI) * (wid === 'saw' ? 8 : 12);
   c.translate(lunge, 0);
@@ -3620,6 +3870,9 @@ function drawKiller(c, P, t) {
     c.fillStyle = '#9aa0a6'; rr(c, 13, -3.5, 22, 7, 2); c.fill();
     const off = P.attackT > 0 ? (t * 60) % 3 : 0; c.fillStyle = '#222'; for (let k = 0; k < 9; k++) c.fillRect(14 + ((k * 2.4 + off) % 21), -5, 1.3, 2.2), c.fillRect(14 + ((k * 2.4 + off) % 21), 3, 1.3, 2.2);
     c.fillStyle = `rgba(140,0,10,${0.4 + bl * 0.5})`; c.fillRect(18, -3, 16, 6);
+  } else if (wid === 'shotgun') {
+    c.fillStyle = '#4a3220'; rr(c, -8, -3.5, 14, 7, 2); c.fill(); c.fillStyle = '#25272b'; rr(c, 4, -2.4, 30, 4.8, 1.5); c.fill(); c.fillStyle = '#14151a'; rr(c, 14, -4, 10, 3, 1); c.fill();
+    if (P.attackT > 0.1) { c.fillStyle = 'rgba(255,225,140,0.95)'; c.beginPath(); c.moveTo(34, 0); c.lineTo(48, -8); c.lineTo(43, 0); c.lineTo(48, 8); c.fill(); }
   } else if (wid === 'pistol') {
     c.fillStyle = '#25272b'; rr(c, -2, -3, 14, 6, 2); c.fill(); c.fillRect(-1, 0, 6, 8); c.fillStyle = '#111'; rr(c, 12, -2.4, 12, 4.8, 2); c.fill();
     if (P.attackT > 0.1) { c.fillStyle = 'rgba(255,230,150,0.95)'; c.beginPath(); c.moveTo(24, 0); c.lineTo(34, -5); c.lineTo(31, 0); c.lineTo(34, 5); c.fill(); }
@@ -3661,7 +3914,10 @@ const ENTRY = {
   hospital: 'Nessun dottore\npotrà salvarvi.',
   camp: 'Il lago sa tenere\ni segreti.',
   hotel: 'Check-out per tutti.\nDefinitivo.',
-  park: 'Ridete. Ridete ancora.\nFinché potete.'
+  park: 'Ridete. Ridete ancora.\nFinché potete.',
+  school: 'Nessuno\nsalta la lezione.',
+  farm: 'Il raccolto\nè pronto.',
+  lab: 'Il vostro esperimento\nfinisce stanotte.'
 };
 const cleanNick = v => String(v || '').replace(/[^\w àèéìòùÀÈÉÌÒÙ.\-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 16);
 const randomNick = () => pick(['Lama', 'Ombra', 'Corvo', 'Spettro', 'Gelo', 'Cenere', 'Veleno', 'Ruggine', 'Notte', 'Sangue']) + pick(['Nera', 'Muta', 'Pallida', 'Cieca', 'Fredda', 'Rossa', 'Vuota']) + (10 + Math.random() * 89 | 0);
@@ -3837,7 +4093,7 @@ const UI = {
     c.fillStyle = '#060508'; c.fillRect(0, 0, cv.width, cv.height);
     for (let y = 0; y < b.H; y++) for (let x = 0; x < b.W; x++) {
       const t = b.t[y * b.W + x];
-      c.fillStyle = t === '#' || t === 'W' ? '#5a5462' : t === '=' ? `hsl(${(x * 20 + y * 10) % 360},70%,35%)` : t === 'f' ? '#0f1a12' : t === 'd' ? '#3a2a18' : OUTSIDE_TILES[t] ? '#0e0e12' : t === 'h' ? '#4a5a58' : t === 'm' ? '#3a4a58' : t === ',' ? '#3a3e44' : t === ':' ? '#3a1820' : '#2a2018';
+      c.fillStyle = t === '#' || t === 'W' ? '#5a5462' : t === '=' ? `hsl(${(x * 20 + y * 10) % 360},70%,35%)` : t === 'c' ? '#243a18' : t === 'f' ? '#0f1a12' : t === 'd' ? '#3a2a18' : OUTSIDE_TILES[t] ? '#0e0e12' : t === 'h' ? '#4a5a58' : t === 'm' ? '#3a4a58' : t === ',' ? '#3a3e44' : t === ':' ? '#3a1820' : '#2a2018';
       if (t === 'H' || t === 'B') c.fillStyle = '#040405'; if (t === '~') c.fillStyle = '#0c4a5a';
       c.fillRect(ox + x * s, oy + y * s, Math.ceil(s), Math.ceil(s));
     }
@@ -3938,6 +4194,7 @@ const UI = {
     { const wp = G.player.weapon, wd = WEAPONS[wp ? wp.id : 'knife']; this.set('hudWeapon', `${wd.icon} <b>${wd.name.toUpperCase()}</b>${wp ? ' ×' + wp.uses : ''}`, 'innerHTML'); }
     $('#hudFrenzy').classList.toggle('hidden', !(G.frenzyT > 0)); if (G.frenzyT > 0) $('#hudFrenzyBar i').style.width = Math.min(100, G.frenzyT / G.frenzyMax * 100) + '%';
     $('#hudChase').classList.toggle('hidden', !G.chased);
+    { const arm = G.npcs.some(n => n.alive && n.armed); $('#hudHp').style.display = arm || G.player.hp < 3 ? '' : 'none'; this.set('hudHp', [0, 1, 2].map(i => `<i class="${G.player.hp > i ? 'f' : ''}">♥</i>`).join(''), 'innerHTML'); }
     { const alt = G.context && G.context.alt; $('#grabBtn').classList.toggle('hidden', !alt); if (alt) this.set('grabLabel', alt.fin.def.label);
       $('#struggle').classList.toggle('hidden', !G.struggle); if (G.struggle) $('#struggleBar').style.width = Math.min(100, G.struggle.prog * 100) + '%'; }
     for (let i = 0; i < 2; i++) { const g = G.gadgets[i], el = $('#gad' + i); el.style.display = g ? '' : 'none'; if (!g) continue; const d = GADGETS[g.id]; this.set('gad' + i, `<span class="ic">${d.icon}</span>${d.short}<small>×${g.n}</small><span class="kb">${i ? 'C' : 'X'}</span>`, 'innerHTML'); el.classList.toggle('na', g.n <= 0); }
@@ -3957,7 +4214,7 @@ const UI = {
     // stealth status
     const P = G.player, st = P.hidden ? 'NASCOSTO' : P.disguise ? 'TRAVESTITO' : P.invisible ? 'NELL\'OMBRA' : P.inDark ? 'PENOMBRA' : 'ALLO SCOPERTO';
     this.set('hudStealth', st); $('#hudEye').className = P.invisible ? 'eye closed' : P.inDark ? 'eye half' : 'eye open';
-    this.set('hudTarget', G.target ? `🎯 ${G.target.name}${G.target.trait ? ' · ' + TRAIT_IT[G.target.trait] : ''}${G.lock === G.target ? ' 🔒' : ''}` : '');
+    this.set('hudTarget', G.target ? `🎯 ${G.target.name}${tagsOf(G.target) ? ' · ' + tagsOf(G.target) : ''}${G.lock === G.target ? ' 🔒' : ''}` : '');
     // joystick
     const j = Input.joy, jb = $('#joy');
     if (j.active) { jb.style.display = 'block'; jb.style.left = j.sx + 'px'; jb.style.top = j.sy + 'px'; $('#joyKnob').style.transform = `translate(${j.dx * 40}px,${j.dy * 40}px)`; }
@@ -3994,7 +4251,7 @@ const UI = {
     const next = r.win && r.level + 1 < LEVELS.length;
     $('#results').innerHTML = `
       <div class="resWrap">
-        <div class="resHead ${r.win ? 'win' : 'lose'}">${r.win ? 'LIVELLO COMPLETATO' : r.reason === 'boom' ? 'ESPLOSO' : 'PRESO'}</div>
+        <div class="resHead ${r.win ? 'win' : 'lose'}">${r.win ? 'LIVELLO COMPLETATO' : r.reason === 'boom' ? 'ESPLOSO' : r.reason === 'shot' ? 'ABBATTUTO' : 'PRESO'}</div>
         <div class="resLvl">${r.levelName}</div>
         <div class="resBody">
           <div class="rank" style="color:${RANK_COL[r.rank]}">${r.rank}</div>
