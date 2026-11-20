@@ -169,6 +169,7 @@ body:not(.touch) .ctrls{bottom:26px}
 #toast{position:fixed;left:50%;bottom:22%;transform:translateX(-50%);z-index:12;pointer-events:none;background:rgba(0,0,0,.7);border-left:3px solid var(--red2);padding:7px 16px;font-family:'Special Elite';font-size:14px;opacity:0;white-space:nowrap}
 #toast.show{animation:toast 2.4s ease forwards}
 @keyframes toast{0%{opacity:0;transform:translate(-50%,10px)}10%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+#hudFear{font-family:'Special Elite';color:#c08aff;font-size:13px;letter-spacing:.12em;text-shadow:0 0 10px rgba(160,80,255,.7)}
 #tut{position:fixed;left:50%;top:calc(max(8px,env(safe-area-inset-top)) + 78px);transform:translateX(-50%);z-index:12;pointer-events:none;width:min(620px,74vw);background:linear-gradient(90deg,rgba(40,0,6,.92),rgba(8,4,10,.88));border-left:4px solid var(--red2);box-shadow:0 6px 30px rgba(0,0,0,.6);padding:8px 16px 9px;font-family:'Special Elite';font-size:clamp(12px,2.3vh,14.5px);line-height:1.4;color:#efe6da;transition:opacity .35s,transform .35s}
 #tut.hidden{display:block!important;opacity:0;transform:translate(-50%,-10px)}
 #tut .th{font-family:Oswald;letter-spacing:.22em;font-size:11px;color:#ff6a74;margin-bottom:3px;display:flex;gap:10px;align-items:center}
@@ -522,7 +523,7 @@ select{background:#111;border:1px solid #444;color:var(--bone);padding:8px 10px;
 <div id="tut" class="hidden"><div class="th"><span id="tutN"></span><b id="tutH"></b><span class="bar"><i id="tutBar"></i></span></div><div id="tutT"></div><div id="tutS"></div></div>
 <div id="hud" class="hidden">
   <div class="hudTL"><div id="hudLevel"></div><div id="hudVictims"></div><div id="hudLeft"></div><div id="hudHp"></div></div>
-  <div class="hudTC"><div id="hudScore">0</div><div id="hudCombo"></div><div id="hudComboWrap"><div id="hudComboBar"></div></div><div id="hudPolice" class="hidden"></div><div id="hudChase" class="hidden">⚠ INSEGUITO!</div><div id="hudFrenzy" class="hidden">FRENESIA<div id="hudFrenzyBar"><i></i></div></div></div>
+  <div class="hudTC"><div id="hudScore">0</div><div id="hudFear" class="hidden"></div><div id="hudCombo"></div><div id="hudComboWrap"><div id="hudComboBar"></div></div><div id="hudPolice" class="hidden"></div><div id="hudChase" class="hidden">⚠ INSEGUITO!</div><div id="hudFrenzy" class="hidden">FRENESIA<div id="hudFrenzyBar"><i></i></div></div></div>
   <div class="hudR2"><div id="hudObj"></div></div>
   <div class="hudTR"><canvas id="minimap"></canvas><button id="btnPause">❚❚</button></div>
   <div class="hudStatus"><div id="hudEye" class="eye open"></div><div><div id="hudStealth"></div><div id="hudTarget"></div></div></div>
@@ -1074,12 +1075,12 @@ const FIN = {
 };
 const FIN_T = { slam: [0.3, 0.72, 1.2], burn: [0.35, 1.4], drown: [0.35, 1.7], bin: [0.3, 0.85], zap: [0.3, 1.0], shred: [0.3, 0.62, 0.95, 1.5], crush: [0.4, 0.95, 1.45], impale: [0.4, 1.1], decap: [0.55, 1.25], melt: [0.35, 0.9, 1.7] };
 const TRAP_STYLE = { crush: 'crush', burn: 'burn', shred: 'shred', impale: 'impale', decap: 'decap', melt: 'melt' };
-const TRAP_TAG = { snare: 'TAGLIOLA', poison: 'AVVELENATO', crush: 'SCHIACCIATO', burn: 'ARSO VIVO', shred: 'TRITATO', impale: 'IMPALATO', decap: 'DECAPITATO', melt: 'SCIOLTO', electro: 'FULMINATO', explode: 'ESPLOSO' };
+const TRAP_TAG = { fright: 'MORTO DI PAURA', snare: 'TAGLIOLA', poison: 'AVVELENATO', crush: 'SCHIACCIATO', burn: 'ARSO VIVO', shred: 'TRITATO', impale: 'IMPALATO', decap: 'DECAPITATO', melt: 'SCIOLTO', electro: 'FULMINATO', explode: 'ESPLOSO' };
 const KT = {
   slash: ['GOLA TAGLIATA!', '#ff2a3a'], stab: ['ACCOLTELLATO!', '#ff4a4a'], push: ['TRAPASSATO!', '#ff1a2a'], chop: ['SPACCATO!', '#ff8a2a'], saw: ['SQUARTATO!', '#ff6a1a'],
   shoot: ['COLPO IN TESTA!', '#ffd23a'], blast: ['POLVERIZZATO!', '#ff9a2a'], slam: ['SBATTUTO!', '#ff3a4a'], burn: ['ARROSTITO!', '#ff7a1a'], drown: ['ANNEGATO!', '#5ac0ff'],
   bin: ['SEPOLTO!', '#c8c8d0'], electro: ['FULMINATO!', '#8ab8ff'], snare: ['TAGLIOLA!', '#ff6a6a'], poison: ['AVVELENATO!', '#7aff8a'], crush: ['SCHIACCIATO!', '#ffcf6a'], explode: ['ESPLOSO!', '#ff9a2a'],
-  backstab: ['PUGNALATO ALLE SPALLE!', '#ff2a3a'], neck: ['LAMA NEL COLLO!', '#ff1a2a'], gut: ['SVENTRATO!', '#ff3a3a'], eye: ['DRITTO NELL\'OCCHIO!', '#ff4a5a'],
+  fright: ['MORTO DI PAURA!', '#b07aff'], backstab: ['PUGNALATO ALLE SPALLE!', '#ff2a3a'], neck: ['LAMA NEL COLLO!', '#ff1a2a'], gut: ['SVENTRATO!', '#ff3a3a'], eye: ['DRITTO NELL\'OCCHIO!', '#ff4a5a'],
   frenzy: ['SCANNATO!', '#ff0a1a'], sleep: ['UCCISO NEL SONNO!', '#c88aff'], thrown: ['COLTELLO LANCIATO!', '#ffd23a'],
   smash: ['FRACASSATO!', '#ffb02a'], hack: ['TRANCIATO!', '#ff2a2a'], shred: ['TRITATO!', '#ff3a1a'], impale: ['IMPALATO!', '#ff2a4a'], decap: ['DECAPITATO!', '#ff1020'], melt: ['SCIOLTO!', '#9aff3a']
 };
@@ -1099,6 +1100,9 @@ const OBJ = {
   window: { t: 'Entra sfondando una finestra', pts: 200, ev: 'window', ok: G => G.tiles.includes('W') },
   mutilate: { t: 'Fai scempio di un cadavere (3 colpi con V)', pts: 300, ev: 'mutilate' },
   hang: { t: 'Appendi un cadavere al muro come trofeo (V)', pts: 400, ev: 'hang' },
+  fright1: { t: 'Fai morire qualcuno di paura', pts: 500, ev: 'fright', terror: 1 },
+  fright2o: { t: 'Fai morire di paura 2 persone', pts: 700, need: 2, ev: 'fright', terror: 1 },
+  scene3o: { t: 'Componi una scena con 3 trofei vicini', pts: 600, ev: 'scene', f: (G, d) => d.n >= 3, terror: 1 },
   heads2: { t: 'Raccogli 2 teste mozzate', pts: 350, need: 2, ev: 'head' },
   totem: { t: 'Impala una testa (V sulla testa)', pts: 400, ev: 'totem' },
   fuse: { t: 'Spegni la corrente dal quadro elettrico', pts: 250, ev: 'fuse', ok: G => G.lures.some(l => l.effect === 'fuse') },
@@ -1284,7 +1288,7 @@ const LEVELS = [
   {
     id: 'club', name: 'Club Inferno', sub: 'Zona industriale · 01:20 · sold out',
     blurb: 'Bassi che coprono le urla. Undici anime, troppi occhi, luci che girano.',
-    music: 'disco', weather: null, par: 330, challenges: ['weapon2', 'hide3', 'speed'],
+    music: 'disco', weather: null, par: 330, challenges: ['fright2', 'scene3', 'hang1'], terror: true,
     ambIn: [0.08, 0.06, 0.12], ambOut: [0.11, 0.11, 0.18],
     hints: [
       'La pista è illuminata: lì ti vedono tutti. Aspetta che vadano in bagno o a fumare.',
@@ -1475,7 +1479,7 @@ const LEVELS = [
   {
     id: 'camp', name: 'Campeggio Lago Nero', sub: 'Montagna · 02:00 · nebbia',
     blurb: 'Un falò, sette ragazzi, un ranger e un lago che non restituisce niente. Nel bosco non senti arrivare nessuno.',
-    music: 'forest', weather: null, par: 400, challenges: ['variety4', 'weapon2', 'nopolice'],
+    music: 'forest', weather: null, par: 400, challenges: ['fright2', 'scene3', 'variety4'], terror: true,
     ambIn: [0.09, 0.09, 0.12], ambOut: [0.12, 0.15, 0.26],
     hints: [
       'All\'aperto il buio è tuo alleato: la luce del falò e delle lanterne è l\'unico pericolo.',
@@ -1639,7 +1643,7 @@ const LEVELS = [
   {
     id: 'park', name: 'Luna Park Sorrisi', sub: 'Litorale · 00:40 · ultima corsa',
     blurb: 'Carosello, ruota panoramica, casa degli orrori e un clown che non smette di ridere. Il parco chiude, ma nessuno uscirà.',
-    music: 'park', weather: null, par: 440, challenges: ['variety4', 'trap2', 'weapon2'],
+    music: 'park', weather: null, par: 440, challenges: ['fright3', 'scene4', 'hang1'], terror: true,
     ambIn: [0.09, 0.08, 0.12], ambOut: [0.13, 0.12, 0.22],
     hints: [
       'Nella casa degli orrori è buio e ci sono mille nascondigli: trascina lì i corpi.',
@@ -1794,7 +1798,7 @@ const LEVELS = [
   {
     id: 'farm', name: 'Fattoria Corvi', sub: 'Pianura · 01:15 · luna piena',
     blurb: 'Un campo di grano alto due metri dove nessuno ti vede, un fienile, un silo che scricchiola e un contadino con il fucile.',
-    music: 'forest', weather: null, par: 480, challenges: ['weapon2', 'variety6', 'nopolice'],
+    music: 'forest', weather: null, par: 480, challenges: ['fright4', 'scene4', 'variety6'], terror: true,
     ambIn: [0.10, 0.09, 0.12], ambOut: [0.13, 0.16, 0.26],
     hints: [
       'Il grano alto BLOCCA la vista: nascondici dentro e aspetta le vittime ai bordi dei sentieri.',
@@ -1938,6 +1942,12 @@ const CHALLENGES = {
   combo4: { t: 'Combo ×4 o più', f: G => G.combo.best >= 4 },
   finisher2: { t: '2 finali ambientali', f: G => (G.st.finisher || 0) >= 2 },
   trap2: { t: '2 incidenti mortali', f: G => G.st.trap >= 2 },
+  fright2: { t: '2 vittime morte di paura', f: G => (G.frights || 0) >= 2 },
+  fright3: { t: '3 vittime morte di paura', f: G => (G.frights || 0) >= 3 },
+  fright4: { t: '4 vittime morte di paura', f: G => (G.frights || 0) >= 4 },
+  scene3: { t: 'Una scena del terrore con 3 elementi', f: G => (G.bestScene || 0) >= 3 },
+  scene4: { t: 'Una scena del terrore con 4 elementi', f: G => (G.bestScene || 0) >= 4 },
+  hang1: { t: 'Appendi almeno un cadavere', f: G => (G.st.hung || 0) >= 1 },
   variety4: { t: 'Uccidi in 4 modi diversi', f: G => Object.keys(G.styleSet || {}).length >= 4 },
   variety6: { t: 'Uccidi in 6 modi diversi', f: G => Object.keys(G.styleSet || {}).length >= 6 }
 };
@@ -1977,13 +1987,13 @@ const TUTORIAL = [
 ];
 const NEWS = {
   villa: ['ADDESTRAMENTO GUIDATO: ti insegno tutto, passo passo', 'Trappole ☠: gas, lampadario, tosaerba'],
-  club: ['GUARDIE: in allerta non si fanno sgozzare', 'DIVISE: rubale ai cadaveri per mimetizzarti', 'MOTOSEGA: squarta chiunque ti stia davanti', 'Fai crollare le luci sulla pista da ballo'],
+  club: ['☠ NOTTE DEL TERRORE: porte sbarrate, nessuno può fuggire — falli morire di paura', 'GUARDIE: in allerta non si fanno sgozzare', 'DIVISE: rubale ai cadaveri per mimetizzarti', 'MOTOSEGA: squarta chiunque ti stia davanti', 'Fai crollare le luci sulla pista da ballo'],
   hospital: ['Sega da autopsia e bombole d\'ossigeno', 'Celle frigorifere per i corpi', 'Due incidenti mortali: la sfida si alza'],
-  camp: ['Bosco aperto e nebbia: niente muri a proteggerti', 'Cippatrice e catasta di tronchi', 'Il lago: annegali'],
+  camp: ['☠ NOTTE DEL TERRORE: porte sbarrate, nessuno può fuggire — falli morire di paura', 'Bosco aperto e nebbia: niente muri a proteggerti', 'Cippatrice e catasta di tronchi', 'Il lago: annegali'],
   hotel: ['TELECAMERE: spegnile o restane fuori', 'Lampadario sulla sala del gala', 'Bancone flambé e piscina elettrificata', 'Ganci da macellaio in cucina'],
-  park: ['Ghigliottina nella casa degli orrori', 'Ruota panoramica: trappola di massa', 'Popcorn incendiari e bombole di elio'],
+  park: ['☠ NOTTE DEL TERRORE: porte sbarrate, nessuno può fuggire — falli morire di paura', 'Ghigliottina nella casa degli orrori', 'Ruota panoramica: trappola di massa', 'Popcorn incendiari e bombole di elio'],
   school: ['ENERGUMENO: ti respinge, serve forza', 'STREAMER: zittiscilo prima che chiami aiuto', 'ARMATI: sparano a vista', 'Canestro, sega circolare, friggitrice'],
-  farm: ['FUCILE A POMPA', 'Più armati, più streamer', 'Cippatrice, ganci del macello, balle di fieno, silo'],
+  farm: ['☠ NOTTE DEL TERRORE: porte sbarrate, nessuno può fuggire — falli morire di paura', 'FUCILE A POMPA', 'Più armati, più streamer', 'Cippatrice, ganci del macello, balle di fieno, silo'],
   lab: ['Massima sicurezza: 5 guardie, 4 telecamere', 'Vasca d\'acido, pressa idraulica, inceneritore', 'Reattore e server: trappole di massa']
 };
 const DARK_T = 0.36;           // light level under which you are "in shadow"
@@ -2035,12 +2045,12 @@ const Game = {
     this.lock = null; this.target = null; this.ended = false; this.endT = 0; this.slowT = 0; this.slowScale = 1; this.hitstop = 0;
     this.shake = 0; this.flash = 0; this.flashColor = '255,0,0'; this.hb = 0; this.glimpseCd = rand(22, 38); this.glimpseN = 0; this.breathT = 1; this.lightDirty = true; this.styleCount = {};
     this.hintI = 0; this.hintT = 3; this.policeCalled = false; this.context = null;
-    this.hintList = (idx > 0 && NEWS[def.id] ? ['NOVITÀ — ' + NEWS[def.id].join(' · ')] : []).concat(def.hints || []);
+    this.hintList = (this.terror ? ['NOTTE DEL TERRORE — porte sbarrate, telefoni morti, nessuno può scappare. Crea scene orribili: cadaveri appesi, teste sui pali, corpi fatti a pezzi vicini tra loro. Chi le vede si riempie di paura e a 100 muore di infarto.'] : []).concat(idx > 0 && NEWS[def.id] ? ['NOVITÀ — ' + NEWS[def.id].join(' · ')] : []).concat(def.hints || []);
     this.cine = null; this.cineK = 0; this.fin = null; this.struggle = null; this.punchT = 0; this.killCamT = 0; this.whisperCd = 0;
     this.frenzyT = 0; this.frenzyMax = 9; this.st = { silent: 0, weapon: 0, trap: 0, multi: 0, hidden: 0 }; this.lastKillT = -9;
     this.tracers = []; this.sched = []; this.screenBlood = []; this.boomFx = []; this.flames = []; this.trapSet = {}; this.styleSet = {};
     this.mode = MODE[UI.mode] || MODE.normal; { const d0 = DIFF[Math.min(idx, DIFF.length - 1)]; this.diff = { sus: d0.sus * this.mode.sus, view: d0.view * this.mode.view, police: Math.round(d0.police * this.mode.police * (UI.endless ? 1.3 : 1)) }; }
-    this.pcap = ({ high: 900, mid: 450, low: 220 })[UI.fx] || 900; this.endless = !!UI.endless; this.wave = 0; this.waveT = 12; this.lureUses = 0; this.powerUses = 0; this.knifeBody = null; this.heads = []; this.totems = []; this.headsTaken = 0; this.bonesRun = 0; this.bloodL = 0; this.tut = def.tutorial ? { i: -1, t: 0, total: 0 } : null; this.tutMark = null;
+    this.pcap = ({ high: 900, mid: 450, low: 220 })[UI.fx] || 900; this.endless = !!UI.endless; this.wave = 0; this.waveT = 12; this.lureUses = 0; this.powerUses = 0; this.knifeBody = null; this.terror = !!def.terror && !UI.endless; if (this.terror) this.phones.forEach(ph => { ph.cut = true; }); this.fearPts = 0; this.frights = 0; this.bestScene = 0; this.fearT = 1; this.heads = []; this.totems = []; this.headsTaken = 0; this.bonesRun = 0; this.bloodL = 0; this.tut = def.tutorial ? { i: -1, t: 0, total: 0 } : null; this.tutMark = null;
     this.cams = (L.cams || []).map(c => ({ ...c, sus: 0, cd: 0, off: 0, a: c.ang }));
     const sh = (UI.progress && UI.progress.shop) || newShop();
     this.gadgets = (UI.loadout || []).filter(id => sh.own.includes(id)).slice(0, 2).map(id => ({ id, n: GADGETS[id].n + ((sh.ch || {})[id] || 0) }));
@@ -2462,6 +2472,7 @@ const Game = {
   },
   scare(n, why, sx, sy) {
     if (!CALM[n.state] || !n.alive) return;
+    if (this.terror && !n.guard) { const sc = why === 'body' || why === 'trophy' ? this.scene(sx, sy) : 1; this.addFear(n, ({ killer: 18, witness: 30, body: 20, trophy: 32, blast: 16, accident: 22 })[why] * sc); if (!n.alive) return; }
     if (why === 'killer' || why === 'witness') this.breakDisguise();
     if (n.drunk && (why === 'witness' || why === 'killer') && Math.random() < 0.5) { this.say(n, pick(['Eh? Ho bevuto troppo…', 'Vedo doppio… o è sangue?', 'Hic! Chi è quello?']), 2.6); n.sus = 0.5; return; }
     if (n.guard) { this.alertGuard(n, why === 'trophy' ? 'body' : why, sx, sy); return; }
@@ -2480,7 +2491,7 @@ const Game = {
       why === 'witness' ? pick(['ASSASSINO!!', 'AIUTO!!', 'NO! NO! NO!']) : pick(['Chi sei?! AIUTO!', 'Ha un coltello!', 'Stai lontano!']), 2.4);
     Sound.scream(n.pitch);
     if (n.streamer && !this.police) { this.say(n, 'SONO IN DIRETTA!! POLIZIA!!', 3); this.callPolice(n); }
-    if (!this.police) { this.slowmo(0.9, 0.3); Sound.spotted(); UI.big(why === 'body' ? 'CADAVERE TROVATO!' : why === 'blast' ? 'CHE BOTTO!' : 'TI HANNO VISTO!', '#ff3344', 'Fermalo prima che raggiunga un telefono'); }
+    if (!this.police) { this.slowmo(0.9, 0.3); Sound.spotted(); UI.big(why === 'body' ? 'CADAVERE TROVATO!' : why === 'blast' ? 'CHE BOTTO!' : 'TI HANNO VISTO!', '#ff3344', this.terror ? 'Non possono scappare. Falli impazzire di paura' : 'Fermalo prima che raggiunga un telefono'); }
     this.flash = 0.5; this.flashColor = '255,30,40';
     this.noise(n.x, n.y, TILE * 6, 0.3, n);
   },
@@ -2747,12 +2758,14 @@ const Game = {
     this.goTo(n, p.x * TILE, p.y * TILE, true); n.state = 'cower'; n.icon = null;
   },
   escape(n) {
+    if (this.terror) { this.say(n, pick(['LA PORTA È SBARRATA!!', 'È chiuso! Siamo chiusi dentro!', 'Non si apre!! NON SI APRE!!']), 2.6); Sound.slam('wood'); this.addFear(n, 25); if (n.alive) this.goCower(n); return; }
     n.alive = false; n.escaped = true; this.escaped++;
     UI.big(n.name.toUpperCase() + ' È FUGGITO', '#ffaa33', this.police ? '' : 'Ha chiamato la polizia da fuori!');
     if (!this.police) this.callPolice(n, true);
     this.checkWin();
   },
   callPolice(n, silent) {
+    if (this.terror) { if (n) this.say(n, pick(['NON C\'È CAMPO!!', 'Il telefono è morto!', 'Nessuno risponde!!']), 2.2); if (n) this.addFear(n, 12); return; }
     if (this.police) return;
     const pt = this.diff ? this.diff.police : 50; this.police = { t: pt, max: pt }; this.policeCalled = true;
     if (!silent) UI.big('POLIZIA IN ARRIVO', '#4aa3ff', 'Finisci il lavoro prima che arrivino!');
@@ -3002,6 +3015,44 @@ const Game = {
       case 'stab': this.addCuts(b, 1); break;
     }
   },
+  /* ---------- NIGHTS OF TERROR: fear is the weapon ---------- */
+  galleryNear(x, y, r) {
+    let c = 0;
+    for (const b of this.bodies) if (!b.hidden && !b.carried && dist(b.x, b.y, x, y) < r) c += b.hung ? 1 : ((b.mut || 0) >= 2 || (b.lost || []).length >= 2) ? 1 : 0.5;
+    for (const t of this.totems) if (dist(t.x, t.y, x, y) < r) c += 1;
+    for (const h of this.heads) if (dist(h.x, h.y, x, y) < r) c += 0.5;
+    return Math.floor(c);
+  },
+  scene(x, y) {
+    const n = this.galleryNear(x, y, TILE * 3.5);
+    if (n >= 2 && n > (this.bestScene || 0)) { this.bestScene = n; UI.big(`SCENA DEL TERRORE ×${n}`, '#b07aff', 'Più trofei vicini, più paura'); this.objEvent('scene', { n }); }
+    return n >= 2 ? 1 + 0.5 * (n - 1) : 1;
+  },
+  addFear(n, v) {
+    if (!this.terror || !n.alive || n.guard || this.ended || v <= 0) return;
+    n.fear = Math.min(100, (n.fear || 0) + v); const pts = Math.round(v * 10); this.fearPts += pts; this.score += pts;
+    n.fearPop = (n.fearPop || 0) + pts; if (n.fearPop >= 150) { this.floaters.push({ x: n.x, y: n.y - 34, text: '👻+' + n.fearPop, sub: '', color: '#c08aff', life: 1.4 }); n.fearPop = 0; }
+    if (n.fear >= 100) this.frightDeath(n);
+  },
+  frightDeath(n) {
+    this.frights++; this.say(n, pick(['Il… cuore…', 'AAAAAAAAH—', 'N-no…']), 1.4);
+    this.kill(n, { trap: true, style: 'fright', sx: n.x - 6, sy: n.y, blood: 0.2 });
+    this.fearPts += 500; this.score += 500; UI.big('MORTO DI PAURA', '#b07aff', n.name + ' non ha retto'); this.objEvent('fright');
+  },
+  fearTick() {
+    const P = this.player, gal = [];
+    for (const b of this.bodies) if (!b.hidden && !b.carried) gal.push([b.x, b.y, b.hung ? 5 : ((b.mut || 0) >= 2 || (b.lost || []).length >= 2) ? 3.5 : 2]);
+    for (const t of this.totems) gal.push([t.x, t.y, 4]);
+    for (const h of this.heads) gal.push([h.x, h.y, 2.5]);
+    for (const n of this.npcs) {
+      if (!n.alive || n.guard || n.state === 'held') continue;
+      let f = 0;
+      for (const [x, y, v] of gal) if (dist(n.x, n.y, x, y) < TILE * 6 && this.sees(n, x, y)) f += v;
+      if (!P.hidden && !P.shroud && this.sees(n, P.x, P.y)) f += P.blood > 0.4 ? 6 : 4;
+      if (!CALM[n.state]) f += 1.2; if (this.isDark()) f += 1;
+      if (f > 0) this.addFear(n, f); else n.fear = Math.max(0, (n.fear || 0) - 1);
+    }
+  },
   /* ---------- the serial killer's gallery: hung bodies, heads on pikes ---------- */
   bones(n, label, x, y) { this.bonesRun = (this.bonesRun || 0) + n; this.floaters.push({ x: x + 18, y: y - 6, text: '🦴+' + n, sub: label || '', color: '#e8dcc0', life: 1.8 }); },
   wallNear(x, y) {
@@ -3206,6 +3257,10 @@ const Game = {
       case 'poison': for (let i = 0; i < 8; i++) this.particles.push({ x: n.x + rand(-8, 8), y: n.y + rand(-8, 8), vx: rand(-14, 14), vy: rand(-26, -8), life: rand(1, 1.8), max: 1.8, size: rand(4, 7), type: 'smoke' }); Sound.thud(); break;
       case 'crush': this.splatter(n.x, n.y, rand(0, TAU), 40, Math.PI, [40, 260]); this.gibs(n.x, n.y, dirA, 5, Math.PI); Sound.thud(); Sound.squelch(); this.shake = 14; break;
       case 'explode': this.splatter(n.x, n.y, dirA, 44, Math.PI, [120, 380]); this.gibs(n.x, n.y, dirA, 8, Math.PI); this.mist(n.x, n.y, 5); break;
+      case 'fright':
+        Sound.scream(n.pitch * 1.45); Sound.heartbeat(1); this.shake = 6; this.flash = 0.35; this.flashColor = '120,40,200';
+        for (let i = 0; i < 26; i++) this.particles.push({ x: n.x + rand(-10, 10), y: n.y + rand(-10, 10), vx: rand(-50, 50), vy: rand(-70, 10), life: rand(0.6, 1.4), max: 1.4, size: rand(6, 13), type: 'shadow' });
+        break;
       case 'backstab':
         this.splatter(n.x, n.y, dirA, 20 * bl, 0.8); Sound.stab(); this.shake = 8; this.hitstop = 0.06; b.spurt = { t: 1.6, max: 1.6, k: 0.2, a: dirA };
         [0.16, 0.32].forEach(dl => this.sched.push({ t: dl, fn: () => { this.splatter(n.x, n.y, dirA + rand(-0.4, 0.4), 20 * bl, 0.8); Sound.stab(); Sound.squelch(); this.shake = 9; Render.splat(n.x + rand(-10, 10), n.y + rand(-10, 10), rand(6, 10), 0.85); } })); break;
@@ -3434,7 +3489,8 @@ const Game = {
     if (k === 'zap') { this.blackoutT = 7; Sound.powerDown(); this.onPowerOff(1, TILE * 9); this.objEvent('fuse'); }
   },
   pickObjectives() {
-    const ids = Object.keys(OBJ).filter(id => !OBJ[id].ok || OBJ[id].ok(this)).sort(() => Math.random() - 0.5);
+    if (this.terror) { const pool = ['scene3o', 'fright2o', 'hang', 'totem', 'mutilate', 'heads2'].sort(() => Math.random() - 0.5).slice(0, 2); this.objectives = ['fright1', ...pool].map(id => ({ id, n: 0, done: false })); return; }
+    const ids = Object.keys(OBJ).filter(id => !OBJ[id].terror).filter(id => !OBJ[id].ok || OBJ[id].ok(this)).sort(() => Math.random() - 0.5);
     const pick3 = ids.slice(0, 3), easy = ['wall', 'fuse', 'silent2', 'hide2', 'cut2', 'dress', 'throat'].filter(id => ids.includes(id));
     if (easy.length && !pick3.some(id => easy.includes(id))) pick3[2] = pick(easy);
     this.objectives = [...new Set(pick3)].map(id => ({ id, n: 0, done: false }));
@@ -3581,7 +3637,7 @@ const Game = {
     if (this.charges < cost) { Sound.denied(); UI.toast(`Serve ${cost} energia Ombra — uccidi per ricaricarla`); return; }
     if (k === 'blackout') {
       if (this.isDark()) { Sound.denied(); return; }
-      this.charges -= 2; this.powerUses++; this.blackoutT = 12; Sound.powerDown(); UI.big('BLACKOUT', '#fff', '12 secondi di buio totale');
+      this.charges -= 2; this.powerUses++; this.blackoutT = 12; if (this.terror) this.npcs.forEach(m => this.addFear(m, 10)); Sound.powerDown(); UI.big('BLACKOUT', '#fff', '12 secondi di buio totale');
       this.onPowerOff(1, TILE * 9);
       return;
     }
@@ -3590,7 +3646,7 @@ const Game = {
     if (P.hidden) this.unhide();
     if (k === 'lure') {
       if (n.guard && !CALM[n.state]) { Sound.denied(); UI.toast('La guardia non abbocca'); return; }
-      this.charges -= 1; this.powerUses++; Sound.whisper();
+      this.charges -= 1; this.powerUses++; Sound.whisper(); this.addFear(n, 12);
       if (n.lure) { this.fixLure(n.lure, null); n.lure = null; }
       this.release(n); n.state = 'invest'; n.lured = true; n.investDur = rand(4, 6); n.lure = null;
       this.goTo(n, P.x, P.y, false); n.speed = 92 * n.speedMul;
@@ -3657,7 +3713,7 @@ const Game = {
   buildResults() {
     const t = this.time, par = this.def.par;
     const timeBonus = this.win ? Math.max(0, Math.round((par - t) * 4)) : 0;
-    const ghost = this.win && this.witnesses === 0 ? 1000 : 0;
+    const ghost = this.win && this.witnesses === 0 && !this.terror ? 1000 : 0;
     const policePen = this.policeCalled ? -400 : 0;
     const escPen = -300 * this.escaped;
     const challenges = (this.def.challenges || []).map(id => ({ id, text: CHALLENGES[id].t, ok: this.win && !!CHALLENGES[id].f(this) }));
@@ -3665,13 +3721,14 @@ const Game = {
     const total = this.win ? Math.max(0, this.score + timeBonus + ghost + policePen + escPen + chBonus) : this.score;
     let rank = 'D';
     if (this.endless) rank = this.kills >= 45 ? 'S' : this.kills >= 30 ? 'A' : this.kills >= 18 ? 'B' : this.kills >= 8 ? 'C' : 'D';
+    else if (this.win && this.terror) { const N = this.npcs.length, f = this.fearPts / N; rank = f >= 900 ? 'S' : f >= 600 ? 'A' : f >= 350 ? 'B' : 'C'; }
     else if (this.win) {
       if (this.escaped) rank = 'C'; else if (this.policeCalled) rank = 'B'; else if (this.witnesses) rank = 'A'; else rank = 'S';
     }
     return { win: this.win, reason: this.reason, level: this.idx, levelId: this.def.id, levelName: this.def.name, time: t, kills: this.kills, total: this.npcs.length,
       witnesses: this.witnesses, escaped: this.escaped, police: this.policeCalled, combo: this.combo.best, base: this.score,
       timeBonus, ghost, policePen, escPen, challenges, chBonus, score: Math.round(total * this.mode.score), rank, styles: this.styleCount, endless: this.endless, wave: this.wave, diff: UI.mode,
-      objectives: (this.objectives || []).map(o => ({ text: OBJ[o.id].t, done: o.done, pts: OBJ[o.id].pts })), objPts: this.objPts || 0 };
+      objectives: (this.objectives || []).map(o => ({ text: OBJ[o.id].t, done: o.done, pts: OBJ[o.id].pts })), objPts: this.objPts || 0, terror: this.terror, fearPts: this.fearPts, frights: this.frights, bestScene: this.bestScene };
   },
 
   /* ---------------- main update ---------------- */
@@ -3746,6 +3803,7 @@ const Game = {
     // late arrivals
     if (!this.ended) for (const ev of this.events) if (!ev.done && this.time >= ev.t) this.spawnEvent(ev);
     for (const n of this.npcs.slice()) this.updateNPC(n, dt);
+    if (this.terror && !this.ended && (this.fearT -= dt) <= 0) { this.fearT = 0.5; this.fearTick(); }
     // police
     if (this.police && !this.ended) {
       this.police.t -= dt; Sound.sirenLevel(0.02 + 0.2 * (1 - this.police.t / this.police.max));
@@ -4527,6 +4585,12 @@ const Render = {
       c.restore();
     }
     if (G.throwT && !(G.context && G.context.kind === 'kill')) { const n = G.throwT, s2 = this.toScreen(n.x, n.y), P2 = this.toScreen(P.x, P.y); c.save(); c.setLineDash([5, 7]); c.strokeStyle = 'rgba(255,210,60,0.45)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(P2.x, P2.y); c.lineTo(s2.x, s2.y); c.stroke(); c.setLineDash([]); c.fillStyle = 'rgba(255,210,60,0.95)'; c.font = '600 11px Oswald, sans-serif'; c.fillText(IS_TOUCH ? '🔪 LANCIA' : '🔪 T', s2.x, s2.y + 30 * z); c.restore(); }
+    // fear meters (Nights of Terror)
+    if (G.terror) for (const n of G.npcs) {
+      if (!n.alive || n.guard || !(n.fear > 1)) continue; const s3 = this.toScreen(n.x, n.y); if (s3.x < -30 || s3.y < -30 || s3.x > this.w + 30 || s3.y > this.h + 30) continue;
+      const w = 26 * z, f = n.fear / 100, x0 = s3.x - w / 2, y0 = s3.y + 22 * z;
+      c.fillStyle = 'rgba(0,0,0,0.6)'; c.fillRect(x0 - 1, y0 - 1, w + 2, 5); c.fillStyle = f > 0.75 ? `rgba(255,${80 + Math.sin(t * 14) * 60 | 0},255,0.95)` : 'rgba(170,100,255,0.9)'; c.fillRect(x0, y0, w * f, 3);
+    }
     // kill highlight
     if (G.context && G.context.kind === 'kill') { const n = G.context.n, s = this.toScreen(n.x, n.y); c.strokeStyle = `rgba(255,30,50,${0.6 + Math.sin(t * 10) * 0.3})`; c.lineWidth = 2.5; c.beginPath(); c.arc(s.x, s.y, 22 * z, 0, TAU); c.stroke(); }
     // target reticle
@@ -5321,7 +5385,7 @@ const UI = {
     $('#liNum').textContent = 'LIVELLO ' + (i + 1);
     $('#liName').textContent = L.name; $('#liSub').textContent = L.sub; $('#liBlurb').textContent = L.blurb;
     const bb = L.build();
-    $('.obj').innerHTML = this.endless ? 'MATTATOIO: ondate infinite · uccidi più persone che puoi prima che arrivi la polizia' : `OBIETTIVO: elimina <b id="liCount">${bb.npcs.length + (bb.events || []).length}</b> persone · nessuno deve completare una chiamata`;
+    $('.obj').innerHTML = this.endless ? 'MATTATOIO: ondate infinite · uccidi più persone che puoi prima che arrivi la polizia' : L.terror ? `☠ NOTTE DEL TERRORE: <b>${bb.npcs.length + (bb.events || []).length}</b> persone chiuse dentro · nessuno può scappare · <b>spaventali a morte</b>` : `OBIETTIVO: elimina <b id="liCount">${bb.npcs.length + (bb.events || []).length}</b> persone · nessuno deve completare una chiamata`;
     const ch = this.endless ? [] : (L.challenges || []).map(id => CHALLENGES[id].t);
     $('#liChal').innerHTML = ch.length ? '<b>SFIDE BONUS · +300 CIASCUNA</b>' + ch.map(t => '◆ ' + t).join('<br>') : '';
     const nw = NEWS[L.id] || []; $('#liNews').innerHTML = nw.length ? `<b>${i === 0 ? 'LIVELLO TUTORIAL' : 'NOVITÀ IN QUESTO LIVELLO'}</b>` + nw.map(t => '✚ ' + t).join(' &nbsp;') : '';
@@ -5390,6 +5454,7 @@ const UI = {
     this.cineUI();
     const alive = G.npcs.filter(n => n.alive).length;
     this.set('hudScore', String(G.score));
+    $('#hudFear').classList.toggle('hidden', !G.terror); if (G.terror) this.set('hudFear', `👻 SPAVENTO ${G.fearPts} · morti di paura ${G.frights}`);
     this.set('hudVictims', (G.endless ? G.npcs.filter(n => n.alive).slice(-14) : G.npcs).map(n => `<span class="${n.alive ? 'v' : n.escaped ? 'e' : 'd'}" title="${n.name}"></span>`).join(''), 'innerHTML');
     const pend = G.events.filter(e => !e.done).length;
     this.set('hudLeft', G.endless ? `ONDATA ${G.wave} · ${alive} vittime · ${G.kills} uccise` : alive + (alive === 1 ? ' rimasta' : ' rimaste') + (pend ? ` · +${pend} in arrivo` : ''));
@@ -5480,6 +5545,7 @@ const UI = {
             <div><span>Tempo</span><b>${mm}:${ss}</b></div>
             <div><span>Testimoni</span><b>${r.witnesses}</b></div>
             <div><span>Combo massima</span><b>×${r.combo}</b></div>
+            ${r.terror ? `<div class="good"><span>👻 Punti spavento</span><b>${r.fearPts}</b></div><div><span>Morti di paura · scena migliore</span><b>${r.frights} · ×${r.bestScene || 0}</b></div>` : ''}
             <div><span>Sangue versato</span><b>${gore.blood} L</b></div>
             ${gore.hung || gore.heads || gore.totems ? `<div><span>Trofei · teste · pali</span><b>${gore.hung} · ${gore.heads} · ${gore.totems}</b></div>` : ''}
             <div class="good"><span>Ossa per l'Ossario</span><b>🦴 +${gore.bones}</b></div>
