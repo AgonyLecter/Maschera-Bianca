@@ -2837,6 +2837,7 @@ const Game = {
   /* ---------------- player ---------------- */
   updatePlayer(dt) {
     const P = this.player, mv = Input.move();
+    if (!P.hidden) this.unstick(P, P.r);
     P.attackT = Math.max(0, P.attackT - dt); P.blinkT -= dt; P.shadowT -= dt;
     if (this.fin || this.struggle || P.stunT > 0) { if (P.stunT > 0) P.stunT -= dt; P.moving = false; P.sprint = false; P.stillT = 0; return; }
     if (P.hidden) {
@@ -2880,6 +2881,26 @@ const Game = {
         b.lx = b.x; b.ly = b.y; b.bleed = Math.max(0, b.bleed - 0.0035);
       }
     }
+  },
+  /* collision: a body of radius r fits at (x,y) when none of its 8 rim points touches a solid tile */
+  fits(x, y, r = 13) {
+    if (!isFinite(x) || !isFinite(y)) return false;
+    return !(this.solidPx(x - r, y - r) || this.solidPx(x + r, y - r) || this.solidPx(x - r, y + r) || this.solidPx(x + r, y + r) || this.solidPx(x, y - r) || this.solidPx(x, y + r) || this.solidPx(x - r, y) || this.solidPx(x + r, y) || this.solidPx(x, y));
+  },
+  /* nearest position where the body fits, searching outward in rings; null if none within ~3 tiles */
+  freeSpot(x, y, r = 13) {
+    if (this.fits(x, y, r)) return { x, y };
+    for (let d = 4; d <= TILE * 3; d += 4) for (let k = 0, n = Math.max(8, Math.round(d / 3)); k < n; k++) {
+      const a = k / n * TAU, px = x + Math.cos(a) * d, py = y + Math.sin(a) * d;
+      if (this.fits(px, py, r)) return { x: px, y: py };
+    }
+    return null;
+  },
+  /* safety net: anything that ended up inside furniture or a wall is pushed back out */
+  unstick(e, r) {
+    if (this.fits(e.x, e.y, r)) { e.safeX = e.x; e.safeY = e.y; return; }
+    const f = this.freeSpot(isFinite(e.x) ? e.x : e.safeX, isFinite(e.y) ? e.y : e.safeY, r);
+    if (f) { e.x = f.x; e.y = f.y; } else if (e.safeX != null) { e.x = e.safeX; e.y = e.safeY; }
   },
   moveCircle(e, dx, dy) {
     const r = e.r;
@@ -3161,7 +3182,9 @@ const Game = {
     // find free spot next to it
     const cand = [[P.hx, P.hy]];
     for (let a = 0; a < 8; a++) cand.push([(h.x + h.w / 2) * TILE + Math.cos(a * Math.PI / 4) * TILE * (Math.max(h.w, h.h) / 2 + 0.6), (h.y + h.h / 2) * TILE + Math.sin(a * Math.PI / 4) * TILE * (Math.max(h.w, h.h) / 2 + 0.6)]);
-    for (const [x, y] of cand) if (!this.solidPx(x, y) && !this.solidPx(x + 12, y) && !this.solidPx(x - 12, y) && !this.solidPx(x, y + 12) && !this.solidPx(x, y - 12)) { P.x = x; P.y = y; break; }
+    let placed = false;
+    for (const [x, y] of cand) if (this.fits(x, y, P.r)) { P.x = x; P.y = y; placed = true; break; }
+    if (!placed) { const f = this.freeSpot(P.hx, P.hy, P.r) || this.freeSpot(P.x, P.y, P.r); if (f) { P.x = f.x; P.y = f.y; } }
   },
 
   /* ---------------- killing & gore ---------------- */
@@ -3433,9 +3456,10 @@ const Game = {
     this.release(n); n.talk = null; n.state = 'held'; n.anim = 'panic'; n.path = []; n.fixer = false;
     if (n.phone && n.phone.busy === n) n.phone.busy = null;
     const cx = clamp(n.x, o.x * TILE, (o.x + o.w) * TILE), cy = clamp(n.y, o.y * TILE, (o.y + o.h) * TILE), dx = n.x - cx, dy = n.y - cy, dl = Math.hypot(dx, dy) || 1;
-    const vx = cx + dx / dl * 16, vy = cy + dy / dl * 16; if (!this.solidPx(vx, vy)) { n.x = vx; n.y = vy; }
+    const vx = cx + dx / dl * 16, vy = cy + dy / dl * 16; if (this.fits(vx, vy, 10)) { n.x = vx; n.y = vy; }
     n.ang = Math.atan2(cy - n.y, cx - n.x); P.ang = Math.atan2(n.y - P.y, n.x - P.x);
-    const px = n.x - Math.cos(P.ang) * 26, py = n.y - Math.sin(P.ang) * 26; if (!this.solidPx(px, py)) { P.x = px; P.y = py; }
+    const px = n.x - Math.cos(P.ang) * 26, py = n.y - Math.sin(P.ang) * 26;
+    if (this.fits(px, py, P.r)) { P.x = px; P.y = py; } else { const f = this.freeSpot(px, py, P.r); if (f && dist(f.x, f.y, n.x, n.y) < TILE * 1.6) { P.x = f.x; P.y = f.y; } }
     this.fin = { n, o, def, t: 0, i: 0, cx, cy }; Sound.strain(); this.killCamT = 1.9; this.say(n, pick(BEG), 1.8);
   },
   updateFinisher(dt) {
@@ -3661,7 +3685,7 @@ const Game = {
       let dest = null;
       for (const off of [0, 0.5, -0.5, 1, -1, 1.5, -1.5]) {
         const a = n.ang + Math.PI + off, x = n.x + Math.cos(a) * 40, y = n.y + Math.sin(a) * 40;
-        if (this.solidPx(x, y) || this.solidPx(x + 12, y) || this.solidPx(x - 12, y) || this.solidPx(x, y + 12) || this.solidPx(x, y - 12)) continue;
+        if (!this.fits(x, y, P.r)) continue;
         if (!this.walkLine(n.x, n.y, x, y, 4)) continue;
         if (this.npcs.some(m => m !== n && m.alive && CALM[m.state] && this.sees(m, x, y) && this.lightAt(x, y) >= DARK_T)) { dest = dest || 'seen'; continue; }
         dest = { x, y }; break;
@@ -3802,7 +3826,11 @@ const Game = {
     if (this.sched.length) { for (const e of this.sched) e.t -= dt; const due = this.sched.filter(e => e.t <= 0); this.sched = this.sched.filter(e => e.t > 0); due.forEach(e => e.fn()); }
     // late arrivals
     if (!this.ended) for (const ev of this.events) if (!ev.done && this.time >= ev.t) this.spawnEvent(ev);
-    for (const n of this.npcs.slice()) this.updateNPC(n, dt);
+    for (const n of this.npcs.slice()) {
+      this.updateNPC(n, dt);
+      if (n.alive && (this.solidPx(n.x, n.y) || !isFinite(n.x) || !isFinite(n.y))) { const f = this.freeSpot(isFinite(n.x) ? n.x : n.safeX, isFinite(n.y) ? n.y : n.safeY, 8); if (f) { n.x = f.x; n.y = f.y; } }
+      else if (n.alive) { n.safeX = n.x; n.safeY = n.y; }
+    }
     if (this.terror && !this.ended && (this.fearT -= dt) <= 0) { this.fearT = 0.5; this.fearTick(); }
     // police
     if (this.police && !this.ended) {
